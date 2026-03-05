@@ -1,4 +1,4 @@
-import dogPng from '@/images/dog.png'
+import dogPng from '@/images/dog.jpg'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import clsx from 'clsx'
 import Image from 'next/image'

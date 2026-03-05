@@ -12,7 +12,7 @@ import SectionVideos from '@/components/SectionVideos'
 import { getAuthors } from '@/data/authors'
 import { getCategories } from '@/data/categories'
 import { getAllPosts, getPostsVideo } from '@/data/posts'
-import becomAuthorImg from '@/images/BecomeAnAuthorImg.png'
+import becomAuthorImg from '@/images/BecomeAnAuthorImg.jpg'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {

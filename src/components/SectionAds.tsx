@@ -1,4 +1,4 @@
-import imgAdsDef from '@/images/ads.png'
+import imgAdsDef from '@/images/ads.jpg'
 import { Link } from '@/shared/link'
 import clsx from 'clsx'
 import Image, { StaticImageData } from 'next/image'

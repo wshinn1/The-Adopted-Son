@@ -1,7 +1,7 @@
 'use client'
 
 import { TPost } from '@/data/posts'
-import musicWave from '@/images/musicWave.png'
+import musicWave from '@/images/musicWave.jpg'
 import clsx from 'clsx'
 import Image from 'next/image'
 import Link from 'next/link'

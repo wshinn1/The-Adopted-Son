@@ -1,4 +1,4 @@
-import rightImgDemo from '@/images/BecomeAnAuthorImg.png'
+import rightImgDemo from '@/images/BecomeAnAuthorImg.jpg'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import clsx from 'clsx'
 import Image, { StaticImageData } from 'next/image'
