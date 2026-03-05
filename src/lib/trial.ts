@@ -1,0 +1,60 @@
+import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
+
+export async function getClientIP(): Promise<string> {
+  const headersList = await headers()
+  return (
+    headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    headersList.get('x-real-ip') ??
+    '127.0.0.1'
+  )
+}
+
+export type TrialStatus =
+  | { hasAccess: true; reason: 'subscribed' | 'trial_active' | 'admin' }
+  | { hasAccess: false; reason: 'trial_expired' | 'no_trial' | 'unauthenticated' }
+
+export async function checkAccess(): Promise<TrialStatus> {
+  const supabase = await createClient()
+
+  // Check authenticated user first
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) {
+    // Check if admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin, subscription_status, subscription_period_end')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.is_admin) return { hasAccess: true, reason: 'admin' }
+
+    if (
+      profile?.subscription_status === 'active' &&
+      profile?.subscription_period_end &&
+      new Date(profile.subscription_period_end) > new Date()
+    ) {
+      return { hasAccess: true, reason: 'subscribed' }
+    }
+  }
+
+  // Check IP-based trial
+  const ip = await getClientIP()
+
+  // Use service role via API route for visitor_trials (RLS blocks anon)
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/trial/check?ip=${encodeURIComponent(ip)}`,
+    { cache: 'no-store' },
+  ).catch(() => null)
+
+  if (response?.ok) {
+    const data = await response.json()
+    if (data.hasAccess) return { hasAccess: true, reason: 'trial_active' }
+    if (data.expired) return { hasAccess: false, reason: 'trial_expired' }
+  }
+
+  return { hasAccess: false, reason: 'no_trial' }
+}

@@ -14,6 +14,10 @@
     "@heroicons/react": "^2.2.0",
     "@hugeicons/core-free-icons": "^1.0.14",
     "@hugeicons/react": "^1.0.5",
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^5.8.0",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.9",
     "@tailwindcss/typography": "^0.5.16",
@@ -37,6 +41,7 @@
     "@types/node": "20.9.2",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
+    "@vercel/blob": "^2.3.1",
     "clsx": "^2.1.1",
     "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
@@ -53,7 +58,9 @@
     "react-swipeable": "^7.0.2",
     "react-use": "^17.6.0",
     "sass": "^1.97.2",
+    "server-only": "^0.0.1",
     "sharp": "^0.33.5",
+    "stripe": "^17.7.0",
     "typescript": "5.2.2"
   },
   "devDependencies": {
