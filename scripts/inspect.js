@@ -1,7 +1,22 @@
 import fs from "fs";
 import path from "path";
 
-const root = "/vercel/share/v0-project";
+const cwd = process.cwd();
+console.log("=== process.cwd() ===", cwd);
+
+// Try possible roots
+const candidates = [cwd, "/home/user", "/app", "/workspace", "/vercel/share/v0-project"];
+let root = cwd;
+for (const c of candidates) {
+  if (fs.existsSync(c)) {
+    console.log(`Exists: ${c} ->`, fs.readdirSync(c).slice(0, 10).join(", "));
+    // If it has package.json or ncmaz-nextjs, use it
+    if (fs.existsSync(path.join(c, "package.json")) || fs.existsSync(path.join(c, "ncmaz-nextjs"))) {
+      root = c;
+    }
+  }
+}
+console.log("=== Using root:", root, "===");
 
 // List root-level files
 console.log("=== ROOT FILES ===");

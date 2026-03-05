@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  srcDir: './ncmaz-nextjs/src',
   images: {
     minimumCacheTTL: 2678400 * 6,
     remotePatterns: [
