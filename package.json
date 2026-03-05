@@ -1,0 +1,10 @@
+{
+  "name": "ncmaz-nextjs-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd ncmaz-nextjs && npm run dev",
+    "build": "cd ncmaz-nextjs && npm run build",
+    "start": "cd ncmaz-nextjs && npm run start"
+  }
+}
