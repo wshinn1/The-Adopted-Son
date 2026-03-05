@@ -14,14 +14,14 @@
     "incremental": true,
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./ncmaz-nextjs/src/*"]
+      "@/*": ["./src/*"]
     },
     "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",
-    "ncmaz-nextjs/**/*.ts",
-    "ncmaz-nextjs/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
