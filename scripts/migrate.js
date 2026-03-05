@@ -1,36 +1,46 @@
-import fs from 'fs'
-import path from 'path'
+const fs = require('fs')
+const path = require('path')
 
-// We're running from /home/user but the project is at a different path
-// The script tool changes cwd to the script directory's parent
-// Let's find the actual project root
+console.log('__dirname:', __dirname)
+console.log('process.cwd():', process.cwd())
 
-function findProjectRoot() {
-  // Try known paths
-  const candidates = [
-    path.join(path.dirname(new URL(import.meta.url).pathname), '..'),
-    '/vercel/share/v0-project',
-  ]
-  for (const c of candidates) {
-    const normalized = path.resolve(c)
-    if (fs.existsSync(normalized) && fs.existsSync(path.join(normalized, 'ncmaz-nextjs'))) {
-      return normalized
+// __dirname should be /vercel/share/v0-project/scripts
+const root = path.resolve(__dirname, '..')
+console.log('Project root:', root)
+console.log('Root contents:', fs.existsSync(root) ? fs.readdirSync(root).join(', ') : 'NOT FOUND')
+
+const ncmazSrc = path.join(root, 'ncmaz-nextjs', 'src')
+console.log('ncmaz src path:', ncmazSrc)
+console.log('ncmaz src exists:', fs.existsSync(ncmazSrc))
+
+function copyRecursive(src, dest) {
+  if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true })
+  const entries = fs.readdirSync(src, { withFileTypes: true })
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name)
+    const destPath = path.join(dest, entry.name)
+    if (entry.isDirectory()) {
+      copyRecursive(srcPath, destPath)
+    } else {
+      fs.copyFileSync(srcPath, destPath)
     }
   }
-  return null
 }
 
-const root = findProjectRoot()
-console.log('Project root:', root)
-if (!root) {
-  console.error('Could not find project root')
-  process.exit(1)
+if (fs.existsSync(ncmazSrc)) {
+  const destSrc = path.join(root, 'src')
+  console.log('Copying', ncmazSrc, '->', destSrc)
+  copyRecursive(ncmazSrc, destSrc)
+  console.log('Done! src/ created at root.')
+  
+  // Also copy public folder
+  const ncmazPublic = path.join(root, 'ncmaz-nextjs', 'public')
+  if (fs.existsSync(ncmazPublic)) {
+    const destPublic = path.join(root, 'public')
+    console.log('Copying public folder...')
+    copyRecursive(ncmazPublic, destPublic)
+    console.log('Done! public/ created at root.')
+  }
+} else {
+  console.error('Source not found, cannot copy.')
 }
-
-const src = path.join(root, 'ncmaz-nextjs', 'src')
-const dst = path.join(root, 'src')
-
-console.log('Source:', src)
-console.log('Dest:', dst)
-console.log('Source exists:', fs.existsSync(src))
-console.log('Dest exists:', fs.existsSync(dst))
