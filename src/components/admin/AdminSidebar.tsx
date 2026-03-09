@@ -6,12 +6,11 @@ import { signOut } from '@/app/actions/auth'
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: '⊞' },
-  { label: 'Devotionals', href: '/admin/devotionals', icon: '✝' },
-  { label: 'New Devotional', href: '/admin/devotionals/new', icon: '+' },
   { label: 'Pages', href: '/admin/pages', icon: '≡' },
+  { label: 'Devotionals', href: '/admin/devotionals', icon: '✝' },
   { label: 'Media', href: '/admin/media', icon: '▣' },
   { label: 'Subscribers', href: '/admin/subscribers', icon: '◎' },
-  { label: 'Settings', href: '/admin/settings', icon: '⚙' },
+  { label: 'Site Settings', href: '/admin/site-settings', icon: '⚙' },
 ]
 
 interface Props {

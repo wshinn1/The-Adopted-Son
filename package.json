@@ -49,6 +49,7 @@
     "eslint-config-next": "^16.1.1",
     "framer-motion": "^12.16.0",
     "lodash": "^4.17.21",
+    "lucide-react": "^0.577.0",
     "next": "^16.1.1",
     "react": "^19.2.3",
     "react-aria": "^3.41.1",
