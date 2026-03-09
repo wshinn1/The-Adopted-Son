@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Devotionals', href: '/admin/devotionals', icon: '✝' },
   { label: 'Media', href: '/admin/media', icon: '▣' },
   { label: 'Subscribers', href: '/admin/subscribers', icon: '◎' },
+  { label: 'Backups', href: '/admin/backups', icon: '↺' },
   { label: 'Site Settings', href: '/admin/site-settings', icon: '⚙' },
 ]
 
