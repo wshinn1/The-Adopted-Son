@@ -1,6 +1,7 @@
 import { put, list, del } from '@vercel/blob'
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { Resend } from 'resend'
 
 // This route is called by Vercel Cron at midnight every day
 // It backs up all database tables and media to Vercel Blob
@@ -110,6 +111,9 @@ export async function GET(request: Request) {
     // Clean up old backups (keep last 30 days)
     await cleanupOldBackups(30)
 
+    // Send email notification
+    await sendBackupEmail(manifest)
+
     return NextResponse.json({
       success: true,
       backup: manifest,
@@ -120,6 +124,70 @@ export async function GET(request: Request) {
       { error: 'Backup failed', details: String(error) },
       { status: 500 }
     )
+  }
+}
+
+async function sendBackupEmail(manifest: {
+  timestamp: string
+  tables: Record<string, { rows: number; success: boolean }>
+  mediaFiles: number
+  totalMediaRecords: number
+}) {
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const adminEmail = process.env.ADMIN_EMAIL
+
+  if (!adminEmail) {
+    console.log('No ADMIN_EMAIL set, skipping backup notification')
+    return
+  }
+
+  const successfulTables = Object.entries(manifest.tables)
+    .filter(([_, v]) => v.success)
+    .map(([name, v]) => `${name}: ${v.rows} rows`)
+  
+  const failedTables = Object.entries(manifest.tables)
+    .filter(([_, v]) => !v.success)
+    .map(([name]) => name)
+
+  const date = new Date(manifest.timestamp).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+
+  try {
+    await resend.emails.send({
+      from: 'The Adopted Son <onboarding@resend.dev>',
+      to: adminEmail,
+      subject: `Backup Complete - ${date}`,
+      html: `
+        <h2>Daily Backup Complete</h2>
+        <p><strong>Date:</strong> ${date}</p>
+        
+        <h3>Database Tables Backed Up:</h3>
+        <ul>
+          ${successfulTables.map(t => `<li>${t}</li>`).join('')}
+        </ul>
+        
+        ${failedTables.length > 0 ? `
+          <h3 style="color: red;">Failed Tables:</h3>
+          <ul>
+            ${failedTables.map(t => `<li>${t}</li>`).join('')}
+          </ul>
+        ` : ''}
+        
+        <h3>Media Files:</h3>
+        <p>${manifest.mediaFiles} of ${manifest.totalMediaRecords} files backed up</p>
+        
+        <p style="margin-top: 20px; color: #666;">
+          View and download backups at <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/backups">/admin/backups</a>
+        </p>
+      `,
+    })
+    console.log('Backup notification email sent')
+  } catch (error) {
+    console.error('Failed to send backup email:', error)
   }
 }
 
