@@ -1,15 +1,8 @@
 'use client'
 
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import LinkExt from '@tiptap/extension-link'
-import ImageExt from '@tiptap/extension-image'
-import Underline from '@tiptap/extension-underline'
-import TextAlign from '@tiptap/extension-text-align'
-import Placeholder from '@tiptap/extension-placeholder'
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import EditorToolbar from './EditorToolbar'
+import BlockEditor from './BlockEditor'
 
 interface Devotional {
   id: string
@@ -54,19 +47,7 @@ export default function DevotionalEditor({ devotional }: Props) {
   const [isPremium, setIsPremium] = useState(devotional?.is_premium ?? true)
   const [isPublished, setIsPublished] = useState(devotional?.is_published ?? false)
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!devotional)
-
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      LinkExt.configure({ openOnClick: false }),
-      ImageExt,
-      Underline,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-      Placeholder.configure({ placeholder: 'Write your devotional here...' }),
-    ],
-    content: (devotional?.content as object) ?? '',
-    immediatelyRender: false,
-  })
+  const [editorContent, setEditorContent] = useState<unknown>(devotional?.content ?? '')
 
   const handleTitleChange = useCallback(
     (value: string) => {
@@ -91,7 +72,7 @@ export default function DevotionalEditor({ devotional }: Props) {
       title,
       slug,
       excerpt,
-      content: editor?.getJSON() ?? null,
+      content: editorContent ?? null,
       cover_image_url: coverImageUrl || null,
       scripture_reference: scriptureRef || null,
       scripture_text: scriptureText || null,
@@ -178,15 +159,11 @@ export default function DevotionalEditor({ devotional }: Props) {
         </div>
 
         {/* Body editor */}
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden">
-          <EditorToolbar editor={editor} />
-          <div className="p-5 min-h-[400px]">
-            <EditorContent
-              editor={editor}
-              className="prose prose-neutral dark:prose-invert max-w-none focus:outline-none prose-p:my-3"
-            />
-          </div>
-        </div>
+        <BlockEditor
+          content={editorContent}
+          onChange={setEditorContent}
+          placeholder="Write your devotional here... Use the toolbar to add headings, images, videos, columns, and more."
+        />
 
         {/* Excerpt */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
