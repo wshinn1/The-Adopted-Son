@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 
 interface NavLink {
@@ -25,7 +26,14 @@ export default function HamburgerHeader({ siteName, logoUrl, navLinks }: Hamburg
         {/* Logo / Site Name */}
         <Link href="/" className="text-lg font-medium text-neutral-900">
           {logoUrl ? (
-            <img src={logoUrl} alt={siteName} className="h-8 w-auto" />
+            <Image 
+              src={logoUrl} 
+              alt={siteName} 
+              width={120}
+              height={32}
+              className="h-8 w-auto"
+              unoptimized={logoUrl.includes('blob.vercel-storage.com')}
+            />
           ) : (
             siteName
           )}

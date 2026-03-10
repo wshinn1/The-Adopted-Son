@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 
 export interface Home1Data {
@@ -44,13 +45,16 @@ export default function Home1({ data }: Home1Props) {
       {/* Image with overlapping card */}
       <div className="relative mt-12 md:mt-16 lg:mt-20">
         {/* Main Image */}
-        <div className="relative w-full md:w-3/4 lg:w-2/3">
-          <img
-            src={data.image_url}
-            alt={data.image_alt}
-            className="h-auto w-full object-cover"
-            style={{ aspectRatio: '4/3' }}
-          />
+        <div className="relative aspect-[4/3] w-full md:w-3/4 lg:w-2/3">
+          {data.image_url && (
+            <Image
+              src={data.image_url}
+              alt={data.image_alt || 'Hero image'}
+              fill
+              className="object-cover"
+              unoptimized={data.image_url.includes('blob.vercel-storage.com')}
+            />
+          )}
         </div>
 
         {/* Overlapping Card */}
