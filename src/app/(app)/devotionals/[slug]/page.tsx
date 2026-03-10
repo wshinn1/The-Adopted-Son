@@ -301,12 +301,14 @@ function TipTapRenderer({ content }: { content: any }) {
           )
         }
         if (node.type === 'heading') {
-          const Tag = `h${node.attrs?.level || 2}` as keyof JSX.IntrinsicElements
-          return (
-            <Tag key={index}>
-              {node.content?.map((child: any, i: number) => child.text).join('')}
-            </Tag>
-          )
+          const level = node.attrs?.level || 2
+          const text = node.content?.map((child: any) => child.text).join('') || ''
+          if (level === 1) return <h1 key={index}>{text}</h1>
+          if (level === 2) return <h2 key={index}>{text}</h2>
+          if (level === 3) return <h3 key={index}>{text}</h3>
+          if (level === 4) return <h4 key={index}>{text}</h4>
+          if (level === 5) return <h5 key={index}>{text}</h5>
+          return <h6 key={index}>{text}</h6>
         }
         if (node.type === 'bulletList') {
           return (
