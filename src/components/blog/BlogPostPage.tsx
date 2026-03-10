@@ -27,13 +27,9 @@ interface BlogPost {
 
 interface Props {
   post: BlogPost
-  typography?: {
-    heading_font?: string
-    body_font?: string
-  }
 }
 
-export default function BlogPostPage({ post, typography }: Props) {
+export default function BlogPostPage({ post }: Props) {
   const publishedDate = post.published_at
     ? new Date(post.published_at).toLocaleDateString('en-US', {
         day: 'numeric',
@@ -45,16 +41,13 @@ export default function BlogPostPage({ post, typography }: Props) {
   const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
   const shareTitle = encodeURIComponent(post.title)
 
-  const headingFont = typography?.heading_font || 'font-sans'
-  const bodyFont = typography?.body_font || 'font-serif'
-
   return (
     <article className="min-h-screen bg-white">
       {/* Article Container - Centered with balanced margins */}
       <div className="mx-auto max-w-4xl px-6 py-12 lg:px-8 lg:py-16">
         
         {/* Title */}
-        <h1 className={`text-4xl md:text-5xl font-bold text-neutral-900 leading-tight ${headingFont}`}>
+        <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 leading-tight font-heading">
           {post.title}
         </h1>
 
@@ -148,7 +141,7 @@ export default function BlogPostPage({ post, typography }: Props) {
               {post.scripture_reference}
             </p>
             {post.scripture_text && (
-              <p className={`text-xl italic text-neutral-700 leading-relaxed ${bodyFont}`}>
+              <p className="text-xl italic text-neutral-700 leading-relaxed font-body">
                 "{post.scripture_text}"
               </p>
             )}
@@ -157,13 +150,13 @@ export default function BlogPostPage({ post, typography }: Props) {
 
         {/* Excerpt - Large italic intro text */}
         {post.excerpt && (
-          <p className={`mt-10 text-xl md:text-2xl text-neutral-700 leading-relaxed ${bodyFont}`}>
+          <p className="mt-10 text-xl md:text-2xl text-neutral-700 leading-relaxed font-body">
             {post.excerpt}
           </p>
         )}
 
         {/* Body Content */}
-        <div className={`mt-8 ${bodyFont}`}>
+        <div className="mt-8 font-body">
           <BlogContent content={post.content} />
         </div>
 

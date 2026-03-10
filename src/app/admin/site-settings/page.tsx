@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { Upload, Plus, Trash2 } from 'lucide-react'
+import Head from 'next/head'
 
 interface NavLink {
   label: string
@@ -21,10 +22,40 @@ interface Page {
 }
 
 const FONT_OPTIONS = [
-  { value: 'font-sans', label: 'Sans-serif (Geist)' },
-  { value: 'font-serif', label: 'Serif (Georgia)' },
-  { value: 'font-mono', label: 'Monospace (Geist Mono)' },
+  // System fonts
+  { value: 'Be_Vietnam_Pro', label: 'Be Vietnam Pro (Default)', category: 'System' },
+  { value: 'system-ui', label: 'System UI', category: 'System' },
+  
+  // Sans-serif Google Fonts
+  { value: 'Inter', label: 'Inter', category: 'Sans-serif' },
+  { value: 'Poppins', label: 'Poppins', category: 'Sans-serif' },
+  { value: 'Open_Sans', label: 'Open Sans', category: 'Sans-serif' },
+  { value: 'Montserrat', label: 'Montserrat', category: 'Sans-serif' },
+  { value: 'Lato', label: 'Lato', category: 'Sans-serif' },
+  { value: 'Nunito', label: 'Nunito', category: 'Sans-serif' },
+  { value: 'Raleway', label: 'Raleway', category: 'Sans-serif' },
+  { value: 'Work_Sans', label: 'Work Sans', category: 'Sans-serif' },
+  { value: 'DM_Sans', label: 'DM Sans', category: 'Sans-serif' },
+  { value: 'Outfit', label: 'Outfit', category: 'Sans-serif' },
+  
+  // Serif Google Fonts
+  { value: 'Playfair_Display', label: 'Playfair Display', category: 'Serif' },
+  { value: 'Merriweather', label: 'Merriweather', category: 'Serif' },
+  { value: 'Lora', label: 'Lora', category: 'Serif' },
+  { value: 'Source_Serif_4', label: 'Source Serif 4', category: 'Serif' },
+  { value: 'Crimson_Text', label: 'Crimson Text', category: 'Serif' },
+  { value: 'EB_Garamond', label: 'EB Garamond', category: 'Serif' },
+  { value: 'Libre_Baskerville', label: 'Libre Baskerville', category: 'Serif' },
+  { value: 'Cormorant_Garamond', label: 'Cormorant Garamond', category: 'Serif' },
+  { value: 'Bitter', label: 'Bitter', category: 'Serif' },
+  { value: 'Spectral', label: 'Spectral', category: 'Serif' },
 ]
+
+const groupedFonts = FONT_OPTIONS.reduce((acc, font) => {
+  if (!acc[font.category]) acc[font.category] = []
+  acc[font.category].push(font)
+  return acc
+}, {} as Record<string, typeof FONT_OPTIONS>)
 
 export default function SiteSettingsPage() {
   const [pages, setPages] = useState<Page[]>([])
@@ -48,6 +79,48 @@ export default function SiteSettingsPage() {
     loadSettings()
     loadPages()
   }, [])
+
+  // Load preview fonts dynamically
+  useEffect(() => {
+    const GOOGLE_FONT_MAP: Record<string, string> = {
+      Inter: 'Inter:wght@400;700',
+      Poppins: 'Poppins:wght@400;700',
+      Open_Sans: 'Open+Sans:wght@400;700',
+      Montserrat: 'Montserrat:wght@400;700',
+      Lato: 'Lato:wght@400;700',
+      Nunito: 'Nunito:wght@400;700',
+      Raleway: 'Raleway:wght@400;700',
+      Work_Sans: 'Work+Sans:wght@400;700',
+      DM_Sans: 'DM+Sans:wght@400;700',
+      Outfit: 'Outfit:wght@400;700',
+      Playfair_Display: 'Playfair+Display:wght@400;700',
+      Merriweather: 'Merriweather:wght@400;700',
+      Lora: 'Lora:wght@400;700',
+      Source_Serif_4: 'Source+Serif+4:wght@400;700',
+      Crimson_Text: 'Crimson+Text:wght@400;700',
+      EB_Garamond: 'EB+Garamond:wght@400;700',
+      Libre_Baskerville: 'Libre+Baskerville:wght@400;700',
+      Cormorant_Garamond: 'Cormorant+Garamond:wght@400;700',
+      Bitter: 'Bitter:wght@400;700',
+      Spectral: 'Spectral:wght@400;700',
+    }
+
+    const fontsToLoad: string[] = []
+    if (GOOGLE_FONT_MAP[headingFont]) fontsToLoad.push(GOOGLE_FONT_MAP[headingFont])
+    if (GOOGLE_FONT_MAP[bodyFont] && bodyFont !== headingFont) fontsToLoad.push(GOOGLE_FONT_MAP[bodyFont])
+
+    if (fontsToLoad.length > 0) {
+      const linkId = 'admin-preview-fonts'
+      let link = document.getElementById(linkId) as HTMLLinkElement | null
+      if (!link) {
+        link = document.createElement('link')
+        link.id = linkId
+        link.rel = 'stylesheet'
+        document.head.appendChild(link)
+      }
+      link.href = `https://fonts.googleapis.com/css2?${fontsToLoad.map(f => `family=${f}`).join('&')}&display=swap`
+    }
+  }, [headingFont, bodyFont])
 
   const loadPages = async () => {
     try {
@@ -327,10 +400,14 @@ export default function SiteSettingsPage() {
                 onChange={(e) => setHeadingFont(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
               >
-                {FONT_OPTIONS.map((font) => (
-                  <option key={font.value} value={font.value}>
-                    {font.label}
-                  </option>
+                {Object.entries(groupedFonts).map(([category, fonts]) => (
+                  <optgroup key={category} label={category}>
+                    {fonts.map((font) => (
+                      <option key={font.value} value={font.value}>
+                        {font.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
               <p className="text-xs text-neutral-500 mt-1">Used for blog post titles and headings</p>
@@ -345,10 +422,14 @@ export default function SiteSettingsPage() {
                 onChange={(e) => setBodyFont(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
               >
-                {FONT_OPTIONS.map((font) => (
-                  <option key={font.value} value={font.value}>
-                    {font.label}
-                  </option>
+                {Object.entries(groupedFonts).map(([category, fonts]) => (
+                  <optgroup key={category} label={category}>
+                    {fonts.map((font) => (
+                      <option key={font.value} value={font.value}>
+                        {font.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
               <p className="text-xs text-neutral-500 mt-1">Used for blog post body text and excerpts</p>
@@ -356,11 +437,17 @@ export default function SiteSettingsPage() {
 
             {/* Font Preview */}
             <div className="mt-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-              <p className="text-xs text-neutral-500 mb-3">Preview:</p>
-              <h3 className={`text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-2 ${headingFont}`}>
+              <p className="text-xs text-neutral-500 mb-3">Preview (save to see changes on your site):</p>
+              <h3 
+                className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-2"
+                style={{ fontFamily: `'${headingFont.replace(/_/g, ' ')}', sans-serif` }}
+              >
                 Sample Heading Text
               </h3>
-              <p className={`text-neutral-700 dark:text-neutral-300 ${bodyFont}`}>
+              <p 
+                className="text-neutral-700 dark:text-neutral-300"
+                style={{ fontFamily: `'${bodyFont.replace(/_/g, ' ')}', serif` }}
+              >
                 This is how your body text will appear in blog posts. The quick brown fox jumps over the lazy dog.
               </p>
             </div>
