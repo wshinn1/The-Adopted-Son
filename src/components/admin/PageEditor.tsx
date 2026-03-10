@@ -6,13 +6,23 @@ import { createBrowserClient } from '@supabase/ssr'
 import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react'
 import SectionEditor from './SectionEditor'
 
+interface SchemaProperty {
+  type: string
+  title: string
+}
+
+interface Schema {
+  type: string
+  properties: Record<string, SchemaProperty>
+}
+
 interface SectionTemplate {
   id: string
   name: string
   description?: string
   component_name: string
   default_data: Record<string, any>
-  schema: Record<string, any>
+  schema: Schema
   preview_image_url?: string
 }
 
