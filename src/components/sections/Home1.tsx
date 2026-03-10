@@ -30,7 +30,7 @@ export default function Home1({ data }: Home1Props) {
       style={{ backgroundColor: data.background_color || '#F5F5F0' }}
     >
       {/* Quote */}
-      <h1 className="max-w-4xl text-4xl font-medium leading-tight tracking-tight text-neutral-900 md:text-5xl lg:text-6xl">
+      <h1 className="max-w-4xl text-4xl font-medium leading-tight tracking-tight text-neutral-900 md:text-5xl lg:text-6xl font-heading">
         {data.quote_before}
         <em className="relative not-italic">
           <span className="relative z-10">{data.quote_highlight}</span>
@@ -65,14 +65,14 @@ export default function Home1({ data }: Home1Props) {
           </span>
 
           {/* Title */}
-          <h2 className="mt-4 text-2xl font-medium leading-snug text-neutral-900 md:text-3xl lg:text-4xl">
+          <h2 className="mt-4 text-2xl font-medium leading-snug text-neutral-900 md:text-3xl lg:text-4xl font-heading">
             {data.card_title_before}{' '}
-            <em className="font-serif">{data.card_title_highlight}</em>{' '}
+            <em className="font-body italic">{data.card_title_highlight}</em>{' '}
             {data.card_title_after}
           </h2>
 
           {/* Description */}
-          <p className="mt-4 text-base leading-relaxed text-neutral-600 md:mt-6">
+          <p className="mt-4 text-base leading-relaxed text-neutral-600 md:mt-6 font-body">
             {data.card_description}
           </p>
 

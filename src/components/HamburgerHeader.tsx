@@ -71,7 +71,7 @@ export default function HamburgerHeader({ siteName, logoUrl, navLinks }: Hamburg
               key={index}
               href={link.url}
               onClick={() => setIsOpen(false)}
-              className="text-3xl font-medium text-neutral-900 transition-colors hover:text-neutral-500 md:text-4xl lg:text-5xl"
+              className="text-3xl font-medium text-neutral-900 transition-colors hover:text-neutral-500 md:text-4xl lg:text-5xl font-heading"
             >
               {link.label}
             </Link>

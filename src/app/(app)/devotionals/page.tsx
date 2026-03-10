@@ -108,18 +108,18 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                       )}
                     </div>
                     <div className="flex grow flex-col gap-y-3 p-4 border border-t-0 rounded-b-3xl border-neutral-100 dark:border-neutral-800">
-                      <span className="text-xs text-neutral-500">
+                      <span className="text-xs text-neutral-500 font-body">
                         {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
-                      <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 line-clamp-2">
+                      <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 line-clamp-2 font-heading">
                         {post.title}
                       </h3>
                       {post.excerpt && (
-                        <p className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2">
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2 font-body">
                           {post.excerpt}
                         </p>
                       )}
-                      <div className="mt-auto pt-3 flex items-center justify-between text-xs text-neutral-500">
+                      <div className="mt-auto pt-3 flex items-center justify-between text-xs text-neutral-500 font-body">
                         <span>{post.readingTime} min read</span>
                       </div>
                     </div>
@@ -149,10 +149,10 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           </>
         ) : (
           <div className="py-20 text-center">
-            <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-200">
+            <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-200 font-heading">
               No devotionals found
             </h2>
-            <p className="mt-4 text-neutral-600 dark:text-neutral-400">
+            <p className="mt-4 text-neutral-600 dark:text-neutral-400 font-body">
               {category ? `No devotionals in the "${category}" category yet.` : 'Check back soon for inspiring daily readings.'}
             </p>
             {category && (

@@ -19,18 +19,18 @@ export default async function PricingPage() {
   return (
     <div className="min-h-screen bg-[#f5f2ed] pt-24">
       <div className="mx-auto max-w-4xl px-6 py-16 md:px-12">
-        <h1 className="text-center text-4xl font-medium text-neutral-900 md:text-5xl">
+        <h1 className="text-center text-4xl font-medium text-neutral-900 md:text-5xl font-heading">
           Pricing
         </h1>
-        <p className="mt-4 text-center text-lg text-neutral-600">
+        <p className="mt-4 text-center text-lg text-neutral-600 font-body">
           Choose a plan that works for you
         </p>
 
         <div className="mt-12 grid gap-8 md:grid-cols-2">
           {/* Free Plan */}
           <div className="rounded-2xl border border-neutral-200 bg-white p-8">
-            <h2 className="text-2xl font-semibold text-neutral-900">Free</h2>
-            <p className="mt-2 text-neutral-600">Get started with daily devotionals</p>
+            <h2 className="text-2xl font-semibold text-neutral-900 font-heading">Free</h2>
+            <p className="mt-2 text-neutral-600 font-body">Get started with daily devotionals</p>
             <div className="mt-6">
               <span className="text-4xl font-bold text-neutral-900">$0</span>
               <span className="text-neutral-500">/month</span>
@@ -50,8 +50,8 @@ export default async function PricingPage() {
 
           {/* Premium Plan */}
           <div className="rounded-2xl border-2 border-neutral-900 bg-white p-8">
-            <h2 className="text-2xl font-semibold text-neutral-900">Premium</h2>
-            <p className="mt-2 text-neutral-600">Full access to all content</p>
+            <h2 className="text-2xl font-semibold text-neutral-900 font-heading">Premium</h2>
+            <p className="mt-2 text-neutral-600 font-body">Full access to all content</p>
             <div className="mt-6">
               <span className="text-4xl font-bold text-neutral-900">$9</span>
               <span className="text-neutral-500">/month</span>

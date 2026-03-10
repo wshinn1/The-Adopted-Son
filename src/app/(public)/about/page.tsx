@@ -19,10 +19,10 @@ export default async function AboutPage() {
   return (
     <div className="min-h-screen bg-[#f5f2ed] pt-24">
       <div className="mx-auto max-w-3xl px-6 py-16 md:px-12">
-        <h1 className="text-4xl font-medium text-neutral-900 md:text-5xl">
+        <h1 className="text-4xl font-medium text-neutral-900 md:text-5xl font-heading">
           About {settings.site_name}
         </h1>
-        <div className="mt-8 space-y-6 text-lg text-neutral-600">
+        <div className="mt-8 space-y-6 text-lg text-neutral-600 font-body">
           <p>
             Welcome to {settings.site_name}. This page can be customized from the admin dashboard.
           </p>
