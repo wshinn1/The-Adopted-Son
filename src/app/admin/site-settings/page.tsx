@@ -14,7 +14,14 @@ interface SocialLink {
   url: string
 }
 
+interface Page {
+  id: string
+  title: string
+  slug: string
+}
+
 export default function SiteSettingsPage() {
+  const [pages, setPages] = useState<Page[]>([])
   const [siteName, setSiteName] = useState('')
   const [siteTagline, setSiteTagline] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
@@ -31,7 +38,22 @@ export default function SiteSettingsPage() {
 
   useEffect(() => {
     loadSettings()
+    loadPages()
   }, [])
+
+  const loadPages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('pages')
+        .select('id, title, slug')
+        .order('title')
+
+      if (error) throw error
+      setPages(data || [])
+    } catch (err) {
+      console.error('Error loading pages:', err)
+    }
+  }
 
   const loadSettings = async () => {
     try {
@@ -233,15 +255,42 @@ export default function SiteSettingsPage() {
                   value={link.label}
                   onChange={(e) => updateNavLink(index, 'label', e.target.value)}
                   placeholder="Label"
-                  className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  className="w-32 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
                 />
-                <input
-                  type="text"
+                <select
                   value={link.url}
-                  onChange={(e) => updateNavLink(index, 'url', e.target.value)}
-                  placeholder="/url"
+                  onChange={(e) => {
+                    const value = e.target.value
+                    updateNavLink(index, 'url', value)
+                    // Auto-fill label if empty and a page is selected
+                    if (value && !link.label) {
+                      const page = pages.find(p => `/${p.slug}` === value || (p.slug === 'home' && value === '/'))
+                      if (page) {
+                        updateNavLink(index, 'label', page.title)
+                      }
+                    }
+                  }}
                   className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
-                />
+                >
+                  <option value="">Select a page or enter custom URL</option>
+                  <option value="/">Home</option>
+                  <option value="/devotionals">Devotionals</option>
+                  {pages.filter(p => p.slug !== 'home').map((page) => (
+                    <option key={page.id} value={`/${page.slug}`}>
+                      {page.title}
+                    </option>
+                  ))}
+                  <option value="__custom__">Custom URL...</option>
+                </select>
+                {link.url === '__custom__' || (link.url && !['/', '/devotionals'].includes(link.url) && !pages.some(p => `/${p.slug}` === link.url)) ? (
+                  <input
+                    type="text"
+                    value={link.url === '__custom__' ? '' : link.url}
+                    onChange={(e) => updateNavLink(index, 'url', e.target.value)}
+                    placeholder="/custom-url"
+                    className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                ) : null}
                 <button
                   onClick={() => removeNavLink(index)}
                   className="p-2 text-red-500 hover:text-red-600"
