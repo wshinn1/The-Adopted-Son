@@ -6,7 +6,7 @@ interface Devotional {
   title: string
   slug: string
   excerpt?: string | null
-  content?: unknown
+  content?: Record<string, unknown> | null
   cover_image_url?: string | null
   scripture_reference?: string | null
   scripture_text?: string | null

@@ -9,7 +9,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import { useEffect } from 'react'
 
 interface Props {
-  content: unknown
+  content: Record<string, unknown>
 }
 
 export default function DevotionalBody({ content }: Props) {
