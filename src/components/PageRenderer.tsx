@@ -11,7 +11,10 @@ interface PageSection {
   section_templates: {
     component_name: string
     default_data: Record<string, any>
-  }
+  } | {
+    component_name: string
+    default_data: Record<string, any>
+  }[]
 }
 
 interface PageRendererProps {
@@ -27,16 +30,23 @@ export default function PageRenderer({ sections }: PageRendererProps) {
       {sortedSections.map((section) => {
         if (!section.is_visible) return null
 
-        const Component = getSectionComponent(section.section_templates.component_name)
+        // Handle both array (from Supabase join) and single object formats
+        const template = Array.isArray(section.section_templates) 
+          ? section.section_templates[0] 
+          : section.section_templates
+
+        if (!template) return null
+
+        const Component = getSectionComponent(template.component_name)
         
         if (!Component) {
-          console.warn(`Section component "${section.section_templates.component_name}" not found`)
+          console.warn(`Section component "${template.component_name}" not found`)
           return null
         }
 
         // Merge default data with section-specific data
         const mergedData = {
-          ...section.section_templates.default_data,
+          ...template.default_data,
           ...section.data,
         }
 
