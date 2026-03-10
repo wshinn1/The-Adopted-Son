@@ -61,13 +61,13 @@ export default function DevotionalContent({ devotional, canRead }: Props) {
 
       {/* Meta */}
       <div className="mt-3 flex items-center gap-3 text-sm text-neutral-400 dark:text-neutral-500">
-        {publishedDate && <span>{publishedDate}</span>}
-        {devotional.read_time_minutes && (
+        {publishedDate ? <span>{publishedDate}</span> : null}
+        {devotional.read_time_minutes ? (
           <>
             <span>·</span>
-            <span>{devotional.read_time_minutes} min read</span>
+            <span>{String(devotional.read_time_minutes)} min read</span>
           </>
-        )}
+        ) : null}
       </div>
 
       {/* Cover image */}
