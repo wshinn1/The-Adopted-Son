@@ -9,9 +9,11 @@ import SectionEditor from './SectionEditor'
 interface SectionTemplate {
   id: string
   name: string
+  description?: string
   component_name: string
   default_data: Record<string, any>
   schema: Record<string, any>
+  preview_image_url?: string
 }
 
 interface PageSection {
