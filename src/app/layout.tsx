@@ -11,11 +11,11 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s - Ncmaz',
-    default: 'Ncmaz - Blog, News, Magazine template',
+    template: '%s — The Adopted Son',
+    default: 'The Adopted Son — Daily Devotionals',
   },
-  description: 'Ncmaz - Blog, News, Magazine template',
-  keywords: ['Ncmaz', 'Blog', 'News', 'Magazine'],
+  description: 'Faith-filled daily devotionals to draw you closer to God. A 14-day free trial, then simple subscription pricing.',
+  keywords: ['devotionals', 'faith', 'Christian', 'adoption', 'daily reading', 'Scripture'],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

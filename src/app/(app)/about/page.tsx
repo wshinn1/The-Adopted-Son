@@ -1,5 +1,5 @@
 import SectionHero from '@/components/SectionHero'
-import rightImg from '@/images/about-hero-right.png'
+import rightImg from '@/images/about-hero-right.jpg'
 import { Button } from '@/shared/Button'
 import Input from '@/shared/Input'
 import { Divider } from '@/shared/divider'

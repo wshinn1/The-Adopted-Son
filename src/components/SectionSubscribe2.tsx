@@ -1,4 +1,4 @@
-import rightImg from '@/images/SVG-subcribe2.png'
+import rightImg from '@/images/SVG-subcribe2.jpg'
 import { Badge } from '@/shared/Badge'
 import ButtonCircle from '@/shared/ButtonCircle'
 import Input from '@/shared/Input'
