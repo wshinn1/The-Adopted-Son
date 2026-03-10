@@ -217,14 +217,14 @@ function BlogContent({ content }: { content?: Record<string, unknown> | null }) 
 
   // If content is TipTap JSON
   if (content.type === 'doc' && Array.isArray(content.content)) {
-    return <TipTapRenderer content={content} />
+    return <TipTapRenderer content={content as { type: string; content: unknown[] }} />
   }
 
   return <p className="text-neutral-600">Content format not recognized.</p>
 }
 
 // Enhanced TipTap renderer with drop cap and better styling
-function TipTapRenderer({ content }: { content: { type: string; content: any[] } }) {
+function TipTapRenderer({ content }: { content: { type: string; content: unknown[] } }) {
   let isFirstParagraph = true
 
   return (
@@ -260,13 +260,17 @@ function TipTapRenderer({ content }: { content: { type: string; content: any[] }
           const level = node.attrs?.level || 2
           const text = extractText(node)
           const className = level === 1 
-            ? 'text-3xl font-bold text-neutral-900 mt-12 mb-6'
+            ? 'text-3xl font-bold text-neutral-900 mt-12 mb-6 font-heading'
             : level === 2 
-              ? 'text-2xl font-bold text-neutral-900 mt-10 mb-4'
-              : 'text-xl font-semibold text-neutral-900 mt-8 mb-3'
+              ? 'text-2xl font-bold text-neutral-900 mt-10 mb-4 font-heading'
+              : 'text-xl font-semibold text-neutral-900 mt-8 mb-3 font-heading'
           
-          const Tag = `h${level}` as keyof JSX.IntrinsicElements
-          return <Tag key={index} className={className}>{text}</Tag>
+          if (level === 1) return <h1 key={index} className={className}>{text}</h1>
+          if (level === 2) return <h2 key={index} className={className}>{text}</h2>
+          if (level === 3) return <h3 key={index} className={className}>{text}</h3>
+          if (level === 4) return <h4 key={index} className={className}>{text}</h4>
+          if (level === 5) return <h5 key={index} className={className}>{text}</h5>
+          return <h6 key={index} className={className}>{text}</h6>
         }
 
         if (node.type === 'bulletList') {
