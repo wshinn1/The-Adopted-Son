@@ -215,6 +215,55 @@ export default function DevotionalEditor({ devotional }: Props) {
 
       {/* Sidebar */}
       <div className="space-y-4">
+        {/* Featured Image - Moved to top for visibility */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
+          <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">
+            Featured Image <span className="text-red-500">*</span>
+          </h3>
+          {coverImageUrl ? (
+            <div className="relative">
+              <div className="aspect-video relative rounded-lg overflow-hidden">
+                <Image
+                  src={coverImageUrl}
+                  alt="Cover"
+                  fill
+                  className="object-cover"
+                  unoptimized={coverImageUrl.includes('blob.vercel-storage.com')}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setCoverImageUrl('')}
+                className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+              {uploading ? (
+                <div className="text-sm text-neutral-500">Uploading...</div>
+              ) : (
+                <>
+                  <Upload className="size-8 text-neutral-400 mb-2" />
+                  <span className="text-sm text-neutral-500">Click to upload</span>
+                  <span className="text-xs text-neutral-400 mt-1">Required for publishing</span>
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleImageUpload(file)
+                }}
+              />
+            </label>
+          )}
+        </div>
+
         {/* Publish */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
           <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">Publish</h3>
@@ -292,53 +341,6 @@ export default function DevotionalEditor({ devotional }: Props) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">
-              Featured Image <span className="text-red-500">*</span>
-            </label>
-            {coverImageUrl ? (
-              <div className="relative">
-                <div className="aspect-video relative rounded-lg overflow-hidden">
-                  <Image
-                    src={coverImageUrl}
-                    alt="Cover"
-                    fill
-                    className="object-cover"
-                    unoptimized={coverImageUrl.includes('blob.vercel-storage.com')}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setCoverImageUrl('')}
-                  className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-                {uploading ? (
-                  <div className="text-sm text-neutral-500">Uploading...</div>
-                ) : (
-                  <>
-                    <Upload className="size-8 text-neutral-400 mb-2" />
-                    <span className="text-sm text-neutral-500">Click to upload</span>
-                    <span className="text-xs text-neutral-400 mt-1">Required for publishing</span>
-                  </>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  disabled={uploading}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file)
-                  }}
-                />
-              </label>
-            )}
-          </div>
         </div>
       </div>
     </div>
