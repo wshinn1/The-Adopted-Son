@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { Upload, X } from 'lucide-react'
 import BlockEditor from './BlockEditor'
 
 interface Devotional {
@@ -48,6 +50,7 @@ export default function DevotionalEditor({ devotional }: Props) {
   const [isPublished, setIsPublished] = useState(devotional?.is_published ?? false)
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!devotional)
   const [editorContent, setEditorContent] = useState<unknown>(devotional?.content ?? '')
+  const [uploading, setUploading] = useState(false)
 
   const handleTitleChange = useCallback(
     (value: string) => {
@@ -59,7 +62,36 @@ export default function DevotionalEditor({ devotional }: Props) {
     [slugManuallyEdited],
   )
 
+  const handleImageUpload = async (file: File) => {
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/media/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) throw new Error('Upload failed')
+
+      const result = await response.json()
+      setCoverImageUrl(result.url)
+    } catch (err) {
+      console.error('Upload error:', err)
+      setError('Failed to upload image')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleSave = async (publish: boolean) => {
+    // Validate required fields
+    if (!coverImageUrl) {
+      setError('Featured image is required')
+      return
+    }
+
     setSaving(true)
     setError(null)
 
@@ -68,9 +100,12 @@ export default function DevotionalEditor({ devotional }: Props) {
       .map((t) => t.trim())
       .filter(Boolean)
 
+    // Always ensure slug is URL-safe
+    const safeSlug = slugify(slug || title)
+
     const body = {
       title,
-      slug,
+      slug: safeSlug,
       excerpt,
       content: editorContent ?? null,
       cover_image_url: coverImageUrl || null,
@@ -180,6 +215,55 @@ export default function DevotionalEditor({ devotional }: Props) {
 
       {/* Sidebar */}
       <div className="space-y-4">
+        {/* Featured Image - Moved to top for visibility */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
+          <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">
+            Featured Image <span className="text-red-500">*</span>
+          </h3>
+          {coverImageUrl ? (
+            <div className="relative">
+              <div className="aspect-video relative rounded-lg overflow-hidden">
+                <Image
+                  src={coverImageUrl}
+                  alt="Cover"
+                  fill
+                  className="object-cover"
+                  unoptimized={coverImageUrl.includes('blob.vercel-storage.com')}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setCoverImageUrl('')}
+                className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg cursor-pointer hover:border-primary-500 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+              {uploading ? (
+                <div className="text-sm text-neutral-500">Uploading...</div>
+              ) : (
+                <>
+                  <Upload className="size-8 text-neutral-400 mb-2" />
+                  <span className="text-sm text-neutral-500">Click to upload</span>
+                  <span className="text-xs text-neutral-400 mt-1">Required for publishing</span>
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleImageUpload(file)
+                }}
+              />
+            </label>
+          )}
+        </div>
+
         {/* Publish */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
           <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">Publish</h3>
@@ -257,16 +341,6 @@ export default function DevotionalEditor({ devotional }: Props) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Cover image URL</label>
-            <input
-              type="url"
-              value={coverImageUrl}
-              onChange={(e) => setCoverImageUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
         </div>
       </div>
     </div>

@@ -5,6 +5,21 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Dynamic font variables - set by FontProvider */
+:root {
+  --font-heading: 'Be Vietnam Pro', sans-serif;
+  --font-body: 'Merriweather', serif;
+}
+
+/* Font utility classes for blog posts */
+@utility font-heading {
+  font-family: var(--font-heading);
+}
+
+@utility font-body {
+  font-family: var(--font-body);
+}
+
 @theme {
   --color-primary-50: rgb(238, 242, 255);
   --color-primary-100: rgb(224, 231, 255);

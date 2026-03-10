@@ -12,7 +12,7 @@ export function Heading({ className, level = 2, dimHeading, children, ...props }
       {...props}
       className={clsx(
         className,
-        'text-3xl font-semibold tracking-tight text-pretty text-neutral-950 sm:text-4xl dark:text-white'
+        'text-3xl font-semibold tracking-tight text-pretty text-neutral-950 sm:text-4xl dark:text-white font-heading'
       )}
     >
       {children}
@@ -28,7 +28,7 @@ export function Subheading({ className, level = 3, ...props }: HeadingProps) {
   return (
     <Element
       {...props}
-      className={clsx(className, 'text-lg font-normal text-neutral-500 lg:text-xl dark:text-neutral-400')}
+      className={clsx(className, 'text-lg font-normal text-neutral-500 lg:text-xl dark:text-neutral-400 font-body')}
     />
   )
 }

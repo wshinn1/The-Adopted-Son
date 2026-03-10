@@ -2,6 +2,7 @@ import '@/styles/tailwind.css'
 import { Metadata } from 'next'
 import { Be_Vietnam_Pro } from 'next/font/google'
 import ThemeProvider from './theme-provider'
+import FontProvider from '@/components/FontProvider'
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ['latin'],
@@ -23,7 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={beVietnamPro.className}>
       <body className="bg-white text-base text-neutral-900 dark:bg-neutral-900 dark:text-neutral-200">
         <ThemeProvider>
-          <div>{children}</div>
+          <FontProvider>
+            <div>{children}</div>
+          </FontProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -2,6 +2,15 @@ import { createClient } from '@/lib/supabase/server'
 import { put } from '@vercel/blob'
 import { NextRequest, NextResponse } from 'next/server'
 
+// Allow larger file uploads (up to 50MB)
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}
+
+export const maxDuration = 60
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
