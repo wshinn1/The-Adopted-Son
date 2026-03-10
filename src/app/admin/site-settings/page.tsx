@@ -20,6 +20,12 @@ interface Page {
   slug: string
 }
 
+const FONT_OPTIONS = [
+  { value: 'font-sans', label: 'Sans-serif (Geist)' },
+  { value: 'font-serif', label: 'Serif (Georgia)' },
+  { value: 'font-mono', label: 'Monospace (Geist Mono)' },
+]
+
 export default function SiteSettingsPage() {
   const [pages, setPages] = useState<Page[]>([])
   const [siteName, setSiteName] = useState('')
@@ -28,6 +34,8 @@ export default function SiteSettingsPage() {
   const [navLinks, setNavLinks] = useState<NavLink[]>([])
   const [footerText, setFooterText] = useState('')
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
+  const [headingFont, setHeadingFont] = useState('font-sans')
+  const [bodyFont, setBodyFont] = useState('font-serif')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -78,6 +86,8 @@ export default function SiteSettingsPage() {
       setNavLinks(settings.nav_links || [{ label: 'Home', url: '/' }])
       setFooterText(settings.footer_text || '')
       setSocialLinks(settings.social_links || [])
+      setHeadingFont(settings.typography?.heading_font || 'font-sans')
+      setBodyFont(settings.typography?.body_font || 'font-serif')
     } catch (err) {
       console.error('Error loading settings:', err)
     } finally {
@@ -102,6 +112,7 @@ export default function SiteSettingsPage() {
       await saveSetting('nav_links', navLinks)
       await saveSetting('footer_text', footerText)
       await saveSetting('social_links', socialLinks)
+      await saveSetting('typography', { heading_font: headingFont, body_font: bodyFont })
       alert('Settings saved!')
     } catch (err) {
       console.error('Error saving settings:', err)
@@ -299,6 +310,60 @@ export default function SiteSettingsPage() {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Typography */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">Typography</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Heading Font
+              </label>
+              <select
+                value={headingFont}
+                onChange={(e) => setHeadingFont(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+              >
+                {FONT_OPTIONS.map((font) => (
+                  <option key={font.value} value={font.value}>
+                    {font.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-neutral-500 mt-1">Used for blog post titles and headings</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Body Font
+              </label>
+              <select
+                value={bodyFont}
+                onChange={(e) => setBodyFont(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+              >
+                {FONT_OPTIONS.map((font) => (
+                  <option key={font.value} value={font.value}>
+                    {font.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-neutral-500 mt-1">Used for blog post body text and excerpts</p>
+            </div>
+
+            {/* Font Preview */}
+            <div className="mt-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+              <p className="text-xs text-neutral-500 mb-3">Preview:</p>
+              <h3 className={`text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-2 ${headingFont}`}>
+                Sample Heading Text
+              </h3>
+              <p className={`text-neutral-700 dark:text-neutral-300 ${bodyFont}`}>
+                This is how your body text will appear in blog posts. The quick brown fox jumps over the lazy dog.
+              </p>
+            </div>
           </div>
         </div>
 
