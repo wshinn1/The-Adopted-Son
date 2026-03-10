@@ -100,9 +100,12 @@ export default function DevotionalEditor({ devotional }: Props) {
       .map((t) => t.trim())
       .filter(Boolean)
 
+    // Always ensure slug is URL-safe
+    const safeSlug = slugify(slug || title)
+
     const body = {
       title,
-      slug,
+      slug: safeSlug,
       excerpt,
       content: editorContent ?? null,
       cover_image_url: coverImageUrl || null,
