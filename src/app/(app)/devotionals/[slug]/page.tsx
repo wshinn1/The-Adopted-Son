@@ -4,7 +4,6 @@ import TrialBanner from '@/components/devotional/TrialBanner'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
 import { checkAccess } from '@/lib/trial'
 import { createClient } from '@/lib/supabase/server'
-import { getSiteSettings } from '@/lib/site-settings'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -29,10 +28,7 @@ export default async function DevotionalPage({ params }: Props) {
   const { slug } = await params
   const supabase = await createClient()
 
-  const [devotional, siteSettings] = await Promise.all([
-    getDevotionalBySlug(supabase, slug),
-    getSiteSettings(),
-  ])
+  const devotional = await getDevotionalBySlug(supabase, slug)
 
   if (!devotional || !devotional.is_published) notFound()
 
@@ -69,10 +65,7 @@ export default async function DevotionalPage({ params }: Props) {
       <TrialBanner />
       
       {/* Main Blog Post */}
-      <BlogPostPage 
-        post={post} 
-        typography={siteSettings.typography}
-      />
+      <BlogPostPage post={post} />
 
       {/* Paywall (if premium and no access) */}
       {!canRead && (
