@@ -15,9 +15,11 @@ interface Props {
 export default function PricingPlans({ plans }: Props) {
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
 
-  const fetchClientSecret = useCallback(async () => {
-    if (!selectedPlanId) return null
-    return await startCheckoutSession(selectedPlanId)
+  const fetchClientSecret = useCallback(async (): Promise<string> => {
+    if (!selectedPlanId) throw new Error('No plan selected')
+    const clientSecret = await startCheckoutSession(selectedPlanId)
+    if (!clientSecret) throw new Error('Failed to create checkout session')
+    return clientSecret
   }, [selectedPlanId])
 
   if (selectedPlanId) {
