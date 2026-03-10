@@ -20,7 +20,14 @@ interface PageSection {
   data: Record<string, any>
   sort_order: number
   is_visible: boolean
-  section_templates: SectionTemplate
+  section_templates: SectionTemplate | SectionTemplate[]
+}
+
+// Helper to normalize section_templates (Supabase returns array from joins)
+function getTemplate(section: PageSection): SectionTemplate {
+  return Array.isArray(section.section_templates) 
+    ? section.section_templates[0] 
+    : section.section_templates
 }
 
 interface Page {
@@ -381,7 +388,7 @@ export default function PageEditor({ page, sections: initialSections, templates 
                   <GripVertical className="size-4 text-neutral-400" />
                   
                   <span className="flex-1 font-medium text-neutral-900 dark:text-neutral-100">
-                    {section.section_templates.name}
+                    {getTemplate(section).name}
                   </span>
 
                   {/* Reorder buttons */}
@@ -430,8 +437,8 @@ export default function PageEditor({ page, sections: initialSections, templates 
                   <div className="p-4 border-t border-neutral-200 dark:border-neutral-700">
                     <SectionEditor
                       data={section.data}
-                      schema={section.section_templates.schema}
-                      defaultData={section.section_templates.default_data}
+                      schema={getTemplate(section).schema}
+                      defaultData={getTemplate(section).default_data}
                       onSave={(newData) => updateSectionData(section.id, newData)}
                       saving={saving}
                     />
