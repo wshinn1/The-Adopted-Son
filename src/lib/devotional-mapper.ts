@@ -187,6 +187,8 @@ export async function getDevotionalBySlug(
   supabase: any,
   slug: string
 ): Promise<Devotional | null> {
+  console.log('[v0] getDevotionalBySlug called with slug:', slug)
+  
   // First try to fetch with authors join
   const { data, error } = await supabase
     .from('devotionals')
@@ -197,8 +199,10 @@ export async function getDevotionalBySlug(
     .eq('slug', slug)
     .single()
   
+  console.log('[v0] Query result - data:', data ? 'found' : 'null', 'error:', error?.message || 'none')
+  
   if (error) {
-    console.error('Error fetching devotional with authors join:', error)
+    console.error('[v0] Error fetching devotional with authors join:', error)
     // Fallback: try without the join
     const { data: fallbackData, error: fallbackError } = await supabase
       .from('devotionals')
@@ -206,8 +210,10 @@ export async function getDevotionalBySlug(
       .eq('slug', slug)
       .single()
     
+    console.log('[v0] Fallback query result - data:', fallbackData ? 'found' : 'null', 'error:', fallbackError?.message || 'none')
+    
     if (fallbackError) {
-      console.error('Error fetching devotional:', fallbackError)
+      console.error('[v0] Error fetching devotional:', fallbackError)
       return null
     }
     return fallbackData
