@@ -67,9 +67,14 @@ export default async function DevotionalPage({ params }: Props) {
   const { slug } = await params
   const settings = await getSiteSettings()
 
+  console.log('[v0] Fetching devotional with slug:', slug)
   const devotional = await getDevotionalBySlug(supabaseAdmin, slug)
+  console.log('[v0] Devotional result:', devotional ? { id: devotional.id, is_published: devotional.is_published, slug: devotional.slug } : 'null')
 
-  if (!devotional || !devotional.is_published) notFound()
+  if (!devotional || !devotional.is_published) {
+    console.log('[v0] 404 - devotional not found or not published')
+    notFound()
+  }
 
   // Check access for premium content
   const access = await checkAccess()
