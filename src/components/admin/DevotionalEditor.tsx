@@ -246,21 +246,25 @@ export default function DevotionalEditor({ devotional }: Props) {
           <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">
             Featured Image <span className="text-red-500">*</span>
           </h3>
-          {coverImageUrl ? (
+          {coverImageUrl && coverImageUrl.length > 0 ? (
             <div className="relative">
-              <div className="aspect-video relative rounded-lg overflow-hidden">
+              <div className="aspect-video relative rounded-lg overflow-hidden bg-neutral-100">
                 <Image
                   src={coverImageUrl}
                   alt="Cover"
                   fill
                   className="object-cover"
                   unoptimized={coverImageUrl.includes('blob.vercel-storage.com')}
+                  onError={(e) => {
+                    // Hide broken image
+                    e.currentTarget.style.display = 'none'
+                  }}
                 />
               </div>
               <button
                 type="button"
                 onClick={() => setCoverImageUrl('')}
-                className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+                className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
               >
                 <X className="size-4" />
               </button>
