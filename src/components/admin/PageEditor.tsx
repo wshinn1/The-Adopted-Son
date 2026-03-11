@@ -64,6 +64,12 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const [saving, setSaving] = useState(false)
   const [addingSection, setAddingSection] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ message, type })
+    setTimeout(() => setNotification(null), 3000)
+  }
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -86,9 +92,10 @@ export default function PageEditor({ page, sections: initialSections, templates 
 
       if (error) throw error
       router.refresh()
+      showNotification('Page settings saved successfully!')
     } catch (err) {
       console.error('Error saving page:', err)
-      alert('Error saving page settings')
+      showNotification('Error saving page settings', 'error')
     } finally {
       setSaving(false)
     }
@@ -155,9 +162,10 @@ export default function PageEditor({ page, sections: initialSections, templates 
       setSections(sections.map(s => 
         s.id === sectionId ? { ...s, data: newData } : s
       ))
+      showNotification('Section saved successfully!')
     } catch (err) {
       console.error('Error updating section:', err)
-      alert('Error updating section')
+      showNotification('Error updating section', 'error')
     } finally {
       setSaving(false)
     }
@@ -247,6 +255,19 @@ export default function PageEditor({ page, sections: initialSections, templates 
 
   return (
     <div className="max-w-4xl">
+      {/* Success/Error Notification */}
+      {notification && (
+        <div 
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-all ${
+            notification.type === 'success' 
+              ? 'bg-green-600 text-white' 
+              : 'bg-red-600 text-white'
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
           Edit Page: {page.title}
