@@ -1,3 +1,12 @@
+-- Create updated_at trigger function if it doesn't exist
+create or replace function public.set_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
 -- Create section_templates table for storing reusable section types
 create table if not exists public.section_templates (
   id uuid primary key default gen_random_uuid(),
@@ -15,9 +24,10 @@ create table if not exists public.section_templates (
 create table if not exists public.page_sections (
   id uuid primary key default gen_random_uuid(),
   page_id uuid not null references public.pages(id) on delete cascade,
-  template_id uuid not null references public.section_templates(id) on delete restrict,
+  template_id uuid references public.section_templates(id) on delete set null,
   data jsonb not null default '{}',
   sort_order integer not null default 0,
+  is_visible boolean default true,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

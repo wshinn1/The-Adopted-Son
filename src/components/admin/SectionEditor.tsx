@@ -2,10 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { Upload } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+// Dynamically import RichTextEditor to avoid SSR issues
+const RichTextEditor = dynamic(() => import('./RichTextEditor'), { ssr: false })
 
 interface SchemaProperty {
   type: string
   title: string
+  enum?: string[] // For select dropdowns
+  format?: string // 'richtext' for rich text editor
 }
 
 interface Schema {
@@ -76,8 +82,28 @@ export default function SectionEditor({
             {prop.title || key}
           </label>
           
-          {/* Image field */}
-          {key.toLowerCase().includes('image') || key.toLowerCase().includes('url') && key !== 'button_url' ? (
+          {/* Rich text editor for content fields */}
+          {(prop.format === 'richtext' || key === 'content') ? (
+            <RichTextEditor
+              content={formData[key] || ''}
+              onChange={(value) => handleChange(key, value)}
+              placeholder={`Enter ${prop.title || key}...`}
+            />
+          ) : prop.enum && prop.enum.length > 0 ? (
+            /* Select dropdown for enum fields */
+            <select
+              value={formData[key] || ''}
+              onChange={(e) => handleChange(key, e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+            >
+              {prop.enum.map((option) => (
+                <option key={option} value={option}>
+                  {option.charAt(0).toUpperCase() + option.slice(1).replace(/_/g, ' ')}
+                </option>
+              ))}
+            </select>
+          ) : /* Image field */
+          key.toLowerCase().includes('image') || key.toLowerCase().includes('url') && key !== 'button_url' ? (
             <div className="space-y-2">
               {formData[key] && (
                 <div className="relative w-full max-w-md rounded-lg overflow-hidden bg-neutral-100">

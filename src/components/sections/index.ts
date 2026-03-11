@@ -5,6 +5,7 @@ import type { ComponentType } from 'react'
 // Add new sections here as they are created
 export const sectionComponents: Record<string, ComponentType<{ data: any }>> = {
   Home1: dynamic(() => import('./Home1')),
+  TextSection: dynamic(() => import('./TextSection')),
 }
 
 // Get a section component by name
