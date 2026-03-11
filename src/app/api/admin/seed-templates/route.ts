@@ -141,52 +141,13 @@ export async function POST() {
       .limit(1)
 
     if (checkError) {
-      // Tables don't exist, try to create them
-      console.log('Tables do not exist, attempting to create...')
-      
-      // Create section_templates table
-      const { error: createTemplatesError } = await supabaseAdmin.rpc('exec_sql', {
-        sql: `
-          create table if not exists public.section_templates (
-            id uuid primary key default gen_random_uuid(),
-            name text not null unique,
-            description text,
-            component_name text not null,
-            schema jsonb not null default '{}',
-            default_data jsonb not null default '{}',
-            thumbnail_url text,
-            created_at timestamptz default now(),
-            updated_at timestamptz default now()
-          );
-        `
-      }).catch(() => ({ error: 'RPC not available' }))
-      
-      // If RPC fails, try direct table creation through REST
-      if (createTemplatesError) {
-        // Return instructions for manual setup
-        return NextResponse.json({ 
-          error: 'Tables do not exist', 
-          message: 'Please create the tables by going to Site Settings and running the SQL in Supabase Dashboard. SQL file: scripts/004_create_section_tables.sql',
-          manualSetup: true
-        }, { status: 400 })
-      }
-
-      // Create page_sections table
-      await supabaseAdmin.rpc('exec_sql', {
-        sql: `
-          create table if not exists public.page_sections (
-            id uuid primary key default gen_random_uuid(),
-            page_id uuid not null references public.pages(id) on delete cascade,
-            template_id uuid references public.section_templates(id) on delete set null,
-            data jsonb not null default '{}',
-            sort_order integer not null default 0,
-            is_visible boolean default true,
-            created_at timestamptz default now(),
-            updated_at timestamptz default now()
-          );
-          create index if not exists idx_page_sections_page_id on public.page_sections(page_id);
-        `
-      }).catch(() => null)
+      // Tables don't exist - return instructions for manual setup
+      console.log('Tables do not exist:', checkError.message)
+      return NextResponse.json({ 
+        error: 'Tables do not exist', 
+        message: 'Please create the tables by running the SQL in Supabase Dashboard. Go to SQL Editor and run the contents of scripts/004_create_section_tables.sql',
+        manualSetup: true
+      }, { status: 400 })
     }
 
     // Upsert templates - check if exists first, then insert or update
