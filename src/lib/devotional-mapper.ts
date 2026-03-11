@@ -31,6 +31,7 @@ export interface Devotional {
     id: string
     name: string
     avatar_url: string | null
+    website: string | null
   } | null
 }
 
@@ -156,7 +157,7 @@ export async function getDevotionals(
     .from('devotionals')
     .select(`
       *,
-      authors(id, name, avatar_url)
+      authors(id, name, avatar_url, website)
     `)
     .order('published_at', { ascending: false })
     .limit(limit)
@@ -190,7 +191,7 @@ export async function getDevotionalBySlug(
     .from('devotionals')
     .select(`
       *,
-      authors(id, name, avatar_url)
+      authors(id, name, avatar_url, website)
     `)
     .eq('slug', slug)
     .single()

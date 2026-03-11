@@ -5,8 +5,11 @@ import Link from 'next/link'
 import { Facebook, Twitter, Share2, ArrowLeft } from 'lucide-react'
 
 interface Author {
+  id?: string
+  name?: string | null
   full_name?: string | null
   avatar_url?: string | null
+  website?: string | null
 }
 
 interface BlogPost {
@@ -23,6 +26,7 @@ interface BlogPost {
   read_time_minutes?: number | null
   published_at?: string | null
   author?: Author | null
+  authors?: Author | null  // New field from authors table join
   author_name?: string | null
 }
 
@@ -39,8 +43,11 @@ export default function BlogPostPage({ post }: Props) {
       })
     : null
 
-  // Prioritize author_name field, fallback to author.full_name, then default
-  const authorName = post.author_name || post.author?.full_name || 'The Adopted Son'
+  // Prioritize authors table (joined), fallback to author_name field, then default
+  const authorData = post.authors || post.author
+  const authorName = authorData?.name || authorData?.full_name || post.author_name || 'The Adopted Son'
+  const authorAvatar = authorData?.avatar_url
+  const authorWebsite = authorData?.website
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
   const shareTitle = encodeURIComponent(post.title)
@@ -69,14 +76,14 @@ export default function BlogPostPage({ post }: Props) {
           {/* Author info */}
           <div className="flex items-center gap-3">
             <div className="size-12 rounded-full overflow-hidden bg-neutral-200 shrink-0">
-              {post.author?.avatar_url ? (
+              {authorAvatar ? (
                 <Image
-                  src={post.author.avatar_url}
+                  src={authorAvatar}
                   alt={authorName}
                   width={48}
                   height={48}
                   className="size-full object-cover"
-                  unoptimized={post.author.avatar_url.includes('blob.vercel-storage.com')}
+                  unoptimized={authorAvatar.includes('blob.vercel-storage.com')}
                 />
               ) : (
                 <div className="size-full flex items-center justify-center text-neutral-500 font-semibold">
@@ -86,7 +93,19 @@ export default function BlogPostPage({ post }: Props) {
             </div>
             <div className="text-sm">
               <div className="text-neutral-600">
-                By<span className="font-semibold text-neutral-900 uppercase ml-1">{authorName}</span>
+                By
+                {authorWebsite ? (
+                  <a 
+                    href={authorWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="font-semibold text-neutral-900 uppercase ml-1 hover:text-primary-600 transition-colors"
+                  >
+                    {authorName}
+                  </a>
+                ) : (
+                  <span className="font-semibold text-neutral-900 uppercase ml-1">{authorName}</span>
+                )}
               </div>
               <div className="text-neutral-500">
                 {publishedDate}
@@ -195,14 +214,14 @@ export default function BlogPostPage({ post }: Props) {
         <div className="mt-12 pt-8 border-t border-neutral-200">
           <div className="flex items-start gap-4">
             <div className="size-16 rounded-full overflow-hidden bg-neutral-200 shrink-0">
-              {post.author?.avatar_url ? (
+              {authorAvatar ? (
                 <Image
-                  src={post.author.avatar_url}
+                  src={authorAvatar}
                   alt={authorName}
                   width={64}
                   height={64}
                   className="size-full object-cover"
-                  unoptimized={post.author.avatar_url.includes('blob.vercel-storage.com')}
+                  unoptimized={authorAvatar.includes('blob.vercel-storage.com')}
                 />
               ) : (
                 <div className="size-full flex items-center justify-center text-neutral-500 text-xl font-semibold">
@@ -212,9 +231,20 @@ export default function BlogPostPage({ post }: Props) {
             </div>
             <div>
               <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Written by</p>
-              <p className="text-lg font-semibold text-neutral-900">
-                {authorName}
-              </p>
+              {authorWebsite ? (
+                <a 
+                  href={authorWebsite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-lg font-semibold text-neutral-900 hover:text-primary-600 transition-colors"
+                >
+                  {authorName}
+                </a>
+              ) : (
+                <p className="text-lg font-semibold text-neutral-900">
+                  {authorName}
+                </p>
+              )}
             </div>
           </div>
         </div>
