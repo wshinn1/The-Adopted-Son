@@ -7,7 +7,6 @@ import Image from 'next/image'
 import { Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import TrialBanner from '@/components/devotional/TrialBanner'
 import HamburgerHeader from '@/components/HamburgerHeader'
-import Footer from '@/components/Footer/Footer'
 
 export const metadata: Metadata = {
   title: 'All Devotionals — The Adopted Son',
@@ -371,7 +370,6 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           )}
         </section>
       </div>
-      <Footer />
     </div>
   )
 }
