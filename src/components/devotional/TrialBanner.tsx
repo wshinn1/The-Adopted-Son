@@ -28,44 +28,10 @@ export default function TrialBanner() {
       try {
         // Check if user is logged in
         const { data: { user } } = await supabase.auth.getUser()
-        console.log('[v0] TrialBanner - user:', user?.id)
 
+        // IMPORTANT: Hide banner for ALL logged-in users, no exceptions
         if (user) {
-          // Check if admin or subscribed
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('is_admin, subscription_status, subscription_period_end')
-            .eq('id', user.id)
-            .single()
-
-          console.log('[v0] TrialBanner - profile:', profile, 'error:', profileError)
-
-          // If user is logged in at all, hide the banner (admin or any authenticated user)
-          if (profile?.is_admin === true) {
-            console.log('[v0] TrialBanner - hiding for admin')
-            setTrialInfo({ isAdmin: true, isSubscribed: false, trialDaysLeft: null, trialExpired: false })
-            setLoading(false)
-            return
-          }
-
-          // Check for active subscription - either status is 'active' OR period hasn't ended
-          const hasActiveSubscription = 
-            profile?.subscription_status === 'active' ||
-            profile?.subscription_status === 'trialing' ||
-            (profile?.subscription_period_end && new Date(profile.subscription_period_end) > new Date())
-
-          console.log('[v0] TrialBanner - hasActiveSubscription:', hasActiveSubscription)
-
-          if (hasActiveSubscription) {
-            setTrialInfo({ isAdmin: false, isSubscribed: true, trialDaysLeft: null, trialExpired: false })
-            setLoading(false)
-            return
-          }
-          
-          // User is logged in but doesn't have subscription - still hide banner for logged-in users
-          // They should see the paywall instead of the trial banner
-          console.log('[v0] TrialBanner - hiding for logged-in user without subscription')
-          setTrialInfo({ isAdmin: false, isSubscribed: true, trialDaysLeft: null, trialExpired: false })
+          setTrialInfo({ isAdmin: true, isSubscribed: false, trialDaysLeft: null, trialExpired: false })
           setLoading(false)
           return
         }
