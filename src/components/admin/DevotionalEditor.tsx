@@ -203,16 +203,27 @@ export default function DevotionalEditor({ devotional }: Props) {
           placeholder="Write your devotional here... Use the toolbar to add headings, images, videos, columns, and more."
         />
 
-        {/* Excerpt */}
+        {/* Short Description / Excerpt */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
-          <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">Excerpt</h3>
+          <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">Short Description</h3>
           <textarea
             value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            placeholder="A short summary shown in cards and previews..."
-            rows={3}
+            onChange={(e) => {
+              // Limit to 160 characters (approximately 1-2 sentences)
+              if (e.target.value.length <= 160) {
+                setExcerpt(e.target.value)
+              }
+            }}
+            placeholder="A brief one-sentence summary shown in post cards and previews..."
+            rows={2}
             className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
           />
+          <div className="flex justify-between items-center mt-1.5">
+            <p className="text-xs text-neutral-400">Keep it to one sentence for best display</p>
+            <span className={`text-xs ${excerpt.length > 140 ? 'text-amber-500' : 'text-neutral-400'}`}>
+              {excerpt.length}/160
+            </span>
+          </div>
         </div>
       </div>
 
