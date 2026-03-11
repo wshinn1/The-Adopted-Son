@@ -24,22 +24,44 @@ export default async function DevotionalsPage({ searchParams }: Props) {
 
   const supabase = await createClient()
 
-  // Fetch featured post (most recent or marked as featured)
-  const { data: featuredData } = await supabase
+  // Fetch featured post (prioritize is_featured, fallback to most recent)
+  let featuredData = null
+  
+  // First try to get a post marked as featured
+  const { data: markedFeatured } = await supabase
     .from('devotionals')
     .select(`
       *,
       author:profiles!devotionals_author_id_fkey(id, full_name, avatar_url)
     `)
     .eq('is_published', true)
+    .eq('is_featured', true)
     .order('published_at', { ascending: false })
     .limit(1)
     .single()
+  
+  if (markedFeatured) {
+    featuredData = markedFeatured
+  } else {
+    // Fallback to most recent post
+    const { data: mostRecent } = await supabase
+      .from('devotionals')
+      .select(`
+        *,
+        author:profiles!devotionals_author_id_fkey(id, full_name, avatar_url)
+      `)
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .limit(1)
+      .single()
+    featuredData = mostRecent
+  }
 
   const featuredPost = featuredData ? devotionalToPost(featuredData as Devotional) : null
+  const featuredId = featuredData?.id
 
-  // Fetch sidebar posts (next 4 after featured)
-  const { data: sidebarData } = await supabase
+  // Fetch sidebar posts (next 4, excluding featured)
+  let sidebarQuery = supabase
     .from('devotionals')
     .select(`
       *,
@@ -47,9 +69,16 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     `)
     .eq('is_published', true)
     .order('published_at', { ascending: false })
-    .range(1, 4)
+    .limit(4)
+  
+  if (featuredId) {
+    sidebarQuery = sidebarQuery.neq('id', featuredId)
+  }
+  
+  const { data: sidebarData } = await sidebarQuery
 
   const sidebarPosts = (sidebarData || []).map((d: Devotional) => devotionalToPost(d))
+  const excludeIds = [featuredId, ...sidebarPosts.map(p => p.id)].filter(Boolean)
 
   // Build query for main grid (excluding featured and sidebar posts)
   let query = supabase
@@ -59,8 +88,13 @@ export default async function DevotionalsPage({ searchParams }: Props) {
       author:profiles!devotionals_author_id_fkey(id, full_name, avatar_url)
     `, { count: 'exact' })
     .eq('is_published', true)
-    .order('published_at', { ascending: false })
-    .range(5 + offset, 5 + offset + POSTS_PER_PAGE - 1)
+  
+  if (excludeIds.length > 0) {
+    query = query.not('id', 'in', `(${excludeIds.join(',')})`)
+  }
+  
+  query = query.order('published_at', { ascending: false })
+    .range(offset, offset + POSTS_PER_PAGE - 1)
 
   // Apply search filter if provided
   if (search) {

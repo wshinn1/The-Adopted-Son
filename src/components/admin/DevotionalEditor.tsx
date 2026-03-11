@@ -20,6 +20,7 @@ interface Devotional {
   read_time_minutes?: number | null
   is_premium?: boolean
   is_published?: boolean
+  is_featured?: boolean
 }
 
 interface Props {
@@ -48,6 +49,7 @@ export default function DevotionalEditor({ devotional }: Props) {
   const [readTime, setReadTime] = useState(devotional?.read_time_minutes ?? 5)
   const [isPremium, setIsPremium] = useState(devotional?.is_premium ?? true)
   const [isPublished, setIsPublished] = useState(devotional?.is_published ?? false)
+  const [isFeatured, setIsFeatured] = useState(devotional?.is_featured ?? false)
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!devotional)
   const [editorContent, setEditorContent] = useState<unknown>(devotional?.content ?? '')
   const [uploading, setUploading] = useState(false)
@@ -116,6 +118,7 @@ export default function DevotionalEditor({ devotional }: Props) {
       read_time_minutes: readTime,
       is_premium: isPremium,
       is_published: publish,
+      is_featured: isFeatured,
       ...(publish && !devotional?.is_published ? { published_at: new Date().toISOString() } : {}),
     }
 
@@ -294,6 +297,17 @@ export default function DevotionalEditor({ devotional }: Props) {
         {/* Settings */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5 space-y-4">
           <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Settings</h3>
+
+          <div className="flex items-center justify-between">
+            <label className="text-sm text-neutral-600 dark:text-neutral-400">Featured post</label>
+            <button
+              type="button"
+              onClick={() => setIsFeatured(!isFeatured)}
+              className={`relative w-10 h-5.5 rounded-full transition-colors ${isFeatured ? 'bg-amber-500' : 'bg-neutral-300 dark:bg-neutral-700'}`}
+            >
+              <span className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${isFeatured ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
 
           <div className="flex items-center justify-between">
             <label className="text-sm text-neutral-600 dark:text-neutral-400">Premium content</label>
