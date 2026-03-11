@@ -45,10 +45,12 @@ export default async function EditPagePage({
     .order('sort_order', { ascending: true })
 
   // Get all available templates
-  const { data: templates } = await supabase
+  const { data: templates, error: templatesError } = await supabase
     .from('section_templates')
     .select('*')
     .order('name', { ascending: true })
+
+  console.log('[v0] Templates loaded:', templates?.length, 'Error:', templatesError?.message)
 
   return (
     <PageEditor
