@@ -70,6 +70,8 @@ export default function SiteSettingsPage() {
   const [bodyFont, setBodyFont] = useState('font-serif')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [seedingTemplates, setSeedingTemplates] = useState(false)
+  const [seedMessage, setSeedMessage] = useState('')
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -579,6 +581,44 @@ export default function SiteSettingsPage() {
               <p className="text-sm text-neutral-500">No social links added yet.</p>
             )}
           </div>
+        </div>
+
+        {/* Page Builder Templates */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">Page Builder</h2>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
+            Initialize or update the section templates for the page builder. This will create or update available components like Text Section and Hero sections.
+          </p>
+          <button
+            onClick={async () => {
+              setSeedingTemplates(true)
+              setSeedMessage('')
+              try {
+                const res = await fetch('/api/admin/seed-templates', { method: 'POST' })
+                const data = await res.json()
+                if (data.success) {
+                  setSeedMessage('Templates seeded successfully!')
+                } else if (data.error === 'Tables do not exist') {
+                  setSeedMessage('Database tables need to be created. Please run the SQL migration in scripts/004_create_section_tables.sql via Supabase Dashboard.')
+                } else {
+                  setSeedMessage(data.error || 'Failed to seed templates')
+                }
+              } catch (err) {
+                setSeedMessage('Error seeding templates')
+              } finally {
+                setSeedingTemplates(false)
+              }
+            }}
+            disabled={seedingTemplates}
+            className="px-4 py-2 bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 font-medium rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-50"
+          >
+            {seedingTemplates ? 'Initializing...' : 'Initialize Section Templates'}
+          </button>
+          {seedMessage && (
+            <p className={`mt-3 text-sm ${seedMessage.includes('successfully') ? 'text-green-600' : 'text-amber-600'}`}>
+              {seedMessage}
+            </p>
+          )}
         </div>
 
         {/* Save Button */}
