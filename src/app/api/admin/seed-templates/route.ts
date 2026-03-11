@@ -141,65 +141,87 @@ export async function POST() {
       .limit(1)
 
     if (checkError) {
-      // Tables don't exist, need to create them first
-      const createTablesSql = `
-        -- Create updated_at trigger function
-        create or replace function public.set_updated_at()
-        returns trigger as $$
-        begin
-          new.updated_at = now();
-          return new;
-        end;
-        $$ language plpgsql;
-
-        -- Create section_templates table
-        create table if not exists public.section_templates (
-          id uuid primary key default gen_random_uuid(),
-          name text not null,
-          description text,
-          component_name text not null,
-          schema jsonb not null default '{}',
-          default_data jsonb not null default '{}',
-          thumbnail_url text,
-          created_at timestamptz default now(),
-          updated_at timestamptz default now()
-        );
-
-        -- Create page_sections table
-        create table if not exists public.page_sections (
-          id uuid primary key default gen_random_uuid(),
-          page_id uuid not null references public.pages(id) on delete cascade,
-          template_id uuid references public.section_templates(id) on delete set null,
-          data jsonb not null default '{}',
-          sort_order integer not null default 0,
-          is_visible boolean default true,
-          created_at timestamptz default now(),
-          updated_at timestamptz default now()
-        );
-
-        -- Create index
-        create index if not exists idx_page_sections_page_id on public.page_sections(page_id);
-      `
+      // Tables don't exist, try to create them
+      console.log('Tables do not exist, attempting to create...')
       
-      // Try to create tables via RPC if available, otherwise return error with instructions
-      return NextResponse.json({ 
-        error: 'Tables do not exist', 
-        message: 'Please run the SQL migration in scripts/004_create_section_tables.sql via Supabase Dashboard',
-        sql: createTablesSql
-      }, { status: 400 })
+      // Create section_templates table
+      const { error: createTemplatesError } = await supabaseAdmin.rpc('exec_sql', {
+        sql: `
+          create table if not exists public.section_templates (
+            id uuid primary key default gen_random_uuid(),
+            name text not null unique,
+            description text,
+            component_name text not null,
+            schema jsonb not null default '{}',
+            default_data jsonb not null default '{}',
+            thumbnail_url text,
+            created_at timestamptz default now(),
+            updated_at timestamptz default now()
+          );
+        `
+      }).catch(() => ({ error: 'RPC not available' }))
+      
+      // If RPC fails, try direct table creation through REST
+      if (createTemplatesError) {
+        // Return instructions for manual setup
+        return NextResponse.json({ 
+          error: 'Tables do not exist', 
+          message: 'Please create the tables by going to Site Settings and running the SQL in Supabase Dashboard. SQL file: scripts/004_create_section_tables.sql',
+          manualSetup: true
+        }, { status: 400 })
+      }
+
+      // Create page_sections table
+      await supabaseAdmin.rpc('exec_sql', {
+        sql: `
+          create table if not exists public.page_sections (
+            id uuid primary key default gen_random_uuid(),
+            page_id uuid not null references public.pages(id) on delete cascade,
+            template_id uuid references public.section_templates(id) on delete set null,
+            data jsonb not null default '{}',
+            sort_order integer not null default 0,
+            is_visible boolean default true,
+            created_at timestamptz default now(),
+            updated_at timestamptz default now()
+          );
+          create index if not exists idx_page_sections_page_id on public.page_sections(page_id);
+        `
+      }).catch(() => null)
     }
 
-    // Upsert templates
+    // Upsert templates - check if exists first, then insert or update
     for (const template of templates) {
-      const { error } = await supabaseAdmin
+      // Check if template exists by name
+      const { data: existing } = await supabaseAdmin
         .from('section_templates')
-        .upsert(
-          { ...template },
-          { onConflict: 'name' }
-        )
+        .select('id')
+        .eq('name', template.name)
+        .single()
 
-      if (error) {
-        console.error('Error upserting template:', template.name, error)
+      if (existing) {
+        // Update existing template
+        const { error } = await supabaseAdmin
+          .from('section_templates')
+          .update({
+            description: template.description,
+            component_name: template.component_name,
+            schema: template.schema,
+            default_data: template.default_data,
+          })
+          .eq('id', existing.id)
+
+        if (error) {
+          console.error('Error updating template:', template.name, error)
+        }
+      } else {
+        // Insert new template
+        const { error } = await supabaseAdmin
+          .from('section_templates')
+          .insert(template)
+
+        if (error) {
+          console.error('Error inserting template:', template.name, error)
+        }
       }
     }
 
