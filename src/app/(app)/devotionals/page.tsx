@@ -36,7 +36,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     .from('devotionals')
     .select(`
       *,
-      author:profiles!devotionals_author_id_fkey(id, full_name, avatar_url)
+      authors:author_id(id, name, avatar_url, website)
     `)
     .eq('is_published', true)
     .eq('is_featured', true)
@@ -52,7 +52,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
       .from('devotionals')
       .select(`
         *,
-        author:profiles!devotionals_author_id_fkey(id, full_name, avatar_url)
+        authors:author_id(id, name, avatar_url, website)
       `)
       .eq('is_published', true)
       .order('published_at', { ascending: false })
@@ -69,7 +69,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     .from('devotionals')
     .select(`
       *,
-      author:profiles!devotionals_author_id_fkey(id, full_name, avatar_url)
+      authors:author_id(id, name, avatar_url, website)
     `)
     .eq('is_published', true)
     .order('published_at', { ascending: false })
@@ -89,7 +89,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     .from('devotionals')
     .select(`
       *,
-      author:profiles!devotionals_author_id_fkey(id, full_name, avatar_url)
+      authors:author_id(id, name, avatar_url, website)
     `, { count: 'exact' })
     .eq('is_published', true)
   
