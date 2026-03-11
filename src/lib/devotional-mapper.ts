@@ -155,10 +155,7 @@ export async function getDevotionals(
   
   let query = supabase
     .from('devotionals')
-    .select(`
-      *,
-      authors:author_id(id, name, avatar_url, website)
-    `)
+    .select('*')
     .order('published_at', { ascending: false })
     .limit(limit)
   
@@ -177,7 +174,27 @@ export async function getDevotionals(
     return []
   }
   
-  return data || []
+  // Fetch authors for all devotionals that have author_id
+  const devotionals = data || []
+  const authorIds = [...new Set(devotionals.filter((d: Devotional) => d.author_id).map((d: Devotional) => d.author_id))]
+  
+  if (authorIds.length > 0) {
+    const { data: authors } = await supabase
+      .from('authors')
+      .select('id, name, avatar_url, website')
+      .in('id', authorIds)
+    
+    if (authors) {
+      const authorMap = new Map(authors.map((a: any) => [a.id, a]))
+      devotionals.forEach((d: Devotional) => {
+        if (d.author_id && authorMap.has(d.author_id)) {
+          d.authors = authorMap.get(d.author_id)
+        }
+      })
+    }
+  }
+  
+  return devotionals
 }
 
 /**
@@ -189,34 +206,34 @@ export async function getDevotionalBySlug(
 ): Promise<Devotional | null> {
   console.log('[v0] getDevotionalBySlug called with slug:', slug)
   
-  // First try to fetch with authors join
+  // Fetch the devotional
   const { data, error } = await supabase
     .from('devotionals')
-    .select(`
-      *,
-      authors:author_id(id, name, avatar_url, website)
-    `)
+    .select('*')
     .eq('slug', slug)
     .single()
   
-  console.log('[v0] Query result - data:', data ? 'found' : 'null', 'error:', error?.message || 'none')
-  
   if (error) {
-    console.error('[v0] Error fetching devotional with authors join:', error)
-    // Fallback: try without the join
-    const { data: fallbackData, error: fallbackError } = await supabase
-      .from('devotionals')
-      .select('*')
-      .eq('slug', slug)
+    console.error('[v0] Error fetching devotional:', error)
+    return null
+  }
+  
+  if (!data) return null
+  
+  // If the devotional has an author_id, fetch the author separately
+  if (data.author_id) {
+    const { data: authorData, error: authorError } = await supabase
+      .from('authors')
+      .select('id, name, avatar_url, website')
+      .eq('id', data.author_id)
       .single()
     
-    console.log('[v0] Fallback query result - data:', fallbackData ? 'found' : 'null', 'error:', fallbackError?.message || 'none')
-    
-    if (fallbackError) {
-      console.error('[v0] Error fetching devotional:', fallbackError)
-      return null
+    if (!authorError && authorData) {
+      console.log('[v0] Author found:', authorData.name, 'avatar:', authorData.avatar_url ? 'yes' : 'no')
+      data.authors = authorData
+    } else {
+      console.log('[v0] Author fetch failed or not found:', authorError?.message)
     }
-    return fallbackData
   }
   
   return data

@@ -28,16 +28,34 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   const supabase = supabaseAdmin
   const settings = await getSiteSettings()
 
+  // Helper function to attach authors to devotionals
+  async function attachAuthors(devotionals: any[]) {
+    const authorIds = [...new Set(devotionals.filter(d => d.author_id).map(d => d.author_id))]
+    if (authorIds.length === 0) return devotionals
+    
+    const { data: authors } = await supabase
+      .from('authors')
+      .select('id, name, avatar_url, website')
+      .in('id', authorIds)
+    
+    if (authors) {
+      const authorMap = new Map(authors.map((a: any) => [a.id, a]))
+      devotionals.forEach(d => {
+        if (d.author_id && authorMap.has(d.author_id)) {
+          d.authors = authorMap.get(d.author_id)
+        }
+      })
+    }
+    return devotionals
+  }
+
   // Fetch featured post (prioritize is_featured, fallback to most recent)
   let featuredData = null
   
   // First try to get a post marked as featured
   const { data: markedFeatured } = await supabase
     .from('devotionals')
-    .select(`
-      *,
-      authors:author_id(id, name, avatar_url, website)
-    `)
+    .select('*')
     .eq('is_published', true)
     .eq('is_featured', true)
     .order('published_at', { ascending: false })
@@ -50,15 +68,18 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     // Fallback to most recent post
     const { data: mostRecent } = await supabase
       .from('devotionals')
-      .select(`
-        *,
-        authors:author_id(id, name, avatar_url, website)
-      `)
+      .select('*')
       .eq('is_published', true)
       .order('published_at', { ascending: false })
       .limit(1)
       .single()
     featuredData = mostRecent
+  }
+
+  // Attach author to featured post
+  if (featuredData) {
+    const withAuthor = await attachAuthors([featuredData])
+    featuredData = withAuthor[0]
   }
 
   const featuredPost = featuredData ? devotionalToPost(featuredData as Devotional) : null
@@ -67,10 +88,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   // Fetch sidebar posts (next 4, excluding featured)
   let sidebarQuery = supabase
     .from('devotionals')
-    .select(`
-      *,
-      authors:author_id(id, name, avatar_url, website)
-    `)
+    .select('*')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
     .limit(4)
@@ -80,17 +98,15 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   }
   
   const { data: sidebarData } = await sidebarQuery
+  const sidebarWithAuthors = await attachAuthors(sidebarData || [])
 
-  const sidebarPosts = (sidebarData || []).map((d: Devotional) => devotionalToPost(d))
+  const sidebarPosts = sidebarWithAuthors.map((d: Devotional) => devotionalToPost(d))
   const excludeIds = [featuredId, ...sidebarPosts.map(p => p.id)].filter(Boolean)
 
   // Build query for main grid (excluding featured and sidebar posts)
   let query = supabase
     .from('devotionals')
-    .select(`
-      *,
-      authors:author_id(id, name, avatar_url, website)
-    `, { count: 'exact' })
+    .select('*', { count: 'exact' })
     .eq('is_published', true)
   
   if (excludeIds.length > 0) {
@@ -106,8 +122,9 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   }
 
   const { data: gridData, count } = await query
+  const gridWithAuthors = await attachAuthors(gridData || [])
 
-  const gridPosts = (gridData || []).map((d: Devotional) => devotionalToPost(d))
+  const gridPosts = gridWithAuthors.map((d: Devotional) => devotionalToPost(d))
   const totalPages = Math.ceil((count ?? 0) / POSTS_PER_PAGE)
 
   const formatDate = (dateStr: string) => {
