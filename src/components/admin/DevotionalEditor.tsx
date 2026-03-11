@@ -21,6 +21,10 @@ interface Devotional {
   is_premium?: boolean
   is_published?: boolean
   is_featured?: boolean
+  author_name?: string | null
+  seo_title?: string | null
+  seo_description?: string | null
+  seo_keywords?: string | null
 }
 
 interface Props {
@@ -50,6 +54,10 @@ export default function DevotionalEditor({ devotional }: Props) {
   const [isPremium, setIsPremium] = useState(devotional?.is_premium ?? true)
   const [isPublished, setIsPublished] = useState(devotional?.is_published ?? false)
   const [isFeatured, setIsFeatured] = useState(devotional?.is_featured ?? false)
+  const [authorName, setAuthorName] = useState(devotional?.author_name ?? 'The Adopted Son')
+  const [seoTitle, setSeoTitle] = useState(devotional?.seo_title ?? '')
+  const [seoDescription, setSeoDescription] = useState(devotional?.seo_description ?? '')
+  const [seoKeywords, setSeoKeywords] = useState(devotional?.seo_keywords ?? '')
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!devotional)
   const [editorContent, setEditorContent] = useState<unknown>(devotional?.content ?? '')
   const [uploading, setUploading] = useState(false)
@@ -119,6 +127,10 @@ export default function DevotionalEditor({ devotional }: Props) {
       is_premium: isPremium,
       is_published: publish,
       is_featured: isFeatured,
+      author_name: authorName || 'The Adopted Son',
+      seo_title: seoTitle || null,
+      seo_description: seoDescription || null,
+      seo_keywords: seoKeywords || null,
       ...(publish && !devotional?.is_published ? { published_at: new Date().toISOString() } : {}),
     }
 
@@ -203,16 +215,27 @@ export default function DevotionalEditor({ devotional }: Props) {
           placeholder="Write your devotional here... Use the toolbar to add headings, images, videos, columns, and more."
         />
 
-        {/* Excerpt */}
+        {/* Short Description / Excerpt */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
-          <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">Excerpt</h3>
+          <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2">Short Description</h3>
           <textarea
             value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            placeholder="A short summary shown in cards and previews..."
-            rows={3}
+            onChange={(e) => {
+              // Limit to 160 characters (approximately 1-2 sentences)
+              if (e.target.value.length <= 160) {
+                setExcerpt(e.target.value)
+              }
+            }}
+            placeholder="A brief one-sentence summary shown in post cards and previews..."
+            rows={2}
             className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
           />
+          <div className="flex justify-between items-center mt-1.5">
+            <p className="text-xs text-neutral-400">Keep it to one sentence for best display</p>
+            <span className={`text-xs ${excerpt.length > 140 ? 'text-amber-500' : 'text-neutral-400'}`}>
+              {excerpt.length}/160
+            </span>
+          </div>
         </div>
       </div>
 
@@ -321,6 +344,17 @@ export default function DevotionalEditor({ devotional }: Props) {
           </div>
 
           <div>
+            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Author Name</label>
+            <input
+              type="text"
+              value={authorName}
+              onChange={(e) => setAuthorName(e.target.value)}
+              placeholder="e.g. The Adopted Son"
+              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+
+          <div>
             <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Category</label>
             <input
               type="text"
@@ -355,6 +389,57 @@ export default function DevotionalEditor({ devotional }: Props) {
             />
           </div>
 
+        </div>
+
+        {/* SEO Settings */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5 space-y-4">
+          <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">SEO Settings</h3>
+          <p className="text-xs text-neutral-400">Optimize your post for search engines</p>
+
+          <div>
+            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">SEO Title</label>
+            <input
+              type="text"
+              value={seoTitle}
+              onChange={(e) => setSeoTitle(e.target.value)}
+              placeholder={title || 'Custom title for search engines'}
+              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <p className="text-xs text-neutral-400 mt-1">Leave empty to use post title</p>
+          </div>
+
+          <div>
+            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Meta Description</label>
+            <textarea
+              value={seoDescription}
+              onChange={(e) => {
+                if (e.target.value.length <= 160) {
+                  setSeoDescription(e.target.value)
+                }
+              }}
+              placeholder={excerpt || 'Description shown in search results'}
+              rows={3}
+              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+            />
+            <div className="flex justify-between items-center mt-1">
+              <p className="text-xs text-neutral-400">Leave empty to use short description</p>
+              <span className={`text-xs ${seoDescription.length > 140 ? 'text-amber-500' : 'text-neutral-400'}`}>
+                {seoDescription.length}/160
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Keywords</label>
+            <input
+              type="text"
+              value={seoKeywords}
+              onChange={(e) => setSeoKeywords(e.target.value)}
+              placeholder="faith, devotional, Christian, prayer"
+              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <p className="text-xs text-neutral-400 mt-1">Comma-separated keywords for search</p>
+          </div>
         </div>
       </div>
     </div>

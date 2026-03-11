@@ -2,7 +2,8 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Facebook, Twitter, Share2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Facebook, Twitter, Share2, ArrowLeft } from 'lucide-react'
 
 interface Author {
   full_name?: string | null
@@ -23,6 +24,7 @@ interface BlogPost {
   read_time_minutes?: number | null
   published_at?: string | null
   author?: Author | null
+  author_name?: string | null
 }
 
 interface Props {
@@ -30,6 +32,7 @@ interface Props {
 }
 
 export default function BlogPostPage({ post }: Props) {
+  const router = useRouter()
   const publishedDate = post.published_at
     ? new Date(post.published_at).toLocaleDateString('en-US', {
         day: 'numeric',
@@ -38,6 +41,9 @@ export default function BlogPostPage({ post }: Props) {
       })
     : null
 
+  // Prioritize author_name field, fallback to author.full_name, then default
+  const authorName = post.author_name || post.author?.full_name || 'The Adopted Son'
+
   const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
   const shareTitle = encodeURIComponent(post.title)
 
@@ -45,6 +51,15 @@ export default function BlogPostPage({ post }: Props) {
     <article className="min-h-screen bg-white">
       {/* Article Container - Centered with balanced margins */}
       <div className="mx-auto max-w-4xl px-6 py-12 lg:px-8 lg:py-16">
+        
+        {/* Back Button */}
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors mb-8 group"
+        >
+          <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
+          <span>Back</span>
+        </button>
         
         {/* Title */}
         <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 leading-tight font-heading">
@@ -59,7 +74,7 @@ export default function BlogPostPage({ post }: Props) {
               {post.author?.avatar_url ? (
                 <Image
                   src={post.author.avatar_url}
-                  alt={post.author.full_name || 'Author'}
+                  alt={authorName}
                   width={48}
                   height={48}
                   className="size-full object-cover"
@@ -67,13 +82,13 @@ export default function BlogPostPage({ post }: Props) {
                 />
               ) : (
                 <div className="size-full flex items-center justify-center text-neutral-500 font-semibold">
-                  {(post.author?.full_name || 'A')[0]}
+                  {authorName[0]}
                 </div>
               )}
             </div>
             <div className="text-sm">
               <div className="text-neutral-600">
-                By<span className="font-semibold text-neutral-900 uppercase ml-1">{post.author?.full_name || 'Anonymous'}</span>
+                By<span className="font-semibold text-neutral-900 uppercase ml-1">{authorName}</span>
               </div>
               <div className="text-neutral-500">
                 {publishedDate}
@@ -129,6 +144,7 @@ export default function BlogPostPage({ post }: Props) {
               fill
               className="object-cover"
               priority
+              loading="eager"
               unoptimized={post.cover_image_url.includes('blob.vercel-storage.com')}
             />
           </div>
@@ -178,34 +194,32 @@ export default function BlogPostPage({ post }: Props) {
         )}
 
         {/* Author Bio */}
-        {post.author && (
-          <div className="mt-12 pt-8 border-t border-neutral-200">
-            <div className="flex items-start gap-4">
-              <div className="size-16 rounded-full overflow-hidden bg-neutral-200 shrink-0">
-                {post.author.avatar_url ? (
-                  <Image
-                    src={post.author.avatar_url}
-                    alt={post.author.full_name || 'Author'}
-                    width={64}
-                    height={64}
-                    className="size-full object-cover"
-                    unoptimized={post.author.avatar_url.includes('blob.vercel-storage.com')}
-                  />
-                ) : (
-                  <div className="size-full flex items-center justify-center text-neutral-500 text-xl font-semibold">
-                    {(post.author.full_name || 'A')[0]}
-                  </div>
-                )}
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Written by</p>
-                <p className="text-lg font-semibold text-neutral-900">
-                  {post.author.full_name || 'The Adopted Son'}
-                </p>
-              </div>
+        <div className="mt-12 pt-8 border-t border-neutral-200">
+          <div className="flex items-start gap-4">
+            <div className="size-16 rounded-full overflow-hidden bg-neutral-200 shrink-0">
+              {post.author?.avatar_url ? (
+                <Image
+                  src={post.author.avatar_url}
+                  alt={authorName}
+                  width={64}
+                  height={64}
+                  className="size-full object-cover"
+                  unoptimized={post.author.avatar_url.includes('blob.vercel-storage.com')}
+                />
+              ) : (
+                <div className="size-full flex items-center justify-center text-neutral-500 text-xl font-semibold">
+                  {authorName[0]}
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Written by</p>
+              <p className="text-lg font-semibold text-neutral-900">
+                {authorName}
+              </p>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </article>
   )

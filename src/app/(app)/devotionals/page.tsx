@@ -146,9 +146,9 @@ export default async function DevotionalsPage({ searchParams }: Props) {
             {featuredPost && (
               <div className="lg:col-span-2">
                 <Link href={`/devotionals/${featuredPost.handle}`} className="group block">
-                  <div className="flex flex-col md:flex-row gap-6 bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                    {/* Image */}
-                    <div className="relative md:w-1/2 aspect-[4/5] md:aspect-auto">
+                  <div className="flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    {/* Square Image */}
+                    <div className="relative w-full md:w-[45%] aspect-square flex-shrink-0">
                       <Image
                         src={typeof featuredPost.featuredImage === 'string' ? featuredPost.featuredImage : featuredPost.featuredImage.src}
                         alt={featuredPost.title}
@@ -159,39 +159,39 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                     </div>
                     
                     {/* Content */}
-                    <div className="flex flex-col justify-center p-6 md:w-1/2">
+                    <div className="flex flex-col justify-center p-6 md:p-8 flex-1">
                       {featuredPost.categories?.[0] && (
-                        <span className="inline-block w-fit px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600 mb-4">
+                        <span className="inline-block w-fit px-4 py-1.5 text-sm font-medium rounded-full bg-blue-50 text-blue-600 mb-4">
                           {featuredPost.categories[0].name}
                         </span>
                       )}
                       
-                      <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors font-heading">
+                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors font-heading leading-tight">
                         {featuredPost.title}
                       </h3>
                       
                       {featuredPost.excerpt && (
-                        <p className="text-gray-600 mb-6 line-clamp-3 font-body">
+                        <p className="text-gray-600 mb-6 line-clamp-3 text-base leading-relaxed font-body">
                           {featuredPost.excerpt}
                         </p>
                       )}
                       
                       {/* Author */}
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 mt-auto">
                         <Image
                           src={featuredPost.author.avatar.src}
                           alt={featuredPost.author.name}
-                          width={44}
-                          height={44}
+                          width={48}
+                          height={48}
                           className="rounded-full"
                           unoptimized
                         />
                         <div>
-                          <p className="font-medium text-gray-900 font-body">{featuredPost.author.name}</p>
+                          <p className="font-semibold text-gray-900 font-body">{featuredPost.author.name}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
                             <span>{formatDate(featuredPost.date)}</span>
                             <span>·</span>
-                            <Clock className="size-3.5" />
+                            <Clock className="size-4" />
                             <span>{featuredPost.readingTime} min</span>
                           </div>
                         </div>
