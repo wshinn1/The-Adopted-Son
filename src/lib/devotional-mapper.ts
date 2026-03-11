@@ -186,10 +186,14 @@ export async function getDevotionals(
       .in('id', authorIds)
     
     if (authors) {
-      type AuthorData = { id: string; name: string; avatar_url: string | null; website_url: string | null; bio: string | null }
-      const authorMap = new Map<string, AuthorData>(authors.map((a: AuthorData) => [a.id, {
-        ...a,
-        website: a.website_url  // Map to expected field name
+      type AuthorDataRaw = { id: string; name: string; avatar_url: string | null; website_url: string | null; bio: string | null }
+      type AuthorDataMapped = { id: string; name: string; avatar_url: string | null; website: string | null; bio: string | null }
+      const authorMap = new Map<string, AuthorDataMapped>(authors.map((a: AuthorDataRaw) => [a.id, {
+        id: a.id,
+        name: a.name,
+        avatar_url: a.avatar_url,
+        website: a.website_url,  // Map to expected field name
+        bio: a.bio
       }]))
       devotionals.forEach((d: Devotional) => {
         if (d.author_id && authorMap.has(d.author_id)) {
