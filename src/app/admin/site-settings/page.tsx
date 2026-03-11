@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { Upload, Trash2 } from 'lucide-react'
+import { Upload, Plus, Trash2 } from 'lucide-react'
 import Head from 'next/head'
 
 interface SocialLink {
