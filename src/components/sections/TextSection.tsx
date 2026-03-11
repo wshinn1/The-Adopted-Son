@@ -43,7 +43,14 @@ export default function TextSection({ data }: TextSectionProps) {
       style={{ backgroundColor: background_color }}
     >
       <div className={`mx-auto ${maxWidthClasses[max_width]}`}>
-        {/* Image at top */}
+        {/* Heading */}
+        {heading && (
+          <h2 className="text-3xl font-medium leading-tight text-neutral-900 md:text-4xl lg:text-5xl font-heading mb-6">
+            {heading}
+          </h2>
+        )}
+
+        {/* Image at top (below heading, above content) */}
         {showImage && image_position === 'top' && (
           <div className="relative mb-12 w-full overflow-hidden">
             <Image
@@ -55,13 +62,6 @@ export default function TextSection({ data }: TextSectionProps) {
               unoptimized={featured_image_url.includes('blob.vercel-storage.com')}
             />
           </div>
-        )}
-
-        {/* Heading */}
-        {heading && (
-          <h2 className="text-3xl font-medium leading-tight text-neutral-900 md:text-4xl lg:text-5xl font-heading mb-6">
-            {heading}
-          </h2>
         )}
 
         {/* Rich text content */}
