@@ -2,7 +2,6 @@ import BlogPostPage from '@/components/blog/BlogPostPage'
 import PaywallGate from '@/components/devotional/PaywallGate'
 import TrialBanner from '@/components/devotional/TrialBanner'
 import HamburgerHeader from '@/components/HamburgerHeader'
-import Footer from '@/components/Footer/Footer'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
 import { getSiteSettings } from '@/lib/site-settings'
 import { checkAccess } from '@/lib/trial'
@@ -204,8 +203,6 @@ export default async function DevotionalPage({ params }: Props) {
           </div>
         )}
       </div>
-
-      <Footer />
     </div>
   )
 }
