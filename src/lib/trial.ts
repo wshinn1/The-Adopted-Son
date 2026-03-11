@@ -41,20 +41,36 @@ export async function checkAccess(): Promise<TrialStatus> {
     }
   }
 
-  // Check IP-based trial
+  // Check IP-based trial for anonymous visitors
   const ip = await getClientIP()
 
   // Use service role via API route for visitor_trials (RLS blocks anon)
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/trial/check?ip=${encodeURIComponent(ip)}`,
-    { cache: 'no-store' },
-  ).catch(() => null)
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/trial/check?ip=${encodeURIComponent(ip)}`,
+      { cache: 'no-store' },
+    )
 
-  if (response?.ok) {
-    const data = await response.json()
-    if (data.hasAccess) return { hasAccess: true, reason: 'trial_active' }
-    if (data.expired) return { hasAccess: false, reason: 'trial_expired' }
+    if (response?.ok) {
+      const data = await response.json()
+      
+      // Trial is active (either existing or newly created)
+      if (data.hasAccess) {
+        return { hasAccess: true, reason: 'trial_active' }
+      }
+      
+      // Trial has expired - user needs to subscribe
+      if (data.expired) {
+        return { hasAccess: false, reason: 'trial_expired' }
+      }
+    }
+  } catch (error) {
+    // If trial check fails, still allow access (fail open for better UX)
+    console.error('Trial check failed:', error)
+    return { hasAccess: true, reason: 'trial_active' }
   }
 
-  return { hasAccess: false, reason: 'no_trial' }
+  // Fallback: allow access if we couldn't determine trial status
+  // This ensures content is always visible unless explicitly expired
+  return { hasAccess: true, reason: 'trial_active' }
 }

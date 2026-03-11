@@ -18,9 +18,10 @@ async function getClientIP(): Promise<string> {
 }
 
 export async function GET(request: NextRequest) {
-  const ip = await getClientIP()
+  try {
+    const ip = await getClientIP()
 
-  const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
     .from('visitor_trials')
     .select('trial_ends_at, converted_to_paid')
     .eq('ip_address', ip)
@@ -74,4 +75,13 @@ export async function GET(request: NextRequest) {
     expired: true,
     daysLeft: 0,
   })
+  } catch (error) {
+    console.error('Trial status error:', error)
+    // Fail open - allow access if there's an error
+    return NextResponse.json({ 
+      hasAccess: true, 
+      daysLeft: 14,
+      expired: false,
+    })
+  }
 }
