@@ -133,6 +133,7 @@ export default function BlogPostPage({ post }: Props) {
               fill
               className="object-cover"
               priority
+              loading="eager"
               unoptimized={post.cover_image_url.includes('blob.vercel-storage.com')}
             />
           </div>
