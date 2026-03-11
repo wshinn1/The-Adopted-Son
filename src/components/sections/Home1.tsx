@@ -44,8 +44,8 @@ export default function Home1({ data }: Home1Props) {
 
       {/* Image with overlapping card */}
       <div className="relative mt-12 md:mt-16 lg:mt-20">
-        {/* Main Image - shifted right with ml-auto */}
-        <div className="relative aspect-[4/3] w-full md:ml-auto md:w-3/4 lg:w-2/3">
+        {/* Main Image - positioned on the left */}
+        <div className="relative aspect-[4/3] w-full md:mr-auto md:w-3/4 lg:w-2/3">
           {data.image_url && (
             <Image
               src={data.image_url}
@@ -59,8 +59,8 @@ export default function Home1({ data }: Home1Props) {
           )}
         </div>
 
-        {/* Overlapping Card - vertically centered, overlapping left side of image */}
-        <div className="relative -mt-16 ml-auto w-11/12 bg-white p-8 shadow-sm md:absolute md:left-0 md:top-1/2 md:mt-0 md:-translate-y-1/2 md:w-1/2 md:p-10 lg:w-5/12 lg:p-12">
+        {/* Overlapping Card - vertically centered, overlapping right side of image */}
+        <div className="relative -mt-16 ml-auto w-11/12 bg-white p-8 shadow-sm md:absolute md:right-0 md:top-1/2 md:mt-0 md:-translate-y-1/2 md:w-1/2 md:p-10 lg:w-5/12 lg:p-12">
           {/* Label */}
           <span className="text-xs font-medium tracking-[0.2em] text-neutral-500">
             {data.card_label}
