@@ -26,10 +26,10 @@ export interface Devotional {
   seo_title: string | null
   seo_description: string | null
   seo_keywords: string | null
-  // Joined fields
-  author?: {
+  // Joined fields from authors table
+  authors?: {
     id: string
-    full_name: string | null
+    name: string
     avatar_url: string | null
   } | null
 }
@@ -68,12 +68,12 @@ export function devotionalToPost(devotional: Devotional): TPost {
       height: 800,
     },
     author: {
-      id: devotional.author?.id || 'default-author',
-      name: devotional.author_name || devotional.author?.full_name || 'The Adopted Son',
+      id: devotional.authors?.id || devotional.author_id || 'default-author',
+      name: devotional.authors?.name || devotional.author_name || 'The Adopted Son',
       handle: 'the-adopted-son',
       avatar: {
-        src: devotional.author?.avatar_url || DEFAULT_AVATAR,
-        alt: devotional.author_name || devotional.author?.full_name || 'The Adopted Son',
+        src: devotional.authors?.avatar_url || DEFAULT_AVATAR,
+        alt: devotional.authors?.name || devotional.author_name || 'The Adopted Son',
         width: 200,
         height: 200,
       },
@@ -156,7 +156,7 @@ export async function getDevotionals(
     .from('devotionals')
     .select(`
       *,
-      author:profiles!devotionals_author_id_fkey(id, full_name, avatar_url)
+      authors(id, name, avatar_url)
     `)
     .order('published_at', { ascending: false })
     .limit(limit)
@@ -190,7 +190,7 @@ export async function getDevotionalBySlug(
     .from('devotionals')
     .select(`
       *,
-      author:profiles!devotionals_author_id_fkey(id, full_name, avatar_url)
+      authors(id, name, avatar_url)
     `)
     .eq('slug', slug)
     .single()

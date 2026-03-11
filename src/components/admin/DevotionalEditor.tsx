@@ -6,6 +6,12 @@ import Image from 'next/image'
 import { Upload, X } from 'lucide-react'
 import BlockEditor from './BlockEditor'
 
+interface Author {
+  id: string
+  name: string
+  avatar_url: string | null
+}
+
 interface Devotional {
   id: string
   title: string
@@ -22,6 +28,7 @@ interface Devotional {
   is_published?: boolean
   is_featured?: boolean
   author_name?: string | null
+  author_id?: string | null
   seo_title?: string | null
   seo_description?: string | null
   seo_keywords?: string | null
@@ -29,6 +36,7 @@ interface Devotional {
 
 interface Props {
   devotional: Devotional | null
+  authors?: Author[]
 }
 
 function slugify(text: string) {
@@ -38,7 +46,7 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, '')
 }
 
-export default function DevotionalEditor({ devotional }: Props) {
+export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +62,8 @@ export default function DevotionalEditor({ devotional }: Props) {
   const [isPremium, setIsPremium] = useState(devotional?.is_premium ?? true)
   const [isPublished, setIsPublished] = useState(devotional?.is_published ?? false)
   const [isFeatured, setIsFeatured] = useState(devotional?.is_featured ?? false)
-  const [authorName, setAuthorName] = useState(devotional?.author_name ?? 'The Adopted Son')
+  const [authorId, setAuthorId] = useState(devotional?.author_id ?? '')
+  const [authorName, setAuthorName] = useState(devotional?.author_name ?? '')
   const [seoTitle, setSeoTitle] = useState(devotional?.seo_title ?? '')
   const [seoDescription, setSeoDescription] = useState(devotional?.seo_description ?? '')
   const [seoKeywords, setSeoKeywords] = useState(devotional?.seo_keywords ?? '')
@@ -113,6 +122,10 @@ export default function DevotionalEditor({ devotional }: Props) {
     // Always ensure slug is URL-safe
     const safeSlug = slugify(slug || title)
 
+    // Get selected author name from authors list
+    const selectedAuthor = authors.find(a => a.id === authorId)
+    const finalAuthorName = selectedAuthor?.name || authorName || 'The Adopted Son'
+
     const body = {
       title,
       slug: safeSlug,
@@ -127,7 +140,8 @@ export default function DevotionalEditor({ devotional }: Props) {
       is_premium: isPremium,
       is_published: publish,
       is_featured: isFeatured,
-      author_name: authorName || 'The Adopted Son',
+      author_id: authorId || null,
+      author_name: finalAuthorName,
       seo_title: seoTitle || null,
       seo_description: seoDescription || null,
       seo_keywords: seoKeywords || null,
@@ -347,14 +361,25 @@ export default function DevotionalEditor({ devotional }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Author Name</label>
-            <input
-              type="text"
-              value={authorName}
-              onChange={(e) => setAuthorName(e.target.value)}
-              placeholder="e.g. The Adopted Son"
-              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
+            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Author</label>
+            {authors.length > 0 ? (
+              <select
+                value={authorId}
+                onChange={(e) => setAuthorId(e.target.value)}
+                className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">Select an author...</option>
+                {authors.map((author) => (
+                  <option key={author.id} value={author.id}>
+                    {author.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="text-sm text-neutral-500">
+                <a href="/admin/authors" className="text-primary-600 underline">Add authors</a> to select from dropdown
+              </div>
+            )}
           </div>
 
           <div>
