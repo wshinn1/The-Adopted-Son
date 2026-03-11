@@ -32,6 +32,7 @@ export interface Devotional {
     name: string
     avatar_url: string | null
     website: string | null
+    bio: string | null
   } | null
 }
 
@@ -181,11 +182,11 @@ export async function getDevotionals(
   if (authorIds.length > 0) {
     const { data: authors } = await supabase
       .from('authors')
-      .select('id, name, avatar_url, website')
+      .select('id, name, avatar_url, website, bio')
       .in('id', authorIds)
     
     if (authors) {
-      type AuthorData = { id: string; name: string; avatar_url: string | null; website: string | null }
+      type AuthorData = { id: string; name: string; avatar_url: string | null; website: string | null; bio: string | null }
       const authorMap = new Map<string, AuthorData>(authors.map((a: AuthorData) => [a.id, a]))
       devotionals.forEach((d: Devotional) => {
         if (d.author_id && authorMap.has(d.author_id)) {
@@ -205,8 +206,6 @@ export async function getDevotionalBySlug(
   supabase: any,
   slug: string
 ): Promise<Devotional | null> {
-  console.log('[v0] getDevotionalBySlug called with slug:', slug)
-  
   // Fetch the devotional
   const { data, error } = await supabase
     .from('devotionals')
@@ -215,7 +214,7 @@ export async function getDevotionalBySlug(
     .single()
   
   if (error) {
-    console.error('[v0] Error fetching devotional:', error)
+    console.error('Error fetching devotional:', error)
     return null
   }
   
@@ -225,15 +224,12 @@ export async function getDevotionalBySlug(
   if (data.author_id) {
     const { data: authorData, error: authorError } = await supabase
       .from('authors')
-      .select('id, name, avatar_url, website')
+      .select('id, name, avatar_url, website, bio')
       .eq('id', data.author_id)
       .single()
     
     if (!authorError && authorData) {
-      console.log('[v0] Author found:', authorData.name, 'avatar:', authorData.avatar_url ? 'yes' : 'no')
       data.authors = authorData
-    } else {
-      console.log('[v0] Author fetch failed or not found:', authorError?.message)
     }
   }
   
