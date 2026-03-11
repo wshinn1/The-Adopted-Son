@@ -10,6 +10,7 @@ interface Author {
   full_name?: string | null
   avatar_url?: string | null
   website?: string | null
+  bio?: string | null
 }
 
 interface BlogPost {
@@ -48,6 +49,7 @@ export default function BlogPostPage({ post }: Props) {
   const authorName = authorData?.name || authorData?.full_name || post.author_name || 'The Adopted Son'
   const authorAvatar = authorData?.avatar_url
   const authorWebsite = authorData?.website
+  const authorBio = authorData?.bio
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
   const shareTitle = encodeURIComponent(post.title)
@@ -229,7 +231,7 @@ export default function BlogPostPage({ post }: Props) {
                 </div>
               )}
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Written by</p>
               {authorWebsite ? (
                 <a 
@@ -243,6 +245,11 @@ export default function BlogPostPage({ post }: Props) {
               ) : (
                 <p className="text-lg font-semibold text-neutral-900">
                   {authorName}
+                </p>
+              )}
+              {authorBio && (
+                <p className="mt-2 text-neutral-600 leading-relaxed">
+                  {authorBio}
                 </p>
               )}
             </div>

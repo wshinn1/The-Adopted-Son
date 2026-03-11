@@ -35,7 +35,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     
     const { data: authors } = await supabase
       .from('authors')
-      .select('id, name, avatar_url, website')
+      .select('id, name, avatar_url, website, bio')
       .in('id', authorIds)
     
     if (authors) {

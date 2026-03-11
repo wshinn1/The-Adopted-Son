@@ -67,19 +67,9 @@ export default async function DevotionalPage({ params }: Props) {
   const { slug } = await params
   const settings = await getSiteSettings()
 
-  console.log('[v0] Fetching devotional with slug:', slug)
   const devotional = await getDevotionalBySlug(supabaseAdmin, slug)
-  console.log('[v0] Devotional result:', devotional ? { 
-    id: devotional.id, 
-    is_published: devotional.is_published, 
-    slug: devotional.slug,
-    author_id: devotional.author_id,
-    authors: devotional.authors,
-    author_name: devotional.author_name
-  } : 'null')
 
   if (!devotional || !devotional.is_published) {
-    console.log('[v0] 404 - devotional not found or not published')
     notFound()
   }
 
