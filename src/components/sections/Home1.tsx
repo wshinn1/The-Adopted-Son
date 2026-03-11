@@ -51,6 +51,8 @@ export default function Home1({ data }: Home1Props) {
               src={data.image_url}
               alt={data.image_alt || 'Hero image'}
               fill
+              priority
+              loading="eager"
               className="object-cover"
               unoptimized={data.image_url.includes('blob.vercel-storage.com')}
             />
