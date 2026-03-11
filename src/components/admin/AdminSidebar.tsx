@@ -12,6 +12,7 @@ const navItems = [
   { label: 'Media', href: '/admin/media', icon: '▣' },
   { label: 'Subscribers', href: '/admin/subscribers', icon: '◎' },
   { label: 'Backups', href: '/admin/backups', icon: '↺' },
+  { label: 'Menu', href: '/admin/menu', icon: '☰' },
   { label: 'Site Settings', href: '/admin/site-settings', icon: '⚙' },
 ]
 
