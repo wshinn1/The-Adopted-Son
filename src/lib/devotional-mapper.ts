@@ -185,10 +185,11 @@ export async function getDevotionals(
       .in('id', authorIds)
     
     if (authors) {
-      const authorMap = new Map(authors.map((a: any) => [a.id, a]))
+      type AuthorData = { id: string; name: string; avatar_url: string | null; website: string | null }
+      const authorMap = new Map<string, AuthorData>(authors.map((a: AuthorData) => [a.id, a]))
       devotionals.forEach((d: Devotional) => {
         if (d.author_id && authorMap.has(d.author_id)) {
-          d.authors = authorMap.get(d.author_id)
+          d.authors = authorMap.get(d.author_id) ?? null
         }
       })
     }
