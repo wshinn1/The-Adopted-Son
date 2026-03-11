@@ -12,6 +12,7 @@ export default async function PublicLayout({
     <div className="min-h-screen">
       <HamburgerHeader
         siteName={settings.site_name}
+        logoType={settings.logo_type}
         logoUrl={settings.logo_url || undefined}
         navLinks={settings.nav_links}
       />

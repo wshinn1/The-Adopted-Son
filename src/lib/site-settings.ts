@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 export interface SiteSettings {
   site_name: string
   site_tagline: string
+  logo_type: 'text' | 'image'
   logo_url: string
   nav_links: Array<{ label: string; url: string }>
   footer_text: string
@@ -16,6 +17,7 @@ export interface SiteSettings {
 const defaults: SiteSettings = {
   site_name: 'The Adopted Son',
   site_tagline: 'Daily Devotionals',
+  logo_type: 'text',
   logo_url: '',
   nav_links: [
     { label: 'Home', url: '/' },
@@ -56,6 +58,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   return {
     site_name: settings.site_name || defaults.site_name,
     site_tagline: settings.site_tagline || defaults.site_tagline,
+    logo_type: settings.logo_type || defaults.logo_type,
     logo_url: settings.logo_url || defaults.logo_url,
     nav_links: settings.nav_links || defaults.nav_links,
     footer_text: settings.footer_text || defaults.footer_text,

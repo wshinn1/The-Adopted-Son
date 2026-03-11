@@ -1,11 +1,12 @@
 import { devotionalToPost, getDevotionals, Devotional } from '@/lib/devotional-mapper'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getSiteSettings } from '@/lib/site-settings'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import TrialBanner from '@/components/devotional/TrialBanner'
-import { ApplicationLayout } from '@/app/(app)/application-layout'
+import HamburgerHeader from '@/components/HamburgerHeader'
 
 export const metadata: Metadata = {
   title: 'All Devotionals — The Adopted Son',
@@ -23,7 +24,9 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   const currentPage = parseInt(page ?? '1', 10)
   const offset = (currentPage - 1) * POSTS_PER_PAGE
 
-  const supabase = await createClient()
+  // Use admin client to bypass RLS and ensure all visitors can see posts
+  const supabase = supabaseAdmin
+  const settings = await getSiteSettings()
 
   // Fetch featured post (prioritize is_featured, fallback to most recent)
   let featuredData = null
@@ -116,9 +119,17 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   }
 
   return (
-    <ApplicationLayout headerStyle="header-2">
-      <div className="min-h-screen bg-gray-50">
-        <TrialBanner />
+    <div className="min-h-screen bg-gray-50">
+      <HamburgerHeader
+        siteName={settings.site_name}
+        logoType={settings.logo_type}
+        logoUrl={settings.logo_url || undefined}
+        navLinks={settings.nav_links}
+      />
+      {/* Spacer for fixed header */}
+      <div className="h-20" />
+      
+      <TrialBanner />
       
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         
@@ -156,6 +167,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                         alt={featuredPost.title}
                         fill
                         className="object-cover"
+                        priority
+                        loading="eager"
                         unoptimized
                       />
                     </div>
@@ -240,7 +253,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           {gridPosts.length > 0 ? (
             <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {gridPosts.map((post) => (
+                {gridPosts.map((post, index) => (
                   <Link key={post.id} href={`/devotionals/${post.handle}`} className="group block">
                     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
                       {/* Image */}
@@ -250,6 +263,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                           alt={post.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          priority={index < 3}
+                          loading={index < 3 ? "eager" : "lazy"}
                           unoptimized
                         />
                       </div>
@@ -356,7 +371,6 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           )}
         </section>
       </div>
-      </div>
-    </ApplicationLayout>
+    </div>
   )
 }

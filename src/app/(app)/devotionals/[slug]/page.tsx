@@ -1,10 +1,11 @@
 import BlogPostPage from '@/components/blog/BlogPostPage'
 import PaywallGate from '@/components/devotional/PaywallGate'
 import TrialBanner from '@/components/devotional/TrialBanner'
-import { ApplicationLayout } from '@/app/(app)/application-layout'
+import HamburgerHeader from '@/components/HamburgerHeader'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
+import { getSiteSettings } from '@/lib/site-settings'
 import { checkAccess } from '@/lib/trial'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -16,8 +17,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
-  const devotional = await getDevotionalBySlug(supabase, slug)
+  const devotional = await getDevotionalBySlug(supabaseAdmin, slug)
 
   // Use SEO fields if available, fallback to regular fields
   const title = devotional?.seo_title || devotional?.title 
@@ -65,9 +65,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DevotionalPage({ params }: Props) {
   const { slug } = await params
-  const supabase = await createClient()
+  const settings = await getSiteSettings()
 
-  const devotional = await getDevotionalBySlug(supabase, slug)
+  const devotional = await getDevotionalBySlug(supabaseAdmin, slug)
 
   if (!devotional || !devotional.is_published) notFound()
 
@@ -76,7 +76,7 @@ export default async function DevotionalPage({ params }: Props) {
   const canRead = !devotional.is_premium || access.hasAccess
 
   // Get related devotionals
-  const relatedDevotionals = await getDevotionals(supabase, { limit: 4, published: true })
+  const relatedDevotionals = await getDevotionals(supabaseAdmin, { limit: 4, published: true })
   const relatedPosts = relatedDevotionals
     .filter(d => d.id !== devotional.id)
     .slice(0, 3)
@@ -128,18 +128,27 @@ export default async function DevotionalPage({ params }: Props) {
   }
 
   return (
-    <ApplicationLayout headerStyle="header-2">
-      <div className="relative bg-white">
-        {/* JSON-LD Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+    <div className="min-h-screen bg-white">
+      <HamburgerHeader
+        siteName={settings.site_name}
+        logoType={settings.logo_type}
+        logoUrl={settings.logo_url || undefined}
+        navLinks={settings.nav_links}
+      />
+      
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      
+      {/* Spacer for fixed header */}
+      <div className="h-20" />
+      
+      <TrialBanner />
         
-        <TrialBanner />
-        
-        {/* Main Blog Post */}
-        <BlogPostPage post={post} />
+      {/* Main Blog Post */}
+      <BlogPostPage post={post} />
 
         {/* Paywall (if premium and no access) */}
         {!canRead && (
@@ -148,51 +157,50 @@ export default async function DevotionalPage({ params }: Props) {
           </div>
         )}
 
-        {/* Related Posts */}
-        {relatedPosts.length > 0 && canRead && (
-          <div className="border-t border-neutral-200">
-            <div className="max-w-6xl mx-auto px-6 lg:px-8 py-16">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-neutral-900">
-                  More Devotionals
-                </h2>
-                <Link 
-                  href="/devotionals" 
-                  className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
-                >
-                  View all
+      {/* Related Posts */}
+      {relatedPosts.length > 0 && canRead && (
+        <div className="border-t border-neutral-200">
+          <div className="max-w-6xl mx-auto px-6 lg:px-8 py-16">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-neutral-900">
+                More Devotionals
+              </h2>
+              <Link 
+                href="/devotionals" 
+                className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+              >
+                View all
+              </Link>
+            </div>
+            <div className="grid gap-8 md:grid-cols-3">
+              {relatedPosts.map((relatedPost) => (
+                <Link key={relatedPost.id} href={`/devotionals/${relatedPost.handle}`} className="group">
+                  <article>
+                    <div className="aspect-[4/3] relative rounded-lg overflow-hidden mb-4">
+                      <Image
+                        src={typeof relatedPost.featuredImage === 'string' 
+                          ? relatedPost.featuredImage 
+                          : relatedPost.featuredImage.src}
+                        alt={relatedPost.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        unoptimized
+                      />
+                    </div>
+                    <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      {relatedPost.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-neutral-500 line-clamp-2">
+                      {relatedPost.excerpt}
+                    </p>
+                  </article>
                 </Link>
-              </div>
-              <div className="grid gap-8 md:grid-cols-3">
-                {relatedPosts.map((relatedPost) => (
-                  <Link key={relatedPost.id} href={`/devotionals/${relatedPost.handle}`} className="group">
-                    <article>
-                      <div className="aspect-[4/3] relative rounded-lg overflow-hidden mb-4">
-                        <Image
-                          src={typeof relatedPost.featuredImage === 'string' 
-                            ? relatedPost.featuredImage 
-                            : relatedPost.featuredImage.src}
-                          alt={relatedPost.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          unoptimized
-                        />
-                      </div>
-                      <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-                        {relatedPost.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-neutral-500 line-clamp-2">
-                        {relatedPost.excerpt}
-                      </p>
-                    </article>
-                  </Link>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
-        )}
-      </div>
-    </ApplicationLayout>
+        </div>
+      )}
+    </div>
   )
 }
 

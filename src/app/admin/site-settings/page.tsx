@@ -61,6 +61,7 @@ export default function SiteSettingsPage() {
   const [pages, setPages] = useState<Page[]>([])
   const [siteName, setSiteName] = useState('')
   const [siteTagline, setSiteTagline] = useState('')
+  const [logoType, setLogoType] = useState<'text' | 'image'>('text')
   const [logoUrl, setLogoUrl] = useState('')
   const [navLinks, setNavLinks] = useState<NavLink[]>([])
   const [footerText, setFooterText] = useState('')
@@ -155,6 +156,7 @@ export default function SiteSettingsPage() {
 
       setSiteName(settings.site_name || 'The Adopted Son')
       setSiteTagline(settings.site_tagline || 'Daily Devotionals')
+      setLogoType(settings.logo_type || 'text')
       setLogoUrl(settings.logo_url || '')
       setNavLinks(settings.nav_links || [{ label: 'Home', url: '/' }])
       setFooterText(settings.footer_text || '')
@@ -181,7 +183,8 @@ export default function SiteSettingsPage() {
     try {
       await saveSetting('site_name', siteName)
       await saveSetting('site_tagline', siteTagline)
-      await saveSetting('logo_url', logoUrl)
+      await saveSetting('logo_type', logoType)
+      await saveSetting('logo_url', logoType === 'image' ? logoUrl : '')
       await saveSetting('nav_links', navLinks)
       await saveSetting('footer_text', footerText)
       await saveSetting('social_links', socialLinks)
@@ -284,36 +287,92 @@ export default function SiteSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Logo
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                Header Logo
               </label>
-              {logoUrl && (
-                <div className="mb-2">
-                  <img src={logoUrl} alt="Logo" className="h-12 object-contain" />
-                </div>
-              )}
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  placeholder="Logo URL"
-                  className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
-                />
-                <label className="flex items-center gap-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-700 rounded-lg cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors">
-                  <Upload className="size-4" />
-                  <span className="text-sm">Upload</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) handleLogoUpload(file)
-                    }}
-                  />
-                </label>
+              
+              {/* Logo Type Toggle */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setLogoType('text')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                    logoType === 'text'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600'
+                  }`}
+                >
+                  Text Logo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLogoType('image')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                    logoType === 'image'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600'
+                  }`}
+                >
+                  Image Logo
+                </button>
               </div>
+
+              {logoType === 'text' ? (
+                <div className="p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
+                    Your site name will be displayed as the logo:
+                  </p>
+                  <p className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+                    {siteName || 'Site Name'}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {logoUrl && (
+                    <div className="mb-3 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+                      <p className="text-xs text-neutral-500 mb-2">Current logo:</p>
+                      <img src={logoUrl} alt="Logo" className="h-12 object-contain" />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={logoUrl}
+                      onChange={(e) => setLogoUrl(e.target.value)}
+                      placeholder="Logo URL (PNG recommended)"
+                      className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    />
+                    <label className="flex items-center gap-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-700 rounded-lg cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors">
+                      <Upload className="size-4" />
+                      <span className="text-sm">Upload</span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/svg+xml"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) handleLogoUpload(file)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {logoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setLogoUrl('')}
+                      className="mt-2 text-sm text-red-500 hover:text-red-600"
+                    >
+                      Remove logo
+                    </button>
+                  )}
+                </>
+              )}
+              <p className="text-xs text-neutral-500 mt-2">
+                {logoType === 'text' 
+                  ? 'The site name above will be used as your header logo.'
+                  : 'Upload a PNG or SVG image for best quality. Recommended size: 200x50px.'
+                }
+              </p>
             </div>
           </div>
         </div>

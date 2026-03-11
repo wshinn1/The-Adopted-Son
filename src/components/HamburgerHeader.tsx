@@ -12,30 +12,34 @@ interface NavLink {
 
 interface HamburgerHeaderProps {
   siteName: string
+  logoType?: 'text' | 'image'
   logoUrl?: string
   navLinks: NavLink[]
 }
 
-export default function HamburgerHeader({ siteName, logoUrl, navLinks }: HamburgerHeaderProps) {
+export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, navLinks }: HamburgerHeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
+
+  // Determine if we should show image: only if logoType is 'image' AND logoUrl exists
+  const showImageLogo = logoType === 'image' && logoUrl
 
   return (
     <>
       {/* Fixed Header */}
-      <header className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 lg:px-24">
+      <header className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 lg:px-24 bg-white/80 backdrop-blur-sm">
         {/* Logo / Site Name */}
         <Link href="/" className="text-lg font-medium text-neutral-900">
-          {logoUrl ? (
+          {showImageLogo ? (
             <Image 
               src={logoUrl} 
               alt={siteName} 
-              width={120}
-              height={32}
-              className="h-8 w-auto"
+              width={160}
+              height={40}
+              className="h-10 w-auto object-contain"
               unoptimized={logoUrl.includes('blob.vercel-storage.com')}
             />
           ) : (
-            siteName
+            <span className="font-heading text-xl font-semibold">{siteName}</span>
           )}
         </Link>
 
