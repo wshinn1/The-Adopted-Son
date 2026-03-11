@@ -22,6 +22,10 @@ export interface Devotional {
   read_time_minutes: number
   created_at: string
   updated_at: string
+  // SEO fields
+  seo_title: string | null
+  seo_description: string | null
+  seo_keywords: string | null
   // Joined fields
   author?: {
     id: string

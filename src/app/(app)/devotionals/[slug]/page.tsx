@@ -18,18 +18,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const devotional = await getDevotionalBySlug(supabase, slug)
 
-  const title = devotional?.title ? `${devotional.title} — The Adopted Son` : 'Devotional'
-  const description = devotional?.excerpt ?? 'A daily devotional from The Adopted Son'
+  // Use SEO fields if available, fallback to regular fields
+  const title = devotional?.seo_title || devotional?.title 
+    ? `${devotional?.seo_title || devotional?.title} — The Adopted Son` 
+    : 'Devotional'
+  const description = devotional?.seo_description || devotional?.excerpt || 'A daily devotional from The Adopted Son'
   const imageUrl = devotional?.cover_image_url ?? 'https://www.theadoptedson.com/og-image.jpg'
+  const keywords = devotional?.seo_keywords?.split(',').map(k => k.trim()).filter(Boolean) || []
 
   return {
     title,
     description,
-    authors: devotional?.author_name ? [{ name: devotional.author_name }] : undefined,
+    keywords: keywords.length > 0 ? keywords : ['devotional', 'Christian', 'faith', 'daily reading', 'The Adopted Son'],
+    authors: devotional?.author_name ? [{ name: devotional.author_name }] : [{ name: 'The Adopted Son' }],
+    creator: devotional?.author_name || 'The Adopted Son',
+    publisher: 'The Adopted Son',
     openGraph: {
       title,
       description,
       type: 'article',
+      publishedTime: devotional?.published_at || undefined,
+      authors: devotional?.author_name ? [devotional.author_name] : ['The Adopted Son'],
       images: [
         {
           url: imageUrl,
@@ -45,6 +54,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       images: [imageUrl],
+      creator: '@theadoptedson',
+    },
+    alternates: {
+      canonical: `https://www.theadoptedson.com/devotionals/${slug}`,
     },
   }
 }
@@ -86,8 +99,41 @@ export default async function DevotionalPage({ params }: Props) {
     author_name: devotional.author_name ?? 'The Adopted Son',
   }
 
+  // JSON-LD structured data for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: devotional.title,
+    description: devotional.excerpt || '',
+    image: devotional.cover_image_url || 'https://www.theadoptedson.com/og-image.jpg',
+    datePublished: devotional.published_at,
+    dateModified: devotional.updated_at || devotional.published_at,
+    author: {
+      '@type': 'Person',
+      name: devotional.author_name || 'The Adopted Son',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'The Adopted Son',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://www.theadoptedson.com/logo.png',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://www.theadoptedson.com/devotionals/${devotional.slug}`,
+    },
+  }
+
   return (
     <div className="relative bg-white">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      
       <TrialBanner />
       
       {/* Main Blog Post */}
