@@ -44,10 +44,15 @@ export async function checkAccess(): Promise<TrialStatus> {
   // Check IP-based trial for anonymous visitors
   const ip = await getClientIP()
 
+  // Determine base URL - use NEXT_PUBLIC_APP_URL, VERCEL_URL, or default to localhost
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL 
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+    || 'http://localhost:3000'
+
   // Use service role via API route for visitor_trials (RLS blocks anon)
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/trial/check?ip=${encodeURIComponent(ip)}`,
+      `${baseUrl}/api/trial/check?ip=${encodeURIComponent(ip)}`,
       { cache: 'no-store' },
     )
 
