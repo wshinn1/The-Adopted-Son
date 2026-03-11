@@ -182,12 +182,19 @@ export async function getDevotionals(
   if (authorIds.length > 0) {
     const { data: authors } = await supabase
       .from('authors')
-      .select('id, name, avatar_url, website, bio')
+      .select('id, name, avatar_url, website_url, bio')
       .in('id', authorIds)
     
     if (authors) {
-      type AuthorData = { id: string; name: string; avatar_url: string | null; website: string | null; bio: string | null }
-      const authorMap = new Map<string, AuthorData>(authors.map((a: AuthorData) => [a.id, a]))
+      type AuthorDataRaw = { id: string; name: string; avatar_url: string | null; website_url: string | null; bio: string | null }
+      type AuthorDataMapped = { id: string; name: string; avatar_url: string | null; website: string | null; bio: string | null }
+      const authorMap = new Map<string, AuthorDataMapped>(authors.map((a: AuthorDataRaw) => [a.id, {
+        id: a.id,
+        name: a.name,
+        avatar_url: a.avatar_url,
+        website: a.website_url,  // Map to expected field name
+        bio: a.bio
+      }]))
       devotionals.forEach((d: Devotional) => {
         if (d.author_id && authorMap.has(d.author_id)) {
           d.authors = authorMap.get(d.author_id) ?? null
@@ -221,22 +228,21 @@ export async function getDevotionalBySlug(
   if (!data) return null
   
   // If the devotional has an author_id, fetch the author separately
-  console.log('[v0] getDevotionalBySlug - author_id:', data.author_id)
   if (data.author_id) {
     const { data: authorData, error: authorError } = await supabase
       .from('authors')
-      .select('id, name, avatar_url, website, bio')
+      .select('id, name, avatar_url, website_url, bio')
       .eq('id', data.author_id)
       .single()
     
-    console.log('[v0] Author query result:', { authorData, authorError: authorError?.message })
-    
     if (!authorError && authorData) {
-      data.authors = authorData
-      console.log('[v0] Attached authors to data:', data.authors)
+      // Map website_url to website for consistency with BlogPostPage
+      data.authors = {
+        ...authorData,
+        website: authorData.website_url
+      }
     }
   }
   
-  console.log('[v0] Returning devotional with authors:', data.authors)
   return data
 }

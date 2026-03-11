@@ -35,11 +35,14 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     
     const { data: authors } = await supabase
       .from('authors')
-      .select('id, name, avatar_url, website, bio')
+      .select('id, name, avatar_url, website_url, bio')
       .in('id', authorIds)
     
     if (authors) {
-      const authorMap = new Map(authors.map((a: any) => [a.id, a]))
+      const authorMap = new Map(authors.map((a: any) => [a.id, {
+        ...a,
+        website: a.website_url  // Map to expected field name
+      }]))
       devotionals.forEach(d => {
         if (d.author_id && authorMap.has(d.author_id)) {
           d.authors = authorMap.get(d.author_id)
