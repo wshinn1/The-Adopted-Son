@@ -30,7 +30,7 @@ export default function Home1({ data }: Home1Props) {
       style={{ backgroundColor: data.background_color || '#F5F5F0' }}
     >
       {/* Quote */}
-      <h1 className="max-w-4xl text-4xl font-medium leading-tight tracking-tight text-neutral-900 md:text-5xl lg:text-6xl font-heading">
+      <h1 className="max-w-full text-4xl font-medium leading-tight tracking-tight text-neutral-900 md:text-5xl lg:text-6xl font-heading">
         {data.quote_before}
         <em className="relative not-italic">
           <span className="relative z-10">{data.quote_highlight}</span>
