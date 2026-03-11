@@ -66,6 +66,10 @@ export default function NewPagePage() {
         Create New Page
       </h1>
 
+      <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+        Create your page first, then you&apos;ll be able to add sections and content.
+      </p>
+
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
         <div className="space-y-4">
           <div>
@@ -106,7 +110,7 @@ export default function NewPagePage() {
             disabled={saving || !title.trim() || !slug.trim()}
             className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50"
           >
-            {saving ? 'Creating...' : 'Create Page'}
+            {saving ? 'Creating...' : 'Create Page & Add Sections'}
           </button>
           <button
             onClick={() => router.back()}

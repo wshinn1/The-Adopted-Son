@@ -352,24 +352,35 @@ export default function PageEditor({ page, sections: initialSections, templates 
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
               Choose a section template:
             </h3>
-            <div className="grid gap-2">
-              {templates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => addSection(template.id)}
-                  className="text-left px-4 py-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-primary-500 transition-colors"
-                >
-                  <div className="font-medium text-neutral-900 dark:text-neutral-100">
-                    {template.name}
-                  </div>
-                  {template.description && (
-                    <div className="text-sm text-neutral-500 mt-1">
-                      {template.description}
+            {templates.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-neutral-600 dark:text-neutral-400 mb-2">
+                  No section templates found.
+                </p>
+                <p className="text-sm text-neutral-500">
+                  Go to <a href="/admin/site-settings" className="text-primary-600 underline">Site Settings</a> and click "Initialize Section Templates" first.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                {templates.map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => addSection(template.id)}
+                    className="text-left px-4 py-3 bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-primary-500 transition-colors"
+                  >
+                    <div className="font-medium text-neutral-900 dark:text-neutral-100">
+                      {template.name}
                     </div>
-                  )}
-                </button>
-              ))}
-            </div>
+                    {template.description && (
+                      <div className="text-sm text-neutral-500 mt-1">
+                        {template.description}
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
             <button
               onClick={() => setAddingSection(false)}
               className="mt-3 text-sm text-neutral-500 hover:text-neutral-700"
