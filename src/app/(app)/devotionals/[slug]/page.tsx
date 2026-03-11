@@ -96,7 +96,7 @@ export default async function DevotionalPage({ params }: Props) {
     tags: devotional.tags,
     read_time_minutes: devotional.read_time_minutes,
     published_at: devotional.published_at,
-    author: devotional.author,
+    authors: devotional.authors,
     author_name: devotional.author_name ?? 'The Adopted Son',
   }
 
