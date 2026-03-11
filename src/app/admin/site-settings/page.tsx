@@ -5,20 +5,9 @@ import { createBrowserClient } from '@supabase/ssr'
 import { Upload, Plus, Trash2 } from 'lucide-react'
 import Head from 'next/head'
 
-interface NavLink {
-  label: string
-  url: string
-}
-
 interface SocialLink {
   platform: string
   url: string
-}
-
-interface Page {
-  id: string
-  title: string
-  slug: string
 }
 
 const FONT_OPTIONS = [
@@ -58,12 +47,10 @@ const groupedFonts = FONT_OPTIONS.reduce((acc, font) => {
 }, {} as Record<string, typeof FONT_OPTIONS>)
 
 export default function SiteSettingsPage() {
-  const [pages, setPages] = useState<Page[]>([])
   const [siteName, setSiteName] = useState('')
   const [siteTagline, setSiteTagline] = useState('')
   const [logoType, setLogoType] = useState<'text' | 'image'>('text')
   const [logoUrl, setLogoUrl] = useState('')
-  const [navLinks, setNavLinks] = useState<NavLink[]>([])
   const [footerText, setFooterText] = useState('')
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   const [headingFont, setHeadingFont] = useState('font-sans')
@@ -80,7 +67,6 @@ export default function SiteSettingsPage() {
 
   useEffect(() => {
     loadSettings()
-    loadPages()
   }, [])
 
   // Load preview fonts dynamically
@@ -125,20 +111,6 @@ export default function SiteSettingsPage() {
     }
   }, [headingFont, bodyFont])
 
-  const loadPages = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('pages')
-        .select('id, title, slug')
-        .order('title')
-
-      if (error) throw error
-      setPages(data || [])
-    } catch (err) {
-      console.error('Error loading pages:', err)
-    }
-  }
-
   const loadSettings = async () => {
     try {
       const { data, error } = await supabase
@@ -160,7 +132,6 @@ export default function SiteSettingsPage() {
       setSiteTagline(settings.site_tagline || 'Daily Devotionals')
       setLogoType(settings.logo_type || 'text')
       setLogoUrl(settings.logo_url || '')
-      setNavLinks(settings.nav_links || [{ label: 'Home', url: '/' }])
       setFooterText(settings.footer_text || '')
       setSocialLinks(settings.social_links || [])
       setHeadingFont(settings.typography?.heading_font || 'font-sans')
@@ -187,7 +158,6 @@ export default function SiteSettingsPage() {
       await saveSetting('site_tagline', siteTagline)
       await saveSetting('logo_type', logoType)
       await saveSetting('logo_url', logoType === 'image' ? logoUrl : '')
-      await saveSetting('nav_links', navLinks)
       await saveSetting('footer_text', footerText)
       await saveSetting('social_links', socialLinks)
       await saveSetting('typography', { heading_font: headingFont, body_font: bodyFont })
@@ -218,20 +188,6 @@ export default function SiteSettingsPage() {
       console.error('Upload error:', err)
       alert('Error uploading logo')
     }
-  }
-
-  const addNavLink = () => {
-    setNavLinks([...navLinks, { label: '', url: '' }])
-  }
-
-  const updateNavLink = (index: number, field: 'label' | 'url', value: string) => {
-    const updated = [...navLinks]
-    updated[index][field] = value
-    setNavLinks(updated)
-  }
-
-  const removeNavLink = (index: number) => {
-    setNavLinks(navLinks.filter((_, i) => i !== index))
   }
 
   const addSocialLink = () => {
@@ -376,74 +332,6 @@ export default function SiteSettingsPage() {
                 }
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Navigation Links</h2>
-            <button
-              onClick={addNavLink}
-              className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700"
-            >
-              <Plus className="size-4" />
-              Add Link
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {navLinks.map((link, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={link.label}
-                  onChange={(e) => updateNavLink(index, 'label', e.target.value)}
-                  placeholder="Label"
-                  className="w-32 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
-                />
-                <select
-                  value={link.url}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    updateNavLink(index, 'url', value)
-                    // Auto-fill label if empty and a page is selected
-                    if (value && !link.label) {
-                      const page = pages.find(p => `/${p.slug}` === value || (p.slug === 'home' && value === '/'))
-                      if (page) {
-                        updateNavLink(index, 'label', page.title)
-                      }
-                    }
-                  }}
-                  className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
-                >
-                  <option value="">Select a page or enter custom URL</option>
-                  <option value="/">Home</option>
-                  <option value="/devotionals">Devotionals</option>
-                  {pages.filter(p => p.slug !== 'home').map((page) => (
-                    <option key={page.id} value={`/${page.slug}`}>
-                      {page.title}
-                    </option>
-                  ))}
-                  <option value="__custom__">Custom URL...</option>
-                </select>
-                {link.url === '__custom__' || (link.url && !['/', '/devotionals'].includes(link.url) && !pages.some(p => `/${p.slug}` === link.url)) ? (
-                  <input
-                    type="text"
-                    value={link.url === '__custom__' ? '' : link.url}
-                    onChange={(e) => updateNavLink(index, 'url', e.target.value)}
-                    placeholder="/custom-url"
-                    className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
-                  />
-                ) : null}
-                <button
-                  onClick={() => removeNavLink(index)}
-                  className="p-2 text-red-500 hover:text-red-600"
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              </div>
-            ))}
           </div>
         </div>
 
