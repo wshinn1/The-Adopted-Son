@@ -5,7 +5,7 @@ import HamburgerHeader from '@/components/HamburgerHeader'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
 import { getSiteSettings } from '@/lib/site-settings'
 import { checkAccess } from '@/lib/trial'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -17,8 +17,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
-  const devotional = await getDevotionalBySlug(supabase, slug)
+  const devotional = await getDevotionalBySlug(supabaseAdmin, slug)
 
   // Use SEO fields if available, fallback to regular fields
   const title = devotional?.seo_title || devotional?.title 
@@ -66,10 +65,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DevotionalPage({ params }: Props) {
   const { slug } = await params
-  const supabase = await createClient()
   const settings = await getSiteSettings()
 
-  const devotional = await getDevotionalBySlug(supabase, slug)
+  const devotional = await getDevotionalBySlug(supabaseAdmin, slug)
 
   if (!devotional || !devotional.is_published) notFound()
 
@@ -78,7 +76,7 @@ export default async function DevotionalPage({ params }: Props) {
   const canRead = !devotional.is_premium || access.hasAccess
 
   // Get related devotionals
-  const relatedDevotionals = await getDevotionals(supabase, { limit: 4, published: true })
+  const relatedDevotionals = await getDevotionals(supabaseAdmin, { limit: 4, published: true })
   const relatedPosts = relatedDevotionals
     .filter(d => d.id !== devotional.id)
     .slice(0, 3)

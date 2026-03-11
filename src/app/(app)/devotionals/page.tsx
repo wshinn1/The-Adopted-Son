@@ -1,5 +1,5 @@
 import { devotionalToPost, getDevotionals, Devotional } from '@/lib/devotional-mapper'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getSiteSettings } from '@/lib/site-settings'
 import { Metadata } from 'next'
 import Link from 'next/link'
@@ -24,7 +24,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   const currentPage = parseInt(page ?? '1', 10)
   const offset = (currentPage - 1) * POSTS_PER_PAGE
 
-  const supabase = await createClient()
+  // Use admin client to bypass RLS and ensure all visitors can see posts
+  const supabase = supabaseAdmin
   const settings = await getSiteSettings()
 
   // Fetch featured post (prioritize is_featured, fallback to most recent)
