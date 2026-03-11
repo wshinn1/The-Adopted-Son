@@ -156,6 +156,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                         alt={featuredPost.title}
                         fill
                         className="object-cover"
+                        priority
+                        loading="eager"
                         unoptimized
                       />
                     </div>
