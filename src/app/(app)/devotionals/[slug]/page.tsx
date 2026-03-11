@@ -204,7 +204,7 @@ export default async function DevotionalPage({ params }: Props) {
           </div>
         )}
       </div>
-      
+
       <Footer />
     </div>
   )
