@@ -43,11 +43,13 @@ export default function TrialBanner() {
             return
           }
 
-          if (
-            profile?.subscription_status === 'active' &&
-            profile?.subscription_period_end &&
-            new Date(profile.subscription_period_end) > new Date()
-          ) {
+          // Check for active subscription - either status is 'active' OR period hasn't ended
+          const hasActiveSubscription = 
+            profile?.subscription_status === 'active' ||
+            profile?.subscription_status === 'trialing' ||
+            (profile?.subscription_period_end && new Date(profile.subscription_period_end) > new Date())
+
+          if (hasActiveSubscription) {
             setTrialInfo({ isAdmin: false, isSubscribed: true, trialDaysLeft: null, trialExpired: false })
             setLoading(false)
             return
