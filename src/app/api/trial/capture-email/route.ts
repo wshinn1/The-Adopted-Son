@@ -7,19 +7,41 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(request: NextRequest) {
-  const { email, ip } = await request.json()
+  const { email } = await request.json()
 
-  if (!email || !ip) {
-    return NextResponse.json({ error: 'Missing email or ip' }, { status: 400 })
+  if (!email) {
+    return NextResponse.json({ error: 'Missing email' }, { status: 400 })
   }
 
-  const { error } = await supabaseAdmin
+  // Get IP from request headers (Vercel provides this)
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
+    || request.headers.get('x-real-ip')
+    || 'unknown'
+
+  // First try to update existing visitor_trials record
+  const { data: existingTrial, error: updateError } = await supabaseAdmin
     .from('visitor_trials')
     .update({ email })
     .eq('ip_address', ip)
+    .select()
+    .single()
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  // If no existing record found, also add to subscribers table as a fallback
+  if (!existingTrial) {
+    // Add to subscribers table
+    const { error: subscriberError } = await supabaseAdmin
+      .from('subscribers')
+      .upsert({ 
+        email, 
+        source: 'trial_banner',
+        subscribed_at: new Date().toISOString()
+      }, { 
+        onConflict: 'email' 
+      })
+
+    if (subscriberError) {
+      console.error('Error adding subscriber:', subscriberError)
+    }
   }
 
   return NextResponse.json({ success: true })
