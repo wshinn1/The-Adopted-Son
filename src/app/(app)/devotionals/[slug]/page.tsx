@@ -11,6 +11,10 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
+// Disable caching to ensure fresh data
+export const revalidate = 0
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ slug: string }>
 }
@@ -68,7 +72,6 @@ export default async function DevotionalPage({ params }: Props) {
   const settings = await getSiteSettings()
 
   const devotional = await getDevotionalBySlug(supabaseAdmin, slug)
-  console.log('[v0] Slug page - devotional.authors:', devotional?.authors)
 
   if (!devotional || !devotional.is_published) {
     notFound()

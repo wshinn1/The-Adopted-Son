@@ -221,7 +221,6 @@ export async function getDevotionalBySlug(
   if (!data) return null
   
   // If the devotional has an author_id, fetch the author separately
-  console.log('[v0] getDevotionalBySlug - author_id:', data.author_id)
   if (data.author_id) {
     const { data: authorData, error: authorError } = await supabase
       .from('authors')
@@ -229,14 +228,10 @@ export async function getDevotionalBySlug(
       .eq('id', data.author_id)
       .single()
     
-    console.log('[v0] Author query result:', { authorData, authorError: authorError?.message })
-    
     if (!authorError && authorData) {
       data.authors = authorData
-      console.log('[v0] Attached authors to data:', data.authors)
     }
   }
   
-  console.log('[v0] Returning devotional with authors:', data.authors)
   return data
 }
