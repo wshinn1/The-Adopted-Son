@@ -157,7 +157,7 @@ export async function getDevotionals(
     .from('devotionals')
     .select(`
       *,
-      authors(id, name, avatar_url, website)
+      authors:author_id(id, name, avatar_url, website)
     `)
     .order('published_at', { ascending: false })
     .limit(limit)
@@ -187,18 +187,30 @@ export async function getDevotionalBySlug(
   supabase: any,
   slug: string
 ): Promise<Devotional | null> {
+  // First try to fetch with authors join
   const { data, error } = await supabase
     .from('devotionals')
     .select(`
       *,
-      authors(id, name, avatar_url, website)
+      authors:author_id(id, name, avatar_url, website)
     `)
     .eq('slug', slug)
     .single()
   
   if (error) {
-    console.error('Error fetching devotional:', error)
-    return null
+    console.error('Error fetching devotional with authors join:', error)
+    // Fallback: try without the join
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('devotionals')
+      .select('*')
+      .eq('slug', slug)
+      .single()
+    
+    if (fallbackError) {
+      console.error('Error fetching devotional:', fallbackError)
+      return null
+    }
+    return fallbackData
   }
   
   return data
