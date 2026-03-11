@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import TrialBanner from '@/components/devotional/TrialBanner'
+import { ApplicationLayout } from '@/app/(app)/application-layout'
 
 export const metadata: Metadata = {
   title: 'All Devotionals — The Adopted Son',
@@ -115,8 +116,9 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <TrialBanner />
+    <ApplicationLayout headerStyle="header-2">
+      <div className="min-h-screen bg-gray-50">
+        <TrialBanner />
       
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         
@@ -354,6 +356,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           )}
         </section>
       </div>
-    </div>
+      </div>
+    </ApplicationLayout>
   )
 }

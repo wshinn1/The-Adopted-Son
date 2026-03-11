@@ -1,6 +1,7 @@
 import BlogPostPage from '@/components/blog/BlogPostPage'
 import PaywallGate from '@/components/devotional/PaywallGate'
 import TrialBanner from '@/components/devotional/TrialBanner'
+import { ApplicationLayout } from '@/app/(app)/application-layout'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
 import { checkAccess } from '@/lib/trial'
 import { createClient } from '@/lib/supabase/server'
@@ -127,69 +128,71 @@ export default async function DevotionalPage({ params }: Props) {
   }
 
   return (
-    <div className="relative bg-white">
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      
-      <TrialBanner />
-      
-      {/* Main Blog Post */}
-      <BlogPostPage post={post} />
+    <ApplicationLayout headerStyle="header-2">
+      <div className="relative bg-white">
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        
+        <TrialBanner />
+        
+        {/* Main Blog Post */}
+        <BlogPostPage post={post} />
 
-      {/* Paywall (if premium and no access) */}
-      {!canRead && (
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 -mt-8 pb-16">
-          <PaywallGate reason={access.reason} />
-        </div>
-      )}
+        {/* Paywall (if premium and no access) */}
+        {!canRead && (
+          <div className="max-w-4xl mx-auto px-6 lg:px-8 -mt-8 pb-16">
+            <PaywallGate reason={access.reason} />
+          </div>
+        )}
 
-      {/* Related Posts */}
-      {relatedPosts.length > 0 && canRead && (
-        <div className="border-t border-neutral-200">
-          <div className="max-w-6xl mx-auto px-6 lg:px-8 py-16">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-neutral-900">
-                More Devotionals
-              </h2>
-              <Link 
-                href="/devotionals" 
-                className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
-              >
-                View all
-              </Link>
-            </div>
-            <div className="grid gap-8 md:grid-cols-3">
-              {relatedPosts.map((relatedPost) => (
-                <Link key={relatedPost.id} href={`/devotionals/${relatedPost.handle}`} className="group">
-                  <article>
-                    <div className="aspect-[4/3] relative rounded-lg overflow-hidden mb-4">
-                      <Image
-                        src={typeof relatedPost.featuredImage === 'string' 
-                          ? relatedPost.featuredImage 
-                          : relatedPost.featuredImage.src}
-                        alt={relatedPost.title}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        unoptimized
-                      />
-                    </div>
-                    <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-                      {relatedPost.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-neutral-500 line-clamp-2">
-                      {relatedPost.excerpt}
-                    </p>
-                  </article>
+        {/* Related Posts */}
+        {relatedPosts.length > 0 && canRead && (
+          <div className="border-t border-neutral-200">
+            <div className="max-w-6xl mx-auto px-6 lg:px-8 py-16">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold text-neutral-900">
+                  More Devotionals
+                </h2>
+                <Link 
+                  href="/devotionals" 
+                  className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+                >
+                  View all
                 </Link>
-              ))}
+              </div>
+              <div className="grid gap-8 md:grid-cols-3">
+                {relatedPosts.map((relatedPost) => (
+                  <Link key={relatedPost.id} href={`/devotionals/${relatedPost.handle}`} className="group">
+                    <article>
+                      <div className="aspect-[4/3] relative rounded-lg overflow-hidden mb-4">
+                        <Image
+                          src={typeof relatedPost.featuredImage === 'string' 
+                            ? relatedPost.featuredImage 
+                            : relatedPost.featuredImage.src}
+                          alt={relatedPost.title}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          unoptimized
+                        />
+                      </div>
+                      <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        {relatedPost.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-neutral-500 line-clamp-2">
+                        {relatedPost.excerpt}
+                      </p>
+                    </article>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ApplicationLayout>
   )
 }
 
