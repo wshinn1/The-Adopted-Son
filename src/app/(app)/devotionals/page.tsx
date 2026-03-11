@@ -253,7 +253,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           {gridPosts.length > 0 ? (
             <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {gridPosts.map((post) => (
+                {gridPosts.map((post, index) => (
                   <Link key={post.id} href={`/devotionals/${post.handle}`} className="group block">
                     <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
                       {/* Image */}
@@ -263,6 +263,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                           alt={post.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          priority={index < 3}
+                          loading={index < 3 ? "eager" : "lazy"}
                           unoptimized
                         />
                       </div>
