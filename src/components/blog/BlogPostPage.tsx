@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Facebook, Twitter, Share2, ArrowLeft } from 'lucide-react'
@@ -36,6 +37,16 @@ interface Props {
 }
 
 export default function BlogPostPage({ post }: Props) {
+  // Debug logging - will show in browser console
+  useEffect(() => {
+    console.log('[v0] BlogPostPage received post:', {
+      title: post.title,
+      authors: post.authors,
+      author: post.author,
+      author_name: post.author_name
+    })
+  }, [post])
+
   const publishedDate = post.published_at
     ? new Date(post.published_at).toLocaleDateString('en-US', {
         day: 'numeric',
@@ -50,6 +61,8 @@ export default function BlogPostPage({ post }: Props) {
   const authorAvatar = authorData?.avatar_url
   const authorWebsite = authorData?.website
   const authorBio = authorData?.bio
+  
+  console.log('[v0] Author data resolved:', { authorData, authorName, authorAvatar, authorWebsite, authorBio })
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
   const shareTitle = encodeURIComponent(post.title)
