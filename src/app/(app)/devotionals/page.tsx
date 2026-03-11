@@ -1,11 +1,13 @@
 import { devotionalToPost, getDevotionals, Devotional } from '@/lib/devotional-mapper'
 import { createClient } from '@/lib/supabase/server'
+import { getSiteSettings } from '@/lib/site-settings'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import TrialBanner from '@/components/devotional/TrialBanner'
-import { ApplicationLayout } from '@/app/(app)/application-layout'
+import HamburgerHeader from '@/components/HamburgerHeader'
+import Footer from '@/components/Footer/Footer'
 
 export const metadata: Metadata = {
   title: 'All Devotionals — The Adopted Son',
@@ -24,6 +26,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   const offset = (currentPage - 1) * POSTS_PER_PAGE
 
   const supabase = await createClient()
+  const settings = await getSiteSettings()
 
   // Fetch featured post (prioritize is_featured, fallback to most recent)
   let featuredData = null
@@ -116,9 +119,17 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   }
 
   return (
-    <ApplicationLayout headerStyle="header-2">
-      <div className="min-h-screen bg-gray-50">
-        <TrialBanner />
+    <div className="min-h-screen bg-gray-50">
+      <HamburgerHeader
+        siteName={settings.site_name}
+        logoType={settings.logo_type}
+        logoUrl={settings.logo_url || undefined}
+        navLinks={settings.nav_links}
+      />
+      {/* Spacer for fixed header */}
+      <div className="h-20" />
+      
+      <TrialBanner />
       
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         
@@ -358,7 +369,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           )}
         </section>
       </div>
-      </div>
-    </ApplicationLayout>
+      <Footer />
+    </div>
   )
 }

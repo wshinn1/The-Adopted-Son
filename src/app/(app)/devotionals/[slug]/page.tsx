@@ -1,8 +1,10 @@
 import BlogPostPage from '@/components/blog/BlogPostPage'
 import PaywallGate from '@/components/devotional/PaywallGate'
 import TrialBanner from '@/components/devotional/TrialBanner'
-import { ApplicationLayout } from '@/app/(app)/application-layout'
+import HamburgerHeader from '@/components/HamburgerHeader'
+import Footer from '@/components/Footer/Footer'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
+import { getSiteSettings } from '@/lib/site-settings'
 import { checkAccess } from '@/lib/trial'
 import { createClient } from '@/lib/supabase/server'
 import { Metadata } from 'next'
@@ -66,6 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function DevotionalPage({ params }: Props) {
   const { slug } = await params
   const supabase = await createClient()
+  const settings = await getSiteSettings()
 
   const devotional = await getDevotionalBySlug(supabase, slug)
 
@@ -128,18 +131,27 @@ export default async function DevotionalPage({ params }: Props) {
   }
 
   return (
-    <ApplicationLayout headerStyle="header-2">
-      <div className="relative bg-white">
-        {/* JSON-LD Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+    <div className="min-h-screen bg-white">
+      <HamburgerHeader
+        siteName={settings.site_name}
+        logoType={settings.logo_type}
+        logoUrl={settings.logo_url || undefined}
+        navLinks={settings.nav_links}
+      />
+      
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      
+      {/* Spacer for fixed header */}
+      <div className="h-20" />
+      
+      <TrialBanner />
         
-        <TrialBanner />
-        
-        {/* Main Blog Post */}
-        <BlogPostPage post={post} />
+      {/* Main Blog Post */}
+      <BlogPostPage post={post} />
 
         {/* Paywall (if premium and no access) */}
         {!canRead && (
@@ -192,7 +204,9 @@ export default async function DevotionalPage({ params }: Props) {
           </div>
         )}
       </div>
-    </ApplicationLayout>
+      
+      <Footer />
+    </div>
   )
 }
 

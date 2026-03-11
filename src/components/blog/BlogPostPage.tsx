@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Facebook, Twitter, Share2, ArrowLeft } from 'lucide-react'
 
 interface Author {
@@ -32,7 +31,6 @@ interface Props {
 }
 
 export default function BlogPostPage({ post }: Props) {
-  const router = useRouter()
   const publishedDate = post.published_at
     ? new Date(post.published_at).toLocaleDateString('en-US', {
         day: 'numeric',
@@ -53,13 +51,13 @@ export default function BlogPostPage({ post }: Props) {
       <div className="mx-auto max-w-4xl px-6 py-12 lg:px-8 lg:py-16">
         
         {/* Back Button */}
-        <button
-          onClick={() => router.back()}
+        <Link
+          href="/devotionals"
           className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors mb-8 group"
         >
           <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
-          <span>Back</span>
-        </button>
+          <span>Back to Devotionals</span>
+        </Link>
         
         {/* Title */}
         <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 leading-tight font-heading">
