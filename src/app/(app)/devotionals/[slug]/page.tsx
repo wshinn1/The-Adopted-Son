@@ -18,9 +18,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const devotional = await getDevotionalBySlug(supabase, slug)
 
+  const title = devotional?.title ? `${devotional.title} — The Adopted Son` : 'Devotional'
+  const description = devotional?.excerpt ?? 'A daily devotional from The Adopted Son'
+  const imageUrl = devotional?.cover_image_url ?? 'https://www.theadoptedson.com/og-image.jpg'
+
   return {
-    title: devotional?.title ? `${devotional.title} — The Adopted Son` : 'Devotional',
-    description: devotional?.excerpt ?? 'A daily devotional from The Adopted Son',
+    title,
+    description,
+    authors: devotional?.author_name ? [{ name: devotional.author_name }] : undefined,
+    openGraph: {
+      title,
+      description,
+      type: 'article',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: devotional?.title ?? 'The Adopted Son Devotional',
+        },
+      ],
+      siteName: 'The Adopted Son',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
+    },
   }
 }
 
@@ -58,6 +83,7 @@ export default async function DevotionalPage({ params }: Props) {
     read_time_minutes: devotional.read_time_minutes,
     published_at: devotional.published_at,
     author: devotional.author,
+    author_name: devotional.author_name ?? 'The Adopted Son',
   }
 
   return (

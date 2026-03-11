@@ -21,6 +21,7 @@ interface Devotional {
   is_premium?: boolean
   is_published?: boolean
   is_featured?: boolean
+  author_name?: string | null
 }
 
 interface Props {
@@ -50,6 +51,7 @@ export default function DevotionalEditor({ devotional }: Props) {
   const [isPremium, setIsPremium] = useState(devotional?.is_premium ?? true)
   const [isPublished, setIsPublished] = useState(devotional?.is_published ?? false)
   const [isFeatured, setIsFeatured] = useState(devotional?.is_featured ?? false)
+  const [authorName, setAuthorName] = useState(devotional?.author_name ?? 'The Adopted Son')
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!devotional)
   const [editorContent, setEditorContent] = useState<unknown>(devotional?.content ?? '')
   const [uploading, setUploading] = useState(false)
@@ -119,6 +121,7 @@ export default function DevotionalEditor({ devotional }: Props) {
       is_premium: isPremium,
       is_published: publish,
       is_featured: isFeatured,
+      author_name: authorName || 'The Adopted Son',
       ...(publish && !devotional?.is_published ? { published_at: new Date().toISOString() } : {}),
     }
 
@@ -329,6 +332,17 @@ export default function DevotionalEditor({ devotional }: Props) {
             >
               <span className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${isPremium ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </button>
+          </div>
+
+          <div>
+            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Author Name</label>
+            <input
+              type="text"
+              value={authorName}
+              onChange={(e) => setAuthorName(e.target.value)}
+              placeholder="e.g. The Adopted Son"
+              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
           </div>
 
           <div>

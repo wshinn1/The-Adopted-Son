@@ -23,6 +23,7 @@ interface BlogPost {
   read_time_minutes?: number | null
   published_at?: string | null
   author?: Author | null
+  author_name?: string | null
 }
 
 interface Props {
@@ -37,6 +38,9 @@ export default function BlogPostPage({ post }: Props) {
         year: 'numeric',
       })
     : null
+
+  // Prioritize author_name field, fallback to author.full_name, then default
+  const authorName = post.author_name || post.author?.full_name || 'The Adopted Son'
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
   const shareTitle = encodeURIComponent(post.title)
@@ -59,7 +63,7 @@ export default function BlogPostPage({ post }: Props) {
               {post.author?.avatar_url ? (
                 <Image
                   src={post.author.avatar_url}
-                  alt={post.author.full_name || 'Author'}
+                  alt={authorName}
                   width={48}
                   height={48}
                   className="size-full object-cover"
@@ -67,13 +71,13 @@ export default function BlogPostPage({ post }: Props) {
                 />
               ) : (
                 <div className="size-full flex items-center justify-center text-neutral-500 font-semibold">
-                  {(post.author?.full_name || 'A')[0]}
+                  {authorName[0]}
                 </div>
               )}
             </div>
             <div className="text-sm">
               <div className="text-neutral-600">
-                By<span className="font-semibold text-neutral-900 uppercase ml-1">{post.author?.full_name || 'Anonymous'}</span>
+                By<span className="font-semibold text-neutral-900 uppercase ml-1">{authorName}</span>
               </div>
               <div className="text-neutral-500">
                 {publishedDate}
@@ -178,34 +182,32 @@ export default function BlogPostPage({ post }: Props) {
         )}
 
         {/* Author Bio */}
-        {post.author && (
-          <div className="mt-12 pt-8 border-t border-neutral-200">
-            <div className="flex items-start gap-4">
-              <div className="size-16 rounded-full overflow-hidden bg-neutral-200 shrink-0">
-                {post.author.avatar_url ? (
-                  <Image
-                    src={post.author.avatar_url}
-                    alt={post.author.full_name || 'Author'}
-                    width={64}
-                    height={64}
-                    className="size-full object-cover"
-                    unoptimized={post.author.avatar_url.includes('blob.vercel-storage.com')}
-                  />
-                ) : (
-                  <div className="size-full flex items-center justify-center text-neutral-500 text-xl font-semibold">
-                    {(post.author.full_name || 'A')[0]}
-                  </div>
-                )}
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Written by</p>
-                <p className="text-lg font-semibold text-neutral-900">
-                  {post.author.full_name || 'The Adopted Son'}
-                </p>
-              </div>
+        <div className="mt-12 pt-8 border-t border-neutral-200">
+          <div className="flex items-start gap-4">
+            <div className="size-16 rounded-full overflow-hidden bg-neutral-200 shrink-0">
+              {post.author?.avatar_url ? (
+                <Image
+                  src={post.author.avatar_url}
+                  alt={authorName}
+                  width={64}
+                  height={64}
+                  className="size-full object-cover"
+                  unoptimized={post.author.avatar_url.includes('blob.vercel-storage.com')}
+                />
+              ) : (
+                <div className="size-full flex items-center justify-center text-neutral-500 text-xl font-semibold">
+                  {authorName[0]}
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-neutral-500 mb-1">Written by</p>
+              <p className="text-lg font-semibold text-neutral-900">
+                {authorName}
+              </p>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </article>
   )

@@ -10,8 +10,10 @@ export interface Devotional {
   cover_image_url: string | null
   cover_image_pathname: string | null
   author_id: string | null
+  author_name: string | null
   is_premium: boolean
   is_published: boolean
+  is_featured: boolean
   published_at: string | null
   scripture_reference: string | null
   scripture_text: string | null
@@ -63,11 +65,11 @@ export function devotionalToPost(devotional: Devotional): TPost {
     },
     author: {
       id: devotional.author?.id || 'default-author',
-      name: devotional.author?.full_name || 'The Adopted Son',
+      name: devotional.author_name || devotional.author?.full_name || 'The Adopted Son',
       handle: 'the-adopted-son',
       avatar: {
         src: devotional.author?.avatar_url || DEFAULT_AVATAR,
-        alt: devotional.author?.full_name || 'The Adopted Son',
+        alt: devotional.author_name || devotional.author?.full_name || 'The Adopted Son',
         width: 200,
         height: 200,
       },
