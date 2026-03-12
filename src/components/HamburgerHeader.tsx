@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, User } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface NavLink {
   label: string
@@ -19,6 +20,25 @@ interface HamburgerHeaderProps {
 
 export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, navLinks }: HamburgerHeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   // Determine if we should show image: only if logoType is 'image' AND logoUrl exists
   const showImageLogo = logoType === 'image' && logoUrl
@@ -80,6 +100,28 @@ export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, 
               {link.label}
             </Link>
           ))}
+          
+          {/* Auth Link - Login or Account based on auth state */}
+          {!loading && (
+            user ? (
+              <Link
+                href="/account"
+                onClick={() => setIsOpen(false)}
+                className="text-3xl font-medium text-neutral-900 transition-colors hover:text-neutral-500 md:text-4xl lg:text-5xl font-heading flex items-center gap-3"
+              >
+                <User className="size-8" />
+                Account
+              </Link>
+            ) : (
+              <Link
+                href="/auth/login"
+                onClick={() => setIsOpen(false)}
+                className="text-3xl font-medium text-neutral-900 transition-colors hover:text-neutral-500 md:text-4xl lg:text-5xl font-heading"
+              >
+                Login
+              </Link>
+            )
+          )}
         </nav>
       </div>
     </>

@@ -69,7 +69,7 @@ export default async function PricingPage() {
               </ul>
               
               <Link
-                href={`/subscribe?plan=${plan.id}`}
+                href={`/auth/sign-up?plan=${plan.id}`}
                 className={`mt-8 block w-full rounded-xl py-3 text-center font-medium transition-colors ${
                   plan.badge
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
