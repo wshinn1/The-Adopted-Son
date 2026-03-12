@@ -2,13 +2,15 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-// Use your verified domain, or fallback to Resend's test domain
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'The Adopted Son <onboarding@resend.dev>'
+// Different sender addresses for different email types
+const ACCOUNTS_EMAIL = 'The Adopted Son <accounts@theadoptedson.com>'
+const NOREPLY_EMAIL = 'The Adopted Son <noreply@theadoptedson.com>'
+const ADMIN_EMAIL = 'weshinn@gmail.com'
 
 export async function sendTrialStartedEmail(email: string) {
   try {
     await resend.emails.send({
-      from: FROM_EMAIL,
+      from: ACCOUNTS_EMAIL,
       to: email,
       subject: 'Welcome to The Adopted Son — Your 14-Day Trial Has Begun',
       html: `
@@ -61,8 +63,9 @@ export async function sendTrialStartedEmail(email: string) {
 
 export async function sendSubscriptionWelcomeEmail(email: string, planName: string) {
   try {
+    // Send welcome email to subscriber
     await resend.emails.send({
-      from: FROM_EMAIL,
+      from: NOREPLY_EMAIL,
       to: email,
       subject: 'Thank You for Subscribing — The Adopted Son',
       html: `
@@ -109,6 +112,32 @@ export async function sendSubscriptionWelcomeEmail(email: string, planName: stri
 </html>
       `,
     })
+
+    // Notify admin of new subscriber
+    await resend.emails.send({
+      from: NOREPLY_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `New Subscriber: ${email}`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="font-family: -apple-system, sans-serif; line-height: 1.6; color: #1a1a1a; padding: 20px;">
+  <h2 style="margin-bottom: 16px;">New Subscription</h2>
+  <p><strong>Email:</strong> ${email}</p>
+  <p><strong>Plan:</strong> ${planName}</p>
+  <p><strong>Date:</strong> ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}</p>
+  <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;">
+  <p style="font-size: 14px; color: #666;">
+    <a href="https://theadoptedson.com/admin/subscribers" style="color: #1a1a1a;">View all subscribers</a>
+  </p>
+</body>
+</html>
+      `,
+    })
+
     return { success: true }
   } catch (error) {
     console.error('Failed to send subscription welcome email:', error)
@@ -119,7 +148,7 @@ export async function sendSubscriptionWelcomeEmail(email: string, planName: stri
 export async function sendTrialEndingSoonEmail(email: string, daysLeft: number) {
   try {
     await resend.emails.send({
-      from: FROM_EMAIL,
+      from: ACCOUNTS_EMAIL,
       to: email,
       subject: `Your Trial Ends in ${daysLeft} Days — The Adopted Son`,
       html: `
