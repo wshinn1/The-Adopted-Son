@@ -3,9 +3,9 @@
 import { signUp } from '@/app/actions/auth'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 
-export default function SignUpPage() {
+function SignUpForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
@@ -113,5 +113,25 @@ export default function SignUpPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full max-w-md">
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-8 shadow-sm animate-pulse">
+          <div className="h-8 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-1/2 mb-6"></div>
+          <div className="space-y-4">
+            <div className="h-10 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
+            <div className="h-10 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
+            <div className="h-10 bg-neutral-200 dark:bg-neutral-700 rounded"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <SignUpForm />
+    </Suspense>
   )
 }
