@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { sendTrialStartedEmail } from '@/lib/email'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -74,6 +75,9 @@ export async function POST(request: NextRequest) {
 
   // Add to Moosend mailing list
   await addToMoosend(email)
+
+  // Send trial started email via Resend
+  await sendTrialStartedEmail(email)
 
   return NextResponse.json({ success: true })
 }

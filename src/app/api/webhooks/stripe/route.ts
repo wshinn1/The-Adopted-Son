@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
+import { sendSubscriptionWelcomeEmail } from '@/lib/email'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -71,6 +72,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   if (!customerEmail) return
 
+  // Get plan name from subscription metadata
+  const planId = session.metadata?.plan_id || 'monthly'
+  const planName = planId === 'annual' ? 'Annual' : 'Monthly'
+
   // Find or create user profile by email
   const { data: existingProfile } = await supabaseAdmin
     .from('profiles')
@@ -86,6 +91,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         stripe_customer_id: customerId,
         stripe_subscription_id: subscriptionId,
         subscription_status: 'active',
+        subscription_plan: planId,
       })
       .eq('id', existingProfile.id)
   }
@@ -104,6 +110,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .from('visitor_trials')
     .update({ converted_to_paid: true })
     .eq('email', customerEmail)
+
+  // Send subscription welcome email
+  await sendSubscriptionWelcomeEmail(customerEmail, planName)
 }
 
 async function handleSubscriptionChange(subscription: Stripe.Subscription) {
