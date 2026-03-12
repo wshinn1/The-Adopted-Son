@@ -88,13 +88,13 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   const featuredPost = featuredData ? devotionalToPost(featuredData as Devotional) : null
   const featuredId = featuredData?.id
 
-  // Fetch sidebar posts (next 4, excluding featured)
+  // Fetch sidebar posts (next 2 most recent, excluding featured)
   let sidebarQuery = supabase
     .from('devotionals')
     .select('*')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
-    .limit(4)
+    .limit(2)
   
   if (featuredId) {
     sidebarQuery = sidebarQuery.neq('id', featuredId)
@@ -104,6 +104,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   const sidebarWithAuthors = await attachAuthors(sidebarData || [])
 
   const sidebarPosts = sidebarWithAuthors.map((d: Devotional) => devotionalToPost(d))
+  
+  // Exclude featured and sidebar posts from the grid (so grid continues sequentially)
   const excludeIds = [featuredId, ...sidebarPosts.map(p => p.id)].filter(Boolean)
 
   // Build query for main grid (excluding featured and sidebar posts)
@@ -237,9 +239,9 @@ export default async function DevotionalsPage({ searchParams }: Props) {
               </div>
             )}
 
-            {/* Sidebar - Two stacked posts matching featured height */}
+            {/* Sidebar - Two latest posts (after featured) matching featured height */}
             <div className="flex flex-col gap-4 lg:h-full">
-              {sidebarPosts.slice(0, 2).map((post) => {
+              {sidebarPosts.map((post) => {
                 const postDate = new Date(post.date)
                 const day = postDate.getDate()
                 const month = postDate.toLocaleDateString('en-US', { month: 'short' })
