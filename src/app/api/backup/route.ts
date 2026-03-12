@@ -158,7 +158,7 @@ async function sendBackupEmail(manifest: {
 
   try {
     await resend.emails.send({
-      from: 'The Adopted Son <onboarding@resend.dev>',
+      from: 'The Adopted Son <noreply@theadoptedson.com>',
       to: adminEmail,
       subject: `Backup Complete - ${date}`,
       html: `
