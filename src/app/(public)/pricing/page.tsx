@@ -1,79 +1,102 @@
-import { getSiteSettings, getPageWithSections } from '@/lib/site-settings'
-import PageRenderer from '@/components/PageRenderer'
+import { PLANS } from '@/lib/plans'
+import { Check } from 'lucide-react'
+import Link from 'next/link'
 
 export const metadata = {
-  title: 'Pricing',
-  description: 'View our subscription plans',
+  title: 'Pricing — The Adopted Son',
+  description: 'Subscribe to access all devotionals',
 }
 
 export default async function PricingPage() {
-  const settings = await getSiteSettings()
-  const pageData = await getPageWithSections('pricing')
-
-  // If there's a page in the database with sections, render them
-  if (pageData?.sections && pageData.sections.length > 0) {
-    return <PageRenderer sections={pageData.sections} />
-  }
-
-  // Otherwise show a simple placeholder with pricing info
   return (
-    <div className="min-h-screen bg-[#f5f2ed] pt-24">
+    <div className="min-h-screen bg-background pt-24">
       <div className="mx-auto max-w-4xl px-6 py-16 md:px-12">
-        <h1 className="text-center text-4xl font-medium text-neutral-900 md:text-5xl font-heading">
-          Pricing
-        </h1>
-        <p className="mt-4 text-center text-lg text-neutral-600 font-body">
-          Choose a plan that works for you
-        </p>
-
-        <div className="mt-12 grid gap-8 md:grid-cols-2">
-          {/* Free Plan */}
-          <div className="rounded-2xl border border-neutral-200 bg-white p-8">
-            <h2 className="text-2xl font-semibold text-neutral-900 font-heading">Free</h2>
-            <p className="mt-2 text-neutral-600 font-body">Get started with daily devotionals</p>
-            <div className="mt-6">
-              <span className="text-4xl font-bold text-neutral-900">$0</span>
-              <span className="text-neutral-500">/month</span>
-            </div>
-            <ul className="mt-6 space-y-3 text-neutral-600">
-              <li>Access to free devotionals</li>
-              <li>Weekly email updates</li>
-              <li>Community access</li>
-            </ul>
-            <a
-              href="/auth/sign-up"
-              className="mt-8 block w-full rounded-xl bg-neutral-900 py-3 text-center font-medium text-white hover:bg-neutral-800"
-            >
-              Get Started
-            </a>
-          </div>
-
-          {/* Premium Plan */}
-          <div className="rounded-2xl border-2 border-neutral-900 bg-white p-8">
-            <h2 className="text-2xl font-semibold text-neutral-900 font-heading">Premium</h2>
-            <p className="mt-2 text-neutral-600 font-body">Full access to all content</p>
-            <div className="mt-6">
-              <span className="text-4xl font-bold text-neutral-900">$9</span>
-              <span className="text-neutral-500">/month</span>
-            </div>
-            <ul className="mt-6 space-y-3 text-neutral-600">
-              <li>All free features</li>
-              <li>Access to premium devotionals</li>
-              <li>Exclusive content</li>
-              <li>Early access to new content</li>
-            </ul>
-            <a
-              href="/subscribe"
-              className="mt-8 block w-full rounded-xl bg-neutral-900 py-3 text-center font-medium text-white hover:bg-neutral-800"
-            >
-              Subscribe
-            </a>
-          </div>
+        <div className="text-center">
+          <h1 className="text-4xl font-medium text-foreground md:text-5xl font-heading">
+            Simple, Transparent Pricing
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground font-body max-w-xl mx-auto">
+            Get full access to all devotionals and spiritual content. 
+            Start with a 14-day free trial, no credit card required.
+          </p>
         </div>
 
-        <p className="mt-8 text-center text-sm text-neutral-500">
-          This page can be customized from the admin dashboard.
-        </p>
+        <div className="mt-12 grid gap-8 md:grid-cols-2">
+          {PLANS.map((plan) => (
+            <div 
+              key={plan.id}
+              className={`relative rounded-2xl border bg-card p-8 ${
+                plan.badge 
+                  ? 'border-primary ring-2 ring-primary' 
+                  : 'border-border'
+              }`}
+            >
+              {plan.badge && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                  {plan.badge}
+                </span>
+              )}
+              
+              <h2 className="text-2xl font-semibold text-foreground font-heading">
+                {plan.name}
+              </h2>
+              <p className="mt-2 text-muted-foreground font-body">
+                {plan.description}
+              </p>
+              
+              <div className="mt-6">
+                <span className="text-4xl font-bold text-foreground">
+                  ${(plan.priceInCents / 100).toFixed(2)}
+                </span>
+                <span className="text-muted-foreground">
+                  /{plan.interval === 'month' ? 'month' : 'year'}
+                </span>
+              </div>
+
+              {plan.interval === 'year' && (
+                <p className="mt-1 text-sm text-green-600 font-medium">
+                  Only ${(plan.priceInCents / 100 / 12).toFixed(2)}/month
+                </p>
+              )}
+              
+              <ul className="mt-6 space-y-3">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3 text-muted-foreground">
+                    <Check className="size-5 text-primary shrink-0 mt-0.5" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <Link
+                href={`/subscribe?plan=${plan.id}`}
+                className={`mt-8 block w-full rounded-xl py-3 text-center font-medium transition-colors ${
+                  plan.badge
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'bg-foreground text-background hover:bg-foreground/90'
+                }`}
+              >
+                Subscribe to {plan.name}
+              </Link>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-muted-foreground">
+            Already have an account?{' '}
+            <Link href="/auth/login" className="text-primary hover:underline font-medium">
+              Sign in
+            </Link>
+          </p>
+        </div>
+
+        <div className="mt-8 rounded-xl bg-muted/50 p-6 text-center">
+          <h3 className="font-semibold text-foreground">30-Day Money Back Guarantee</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Not satisfied? Contact us within 30 days for a full refund, no questions asked.
+          </p>
+        </div>
       </div>
     </div>
   )

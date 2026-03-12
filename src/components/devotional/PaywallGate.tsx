@@ -21,7 +21,7 @@ export default function PaywallGate({ reason }: Props) {
       <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
         <Link
           href="/pricing"
-          className="px-6 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors"
+          className="px-6 py-3 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors"
         >
           View plans
         </Link>
@@ -33,7 +33,7 @@ export default function PaywallGate({ reason }: Props) {
         </Link>
       </div>
       <p className="mt-4 text-xs text-neutral-400">
-        Plans start at $9.99/month. Cancel anytime.
+        Plans start at $2.99/month. Cancel anytime.
       </p>
     </div>
   )

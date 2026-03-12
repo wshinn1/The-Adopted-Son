@@ -6,6 +6,41 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
+// Add subscriber to Moosend mailing list
+async function addToMoosend(email: string) {
+  const apiKey = process.env.MOOSEND_API_KEY
+  const listId = process.env.MOOSEND_LIST_ID
+
+  if (!apiKey || !listId) {
+    console.log('Moosend not configured, skipping')
+    return
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.moosend.com/v3/subscribers/${listId}/subscribe.json?apikey=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          Email: email,
+          HasExternalDoubleOptIn: false,
+          CustomFields: [
+            'Source=trial_banner',
+            `TrialStarted=${new Date().toISOString()}`
+          ]
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Moosend API error:', await response.text())
+    }
+  } catch (error) {
+    console.error('Failed to add to Moosend:', error)
+  }
+}
+
 export async function POST(request: NextRequest) {
   const { email } = await request.json()
 
@@ -18,31 +53,27 @@ export async function POST(request: NextRequest) {
     || request.headers.get('x-real-ip')
     || 'unknown'
 
-  // First try to update existing visitor_trials record
-  const { data: existingTrial, error: updateError } = await supabaseAdmin
+  // Update visitor_trials record with email
+  const { data: existingTrial } = await supabaseAdmin
     .from('visitor_trials')
     .update({ email })
     .eq('ip_address', ip)
     .select()
     .single()
 
-  // If no existing record found, also add to subscribers table as a fallback
-  if (!existingTrial) {
-    // Add to subscribers table
-    const { error: subscriberError } = await supabaseAdmin
-      .from('subscribers')
-      .upsert({ 
-        email, 
-        source: 'trial_banner',
-        subscribed_at: new Date().toISOString()
-      }, { 
-        onConflict: 'email' 
-      })
+  // Always add to subscribers table
+  await supabaseAdmin
+    .from('subscribers')
+    .upsert({ 
+      email, 
+      source: 'trial_banner',
+      subscribed_at: new Date().toISOString()
+    }, { 
+      onConflict: 'email' 
+    })
 
-    if (subscriberError) {
-      console.error('Error adding subscriber:', subscriberError)
-    }
-  }
+  // Add to Moosend mailing list
+  await addToMoosend(email)
 
   return NextResponse.json({ success: true })
 }
