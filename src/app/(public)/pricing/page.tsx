@@ -88,16 +88,20 @@ export default async function PricingPage() {
           ))}
         </div>
 
-        {!isLoggedIn && (
-          <div className="mt-12 text-center">
+        <div className="mt-12 text-center">
+          {isLoggedIn ? (
+            <p className="text-muted-foreground">
+              Signed in as <span className="font-medium">{user?.email}</span>
+            </p>
+          ) : (
             <p className="text-muted-foreground">
               Already have an account?{' '}
               <Link href="/auth/login" className="text-primary hover:underline font-medium">
                 Sign in
               </Link>
             </p>
-          </div>
-        )}
+          )}
+        </div>
 
         <div className="mt-8 rounded-xl bg-muted/50 p-6 text-center">
           <h3 className="font-semibold text-foreground">30-Day Money Back Guarantee</h3>
