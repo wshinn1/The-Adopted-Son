@@ -1,4 +1,5 @@
 import { PLANS } from '@/lib/plans'
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SubscribeCheckout from './SubscribeCheckout'
 
@@ -15,6 +16,14 @@ export default async function SubscribePage({ searchParams }: Props) {
   const params = await searchParams
   const planId = params.plan || 'annual'
   
+  // Require authentication - redirect to sign up if not logged in
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) {
+    redirect(`/auth/sign-up?plan=${planId}`)
+  }
+  
   const plan = PLANS.find((p) => p.id === planId)
   if (!plan) {
     redirect('/pricing')
@@ -28,7 +37,7 @@ export default async function SubscribePage({ searchParams }: Props) {
             Complete Your Subscription
           </h1>
           <p className="mt-2 text-muted-foreground">
-            You're subscribing to the <strong>{plan.name}</strong> plan at{' '}
+            Subscribing as <strong>{user.email}</strong> to the <strong>{plan.name}</strong> plan at{' '}
             <strong>${(plan.priceInCents / 100).toFixed(2)}/{plan.interval}</strong>
           </p>
         </div>

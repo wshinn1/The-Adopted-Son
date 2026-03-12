@@ -19,16 +19,27 @@ export async function signUp(formData: FormData) {
   const supabase = await createClient()
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-  const fullName = formData.get('fullName') as string
+  const firstName = formData.get('firstName') as string
+  const lastName = formData.get('lastName') as string
+  const redirectTo = formData.get('redirectTo') as string | null
 
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  
+  // If there's a redirect (e.g., to subscribe page), include it in the email confirmation link
+  const emailRedirectTo = redirectTo 
+    ? `${origin}/auth/confirm?next=${encodeURIComponent(redirectTo)}`
+    : `${origin}/auth/confirm`
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/confirm`,
-      data: { full_name: fullName },
+      emailRedirectTo,
+      data: { 
+        first_name: firstName,
+        last_name: lastName,
+        full_name: `${firstName} ${lastName}`.trim(),
+      },
     },
   })
 

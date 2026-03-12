@@ -2,15 +2,25 @@
 
 import { signUp } from '@/app/actions/auth'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const plan = searchParams.get('plan')
+  const redirectTo = plan ? `/subscribe?plan=${plan}` : null
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
     setError(null)
+    
+    // Add redirect URL to form data if present
+    if (redirectTo) {
+      formData.set('redirectTo', redirectTo)
+    }
+    
     const result = await signUp(formData)
     if (result?.error) {
       setError(result.error)
@@ -25,7 +35,7 @@ export default function SignUpPage() {
           Create an account
         </h1>
         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
-          Join The Adopted Son community
+          {plan ? 'Create your account to continue with subscription' : 'Join The Adopted Son community'}
         </p>
 
         {error && (
@@ -35,17 +45,31 @@ export default function SignUpPage() {
         )}
 
         <form action={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-              Full name
-            </label>
-            <input
-              type="text"
-              name="fullName"
-              required
-              className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-              placeholder="Your name"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+                First name
+              </label>
+              <input
+                type="text"
+                name="firstName"
+                required
+                className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                placeholder="First"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+                Last name
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                required
+                className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                placeholder="Last"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
@@ -77,7 +101,7 @@ export default function SignUpPage() {
             disabled={loading}
             className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50 text-sm"
           >
-            {loading ? 'Creating account...' : 'Create account'}
+            {loading ? 'Creating account...' : plan ? 'Create account & continue' : 'Create account'}
           </button>
         </form>
 
