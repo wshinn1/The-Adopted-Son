@@ -1,4 +1,5 @@
 import { PLANS } from '@/lib/plans'
+import { createClient } from '@/lib/supabase/server'
 import { Check } from 'lucide-react'
 import Link from 'next/link'
 
@@ -8,6 +9,11 @@ export const metadata = {
 }
 
 export default async function PricingPage() {
+  // Check if user is logged in
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isLoggedIn = !!user
+
   return (
     <div className="min-h-screen bg-background pt-24">
       <div className="mx-auto max-w-4xl px-6 py-16 md:px-12">
@@ -69,7 +75,7 @@ export default async function PricingPage() {
               </ul>
               
               <Link
-                href={`/auth/sign-up?plan=${plan.id}`}
+                href={isLoggedIn ? `/subscribe?plan=${plan.id}` : `/auth/sign-up?plan=${plan.id}`}
                 className={`mt-8 block w-full rounded-xl py-3 text-center font-medium transition-colors ${
                   plan.badge
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -82,14 +88,16 @@ export default async function PricingPage() {
           ))}
         </div>
 
-        <div className="mt-12 text-center">
-          <p className="text-muted-foreground">
-            Already have an account?{' '}
-            <Link href="/auth/login" className="text-primary hover:underline font-medium">
-              Sign in
-            </Link>
-          </p>
-        </div>
+        {!isLoggedIn && (
+          <div className="mt-12 text-center">
+            <p className="text-muted-foreground">
+              Already have an account?{' '}
+              <Link href="/auth/login" className="text-primary hover:underline font-medium">
+                Sign in
+              </Link>
+            </p>
+          </div>
+        )}
 
         <div className="mt-8 rounded-xl bg-muted/50 p-6 text-center">
           <h3 className="font-semibold text-foreground">30-Day Money Back Guarantee</h3>
