@@ -167,11 +167,11 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           </form>
         </div>
 
-        {/* Suggested Articles Section */}
+        {/* Devotionals Section */}
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-1 h-8 bg-blue-500 rounded-full" />
-            <h2 className="text-2xl font-bold text-gray-900 font-heading">Suggested Articles</h2>
+            <h2 className="text-2xl font-bold text-gray-900 font-heading">Devotionals</h2>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
@@ -242,18 +242,32 @@ export default async function DevotionalsPage({ searchParams }: Props) {
               {sidebarPosts.map((post) => (
                 <Link key={post.id} href={`/devotionals/${post.handle}`} className="group block">
                   <div className="flex gap-4 p-4 bg-white rounded-xl border-l-4 border-blue-500 hover:shadow-sm transition-shadow">
+                    {/* Thumbnail */}
+                    <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                      <Image
+                        src={typeof post.featuredImage === 'string' ? post.featuredImage : post.featuredImage.src}
+                        alt={post.title}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors font-heading">
                         {post.title}
                       </h4>
-                      <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
-                        <span className="font-medium font-body">{post.author.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span>{formatDate(post.date).split(',')[0]}</span>
-                          <span>·</span>
-                          <Clock className="size-3.5" />
-                          <span>{post.readingTime} min</span>
-                        </div>
+                      {post.excerpt && (
+                        <p className="text-gray-500 text-sm line-clamp-2 mt-1 font-body">
+                          {post.excerpt}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                        <span className="font-medium">{post.author.name}</span>
+                        <span>·</span>
+                        <span>{formatDate(post.date).split(',')[0]}</span>
+                        <span>·</span>
+                        <Clock className="size-3" />
+                        <span>{post.readingTime} min</span>
                       </div>
                     </div>
                   </div>
