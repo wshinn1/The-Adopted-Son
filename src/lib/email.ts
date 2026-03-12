@@ -145,6 +145,80 @@ export async function sendSubscriptionWelcomeEmail(email: string, planName: stri
   }
 }
 
+export async function sendPaymentReceiptEmail(
+  email: string,
+  details: {
+    planName: string
+    amount: number
+    periodEnd: Date
+  }
+) {
+  try {
+    const formattedAmount = details.amount.toFixed(2)
+    const formattedDate = details.periodEnd.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    })
+
+    await resend.emails.send({
+      from: ACCOUNTS_EMAIL,
+      to: email,
+      subject: 'The Adopted Son - Payment Receipt',
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Georgia, serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+  <h1 style="font-size: 28px; font-weight: normal; margin-bottom: 24px;">Payment Receipt</h1>
+  
+  <p style="font-size: 16px; margin-bottom: 24px;">
+    Thank you for your payment. Here are the details of your transaction:
+  </p>
+  
+  <div style="background: #f5f2ed; padding: 24px; border-radius: 12px; margin: 24px 0;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 16px;">
+      <tr>
+        <td style="padding: 8px 0; color: #666;">Plan</td>
+        <td style="padding: 8px 0; text-align: right; font-weight: bold;">${details.planName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #666;">Amount</td>
+        <td style="padding: 8px 0; text-align: right; font-weight: bold;">$${formattedAmount}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #666;">Next billing date</td>
+        <td style="padding: 8px 0; text-align: right; font-weight: bold;">${formattedDate}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #666;">Payment date</td>
+        <td style="padding: 8px 0; text-align: right;">${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</td>
+      </tr>
+    </table>
+  </div>
+  
+  <p style="font-size: 14px; color: #666; margin-top: 24px;">
+    You can manage your subscription anytime from your <a href="https://theadoptedson.com/account/billing" style="color: #1a1a1a;">account settings</a>.
+  </p>
+  
+  <p style="font-size: 14px; color: #666; margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e5e5;">
+    Questions about your payment? Simply reply to this email.<br>
+    <a href="https://theadoptedson.com" style="color: #1a1a1a;">theadoptedson.com</a>
+  </p>
+</body>
+</html>
+      `,
+    })
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send payment receipt email:', error)
+    return { success: false, error }
+  }
+}
+
 export async function sendTrialEndingSoonEmail(email: string, daysLeft: number) {
   try {
     await resend.emails.send({

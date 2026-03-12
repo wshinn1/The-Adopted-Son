@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { sendSubscriptionWelcomeEmail, sendPaymentReceiptEmail } from '@/lib/email'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -36,24 +37,46 @@ export async function POST(request: NextRequest) {
       const session = event.data.object as Stripe.Checkout.Session
       const customerId = session.customer as string
       const subscriptionId = session.subscription as string
-
-      // Find profile by stripe_customer_id or email
       const email = session.customer_details?.email
-      if (email) {
-        await supabaseAdmin
-          .from('profiles')
-          .update({ stripe_customer_id: customerId })
-          .eq('email', email)
-          .is('stripe_customer_id', null)
+
+      if (!email) {
+        console.error('No email found in checkout session')
+        break
+      }
+
+      // Find profile by email (case insensitive)
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email')
+        .ilike('email', email)
+        .single()
+
+      if (!profile) {
+        console.error(`No profile found for email: ${email}`)
+        break
       }
 
       // Fetch subscription details
       if (subscriptionId) {
         const sub = await stripe.subscriptions.retrieve(subscriptionId)
-        const plan = sub.items.data[0]?.price?.lookup_key ?? 'monthly'
+        const priceId = sub.items.data[0]?.price?.id
+        const lookupKey = sub.items.data[0]?.price?.lookup_key
+        
+        // Determine plan name from price
+        let plan = 'monthly'
+        if (lookupKey) {
+          plan = lookupKey
+        } else if (priceId) {
+          // Check if it's annual based on interval
+          const interval = sub.items.data[0]?.price?.recurring?.interval
+          plan = interval === 'year' ? 'annual' : 'monthly'
+        }
+        
         const periodEnd = new Date(sub.current_period_end * 1000).toISOString()
+        const amount = sub.items.data[0]?.price?.unit_amount ?? 0
 
-        await supabaseAdmin
+        // Update profile with subscription info
+        const { error } = await supabaseAdmin
           .from('profiles')
           .update({
             subscription_status: 'active',
@@ -61,7 +84,21 @@ export async function POST(request: NextRequest) {
             subscription_period_end: periodEnd,
             stripe_customer_id: customerId,
           })
-          .eq('email', email ?? '')
+          .eq('id', profile.id)
+
+        if (error) {
+          console.error('Failed to update profile:', error)
+        } else {
+          // Send welcome email
+          await sendSubscriptionWelcomeEmail(email, plan === 'annual' ? 'Annual' : 'Monthly')
+          
+          // Send payment receipt
+          await sendPaymentReceiptEmail(email, {
+            planName: plan === 'annual' ? 'Annual Subscription' : 'Monthly Subscription',
+            amount: amount / 100,
+            periodEnd: new Date(sub.current_period_end * 1000),
+          })
+        }
       }
       break
     }
@@ -105,6 +142,45 @@ export async function POST(request: NextRequest) {
         .from('profiles')
         .update({ subscription_status: 'past_due' })
         .eq('stripe_customer_id', customerId)
+      break
+    }
+
+    case 'invoice.payment_succeeded': {
+      const invoice = event.data.object as Stripe.Invoice
+      const customerId = invoice.customer as string
+      const subscriptionId = invoice.subscription as string
+      
+      // Only send receipt for recurring payments (not the first one - that's handled by checkout.session.completed)
+      if (invoice.billing_reason === 'subscription_cycle' && subscriptionId) {
+        // Get customer email
+        const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer
+        const email = customer.email
+        
+        if (email) {
+          // Get subscription details
+          const sub = await stripe.subscriptions.retrieve(subscriptionId)
+          const interval = sub.items.data[0]?.price?.recurring?.interval
+          const plan = interval === 'year' ? 'annual' : 'monthly'
+          const amount = invoice.amount_paid / 100
+          const periodEnd = new Date(sub.current_period_end * 1000)
+          
+          // Update subscription period end
+          await supabaseAdmin
+            .from('profiles')
+            .update({
+              subscription_status: 'active',
+              subscription_period_end: periodEnd.toISOString(),
+            })
+            .eq('stripe_customer_id', customerId)
+          
+          // Send receipt email
+          await sendPaymentReceiptEmail(email, {
+            planName: plan === 'annual' ? 'Annual Subscription' : 'Monthly Subscription',
+            amount,
+            periodEnd,
+          })
+        }
+      }
       break
     }
   }
