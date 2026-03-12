@@ -182,8 +182,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
               <div className="lg:col-span-2">
                 <Link href={`/devotionals/${featuredPost.handle}`} className="group block h-full">
                   <div className="flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full">
-                    {/* Square Image */}
-                    <div className="relative w-full md:w-[45%] aspect-square flex-shrink-0">
+                    {/* Image - takes up more space to reduce white space */}
+                    <div className="relative w-full md:w-[55%] aspect-square flex-shrink-0">
                       <Image
                         src={typeof featuredPost.featuredImage === 'string' ? featuredPost.featuredImage : featuredPost.featuredImage.src}
                         alt={featuredPost.title}
@@ -195,8 +195,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                       />
                     </div>
                     
-                    {/* Content */}
-                    <div className="flex flex-col justify-center p-6 md:p-8 flex-1">
+                    {/* Content - more compact */}
+                    <div className="flex flex-col justify-center p-5 md:p-6 flex-1">
                       {featuredPost.categories?.[0] && (
                         <span className="inline-block w-fit px-4 py-1.5 text-sm font-medium rounded-full bg-blue-50 text-blue-600 mb-4">
                           {featuredPost.categories[0].name}
