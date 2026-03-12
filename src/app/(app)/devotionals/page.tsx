@@ -88,13 +88,13 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   const featuredPost = featuredData ? devotionalToPost(featuredData as Devotional) : null
   const featuredId = featuredData?.id
 
-  // Fetch sidebar posts (next 4, excluding featured)
+  // Fetch sidebar posts (next 2 most recent, excluding featured)
   let sidebarQuery = supabase
     .from('devotionals')
     .select('*')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
-    .limit(4)
+    .limit(2)
   
   if (featuredId) {
     sidebarQuery = sidebarQuery.neq('id', featuredId)
@@ -104,6 +104,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   const sidebarWithAuthors = await attachAuthors(sidebarData || [])
 
   const sidebarPosts = sidebarWithAuthors.map((d: Devotional) => devotionalToPost(d))
+  
+  // Exclude featured and sidebar posts from the grid (so grid continues sequentially)
   const excludeIds = [featuredId, ...sidebarPosts.map(p => p.id)].filter(Boolean)
 
   // Build query for main grid (excluding featured and sidebar posts)
@@ -167,19 +169,19 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           </form>
         </div>
 
-        {/* Suggested Articles Section */}
+        {/* Devotionals Section */}
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-1 h-8 bg-blue-500 rounded-full" />
-            <h2 className="text-2xl font-bold text-gray-900 font-heading">Suggested Articles</h2>
+            <h2 className="text-2xl font-bold text-gray-900 font-heading">Devotionals</h2>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Featured Post - Large Card */}
             {featuredPost && (
               <div className="lg:col-span-2">
-                <Link href={`/devotionals/${featuredPost.handle}`} className="group block">
-                  <div className="flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <Link href={`/devotionals/${featuredPost.handle}`} className="group block h-full">
+                  <div className="flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full">
                     {/* Square Image */}
                     <div className="relative w-full md:w-[45%] aspect-square flex-shrink-0">
                       <Image
@@ -237,100 +239,118 @@ export default async function DevotionalsPage({ searchParams }: Props) {
               </div>
             )}
 
-            {/* Sidebar - Recent Posts List */}
-            <div className="space-y-4">
-              {sidebarPosts.map((post) => (
-                <Link key={post.id} href={`/devotionals/${post.handle}`} className="group block">
-                  <div className="flex gap-4 p-4 bg-white rounded-xl border-l-4 border-blue-500 hover:shadow-sm transition-shadow">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors font-heading">
-                        {post.title}
-                      </h4>
-                      <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
-                        <span className="font-medium font-body">{post.author.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span>{formatDate(post.date).split(',')[0]}</span>
-                          <span>·</span>
-                          <Clock className="size-3.5" />
-                          <span>{post.readingTime} min</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Recently Published Section - 3-Column Grid */}
-        <section>
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-1 h-8 bg-blue-500 rounded-full" />
-            <h2 className="text-2xl font-bold text-gray-900 font-heading">Recently Published</h2>
-          </div>
-
-          {gridPosts.length > 0 ? (
-            <>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {gridPosts.map((post, index) => (
-                  <Link key={post.id} href={`/devotionals/${post.handle}`} className="group block">
-                    <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
-                      {/* Image */}
-                      <div className="relative aspect-[4/3] overflow-hidden">
+            {/* Sidebar - Two latest posts (after featured) matching featured height */}
+            <div className="flex flex-col gap-4 lg:h-full">
+              {sidebarPosts.map((post) => {
+                const postDate = new Date(post.date)
+                const day = postDate.getDate()
+                const month = postDate.toLocaleDateString('en-US', { month: 'short' })
+                
+                return (
+                  <Link key={post.id} href={`/devotionals/${post.handle}`} className="group block flex-1">
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
+                      {/* Image with date badge */}
+                      <div className="relative aspect-[16/9] overflow-hidden">
                         <Image
                           src={typeof post.featuredImage === 'string' ? post.featuredImage : post.featuredImage.src}
                           alt={post.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          priority={index < 3}
-                          loading={index < 3 ? "eager" : "lazy"}
                           unoptimized
                         />
+                        {/* Date Badge */}
+                        <div className="absolute top-3 left-3 bg-gray-800/80 text-white px-3 py-2 rounded-lg text-center">
+                          <div className="text-xl font-bold leading-none">{day}</div>
+                          <div className="text-xs uppercase">{month}</div>
+                        </div>
                       </div>
-                      
                       {/* Content */}
-                      <div className="flex flex-col flex-1 p-5">
-                        {post.categories?.[0] && (
-                          <span className="inline-block w-fit px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 mb-3">
-                            {post.categories[0].name}
-                          </span>
-                        )}
-                        
-                        <h3 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors font-heading">
+                      <div className="p-4 flex flex-col flex-1">
+                        <h4 className="font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors font-heading mb-2">
                           {post.title}
-                        </h3>
-                        
+                        </h4>
                         {post.excerpt && (
-                          <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1 font-body">
+                          <p className="text-gray-500 text-sm line-clamp-2 font-body flex-1">
                             {post.excerpt}
                           </p>
                         )}
-                        
-                        {/* Author */}
-                        <div className="flex items-center gap-3 pt-4 border-t border-gray-100 mt-auto">
-                          <Image
-                            src={post.author.avatar.src}
-                            alt={post.author.name}
-                            width={36}
-                            height={36}
-                            className="rounded-full"
-                            unoptimized
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 text-sm font-body">{post.author.name}</p>
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                              <span>{formatDate(post.date).split(',')[0]}</span>
-                              <span>·</span>
-                              <Clock className="size-3" />
-                              <span>{post.readingTime} min</span>
-                            </div>
-                          </div>
+                        <div className="flex items-center gap-2 mt-3 text-xs text-gray-400">
+                          <span className="font-medium">{post.author.name}</span>
+                          <span>·</span>
+                          <Clock className="size-3" />
+                          <span>{post.readingTime} min</span>
                         </div>
                       </div>
-                    </article>
+                    </div>
                   </Link>
-                ))}
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* More Devotionals Section - 2-Column Grid with StoryHub Style */}
+        <section>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-1 h-8 bg-blue-500 rounded-full" />
+            <h2 className="text-2xl font-bold text-gray-900 font-heading">More Devotionals</h2>
+          </div>
+
+          {gridPosts.length > 0 ? (
+            <>
+              <div className="grid md:grid-cols-2 gap-8">
+                {gridPosts.map((post, index) => {
+                  const postDate = new Date(post.date)
+                  const day = postDate.getDate()
+                  const month = postDate.toLocaleDateString('en-US', { month: 'short' })
+                  
+                  return (
+                    <Link key={post.id} href={`/devotionals/${post.handle}`} className="group block">
+                      <article>
+                        {/* Large Image with Date Badge */}
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-4">
+                          <Image
+                            src={typeof post.featuredImage === 'string' ? post.featuredImage : post.featuredImage.src}
+                            alt={post.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            priority={index < 2}
+                            loading={index < 2 ? "eager" : "lazy"}
+                            unoptimized
+                          />
+                          {/* Date Badge */}
+                          <div className="absolute top-4 left-4 bg-gray-800/80 text-white px-4 py-2 rounded-lg text-center">
+                            <div className="text-2xl font-bold leading-none">{day}</div>
+                            <div className="text-xs uppercase">{month}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Categories/Tags */}
+                        {post.categories && post.categories.length > 0 && (
+                          <div className="flex flex-wrap gap-3 mb-3">
+                            {post.categories.slice(0, 3).map((cat, i) => (
+                              <span key={i} className="text-sm font-medium text-rose-500">
+                                #{cat.name.toLowerCase().replace(/\s+/g, '')}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Title */}
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors font-heading">
+                          {post.title}
+                        </h3>
+                        
+                        {/* Excerpt */}
+                        {post.excerpt && (
+                          <p className="text-gray-600 line-clamp-3 font-body leading-relaxed">
+                            {post.excerpt}
+                          </p>
+                        )}
+                      </article>
+                    </Link>
+                  )
+                })}
               </div>
 
               {/* Pagination */}
