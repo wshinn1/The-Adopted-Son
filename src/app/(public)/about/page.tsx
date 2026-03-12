@@ -3,7 +3,31 @@ import PageRenderer from '@/components/PageRenderer'
 
 export const metadata = {
   title: 'About',
-  description: 'Learn more about The Adopted Son',
+  description: 'Learn more about The Adopted Son — a daily devotional ministry rooted in faith, Scripture, and the love of God.',
+  openGraph: {
+    title: 'About — The Adopted Son',
+    description: 'Learn more about The Adopted Son — a daily devotional ministry rooted in faith, Scripture, and the love of God.',
+    type: 'website',
+    url: 'https://www.theadoptedson.com/about',
+    siteName: 'The Adopted Son',
+    images: [
+      {
+        url: 'https://www.theadoptedson.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'About — The Adopted Son',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About — The Adopted Son',
+    description: 'Learn more about The Adopted Son — a daily devotional ministry rooted in faith, Scripture, and the love of God.',
+    images: ['https://www.theadoptedson.com/og-image.jpg'],
+  },
+  alternates: {
+    canonical: 'https://www.theadoptedson.com/about',
+  },
 }
 
 export default async function AboutPage() {

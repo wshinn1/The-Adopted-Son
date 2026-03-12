@@ -4,9 +4,37 @@ import type { Metadata } from 'next'
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
+  const ogImage = settings.og_image_url || 'https://www.theadoptedson.com/og-image.jpg'
+  const title = settings.site_name || 'The Adopted Son'
+  const description = settings.site_tagline || 'Faith-filled daily devotionals to draw you closer to God.'
+
   return {
-    title: settings.site_name,
-    description: settings.site_tagline,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: 'https://www.theadoptedson.com',
+      siteName: 'The Adopted Son',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: 'https://www.theadoptedson.com',
+    },
   }
 }
 

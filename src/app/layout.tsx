@@ -10,6 +10,9 @@ const beVietnamPro = Be_Vietnam_Pro({
   weight: ['300', '400', '500', '600', '700'],
 })
 
+const BASE_URL = 'https://www.theadoptedson.com'
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.jpg`
+
 export const metadata: Metadata = {
   title: {
     template: '%s — The Adopted Son',
@@ -17,6 +20,31 @@ export const metadata: Metadata = {
   },
   description: 'Faith-filled daily devotionals to draw you closer to God. A 14-day free trial, then simple subscription pricing.',
   keywords: ['devotionals', 'faith', 'Christian', 'adoption', 'daily reading', 'Scripture'],
+  metadataBase: new URL(BASE_URL),
+  openGraph: {
+    siteName: 'The Adopted Son',
+    type: 'website',
+    locale: 'en_US',
+    url: BASE_URL,
+    title: 'The Adopted Son — Daily Devotionals',
+    description: 'Faith-filled daily devotionals to draw you closer to God.',
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: 'The Adopted Son — Daily Devotionals',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@theadoptedson',
+    creator: '@theadoptedson',
+    title: 'The Adopted Son — Daily Devotionals',
+    description: 'Faith-filled daily devotionals to draw you closer to God.',
+    images: [DEFAULT_OG_IMAGE],
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

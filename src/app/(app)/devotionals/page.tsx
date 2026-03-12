@@ -9,8 +9,32 @@ import TrialBanner from '@/components/devotional/TrialBanner'
 import HamburgerHeader from '@/components/HamburgerHeader'
 
 export const metadata: Metadata = {
-  title: 'All Devotionals — The Adopted Son',
-  description: 'Browse all daily devotionals from The Adopted Son.',
+  title: 'Devotionals',
+  description: 'Browse all daily devotionals from The Adopted Son. Faith-filled readings to draw you closer to God.',
+  openGraph: {
+    title: 'Devotionals — The Adopted Son',
+    description: 'Browse all daily devotionals from The Adopted Son. Faith-filled readings to draw you closer to God.',
+    type: 'website',
+    url: 'https://www.theadoptedson.com/devotionals',
+    siteName: 'The Adopted Son',
+    images: [
+      {
+        url: 'https://www.theadoptedson.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Devotionals — The Adopted Son',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Devotionals — The Adopted Son',
+    description: 'Browse all daily devotionals from The Adopted Son.',
+    images: ['https://www.theadoptedson.com/og-image.jpg'],
+  },
+  alternates: {
+    canonical: 'https://www.theadoptedson.com/devotionals',
+  },
 }
 
 interface Props {

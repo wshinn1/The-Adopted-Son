@@ -4,8 +4,32 @@ import { Check } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Pricing — The Adopted Son',
-  description: 'Subscribe to access all devotionals',
+  title: 'Pricing',
+  description: 'Subscribe to The Adopted Son for full access to all devotionals. Start with a 14-day free trial.',
+  openGraph: {
+    title: 'Pricing — The Adopted Son',
+    description: 'Subscribe to The Adopted Son for full access to all devotionals. Start with a 14-day free trial.',
+    type: 'website',
+    url: 'https://www.theadoptedson.com/pricing',
+    siteName: 'The Adopted Son',
+    images: [
+      {
+        url: 'https://www.theadoptedson.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Pricing — The Adopted Son',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Pricing — The Adopted Son',
+    description: 'Subscribe to The Adopted Son for full access to all devotionals. Start with a 14-day free trial.',
+    images: ['https://www.theadoptedson.com/og-image.jpg'],
+  },
+  alternates: {
+    canonical: 'https://www.theadoptedson.com/pricing',
+  },
 }
 
 export default async function PricingPage() {
