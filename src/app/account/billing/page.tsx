@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import ManageSubscriptionButton from '../ManageSubscriptionButton'
+import SyncSubscriptionButton from '../SyncSubscriptionButton'
 
 export default async function AccountBillingPage() {
   const supabase = await createClient()
@@ -65,10 +66,11 @@ export default async function AccountBillingPage() {
             </p>
             <Link
               href="/pricing"
-              className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors"
+              className="inline-block px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors"
             >
               Subscribe now
             </Link>
+            <SyncSubscriptionButton />
           </div>
         )}
       </div>
