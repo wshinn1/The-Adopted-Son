@@ -107,7 +107,7 @@ function SignUpForm() {
 
         <p className="mt-5 text-center text-sm text-neutral-500 dark:text-neutral-400">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-primary-600 hover:text-primary-700 font-medium">
+          <Link href={plan ? `/auth/login?plan=${plan}` : '/auth/login'} className="text-primary-600 hover:text-primary-700 font-medium">
             Sign in
           </Link>
         </p>

@@ -10,7 +10,8 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') ?? '/account'
+  const plan = searchParams.get('plan')
+  const redirectTo = plan ? `/subscribe?plan=${plan}` : (searchParams.get('redirectTo') ?? '/account')
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -30,7 +31,7 @@ function LoginForm() {
           Sign in
         </h1>
         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
-          Welcome back to The Adopted Son
+          {plan ? 'Sign in to continue with your subscription' : 'Welcome back to The Adopted Son'}
         </p>
 
         {error && (
@@ -80,7 +81,7 @@ function LoginForm() {
 
         <p className="mt-5 text-center text-sm text-neutral-500 dark:text-neutral-400">
           {"Don't have an account? "}
-          <Link href="/auth/sign-up" className="text-primary-600 hover:text-primary-700 font-medium">
+          <Link href={plan ? `/auth/sign-up?plan=${plan}` : '/auth/sign-up'} className="text-primary-600 hover:text-primary-700 font-medium">
             Sign up
           </Link>
         </p>

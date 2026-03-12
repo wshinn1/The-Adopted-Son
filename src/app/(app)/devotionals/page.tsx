@@ -182,8 +182,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
               <div className="lg:col-span-2">
                 <Link href={`/devotionals/${featuredPost.handle}`} className="group block h-full">
                   <div className="flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full">
-                    {/* Square Image */}
-                    <div className="relative w-full md:w-[45%] aspect-square flex-shrink-0">
+                    {/* Image - fills full height of card */}
+                    <div className="relative w-full md:w-1/2 aspect-[4/3] md:aspect-auto">
                       <Image
                         src={typeof featuredPost.featuredImage === 'string' ? featuredPost.featuredImage : featuredPost.featuredImage.src}
                         alt={featuredPost.title}
