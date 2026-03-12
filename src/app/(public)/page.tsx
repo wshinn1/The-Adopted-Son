@@ -2,11 +2,16 @@ import { getHomepage, getSiteSettings } from '@/lib/site-settings'
 import PageRenderer from '@/components/PageRenderer'
 import type { Metadata } from 'next'
 
+const DEFAULT_OG = 'https://www.theadoptedson.com/og-image.jpg'
+const BASE_URL = 'https://www.theadoptedson.com'
+
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings()
-  const ogImage = settings.og_image_url || 'https://www.theadoptedson.com/og-image.jpg'
-  const title = settings.site_name || 'The Adopted Son'
-  const description = settings.site_tagline || 'Faith-filled daily devotionals to draw you closer to God.'
+  const [settings, homepage] = await Promise.all([getSiteSettings(), getHomepage()])
+  const page = homepage?.page as any
+
+  const title = page?.og_title || settings.site_name || 'The Adopted Son'
+  const description = page?.og_description || settings.site_tagline || 'Faith-filled daily devotionals to draw you closer to God.'
+  const ogImage = page?.og_image_url || settings.og_image_url || DEFAULT_OG
 
   return {
     title,
@@ -15,16 +20,9 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       type: 'website',
-      url: 'https://www.theadoptedson.com',
+      url: BASE_URL,
       siteName: 'The Adopted Son',
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -32,9 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [ogImage],
     },
-    alternates: {
-      canonical: 'https://www.theadoptedson.com',
-    },
+    alternates: { canonical: BASE_URL },
   }
 }
 

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
-import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react'
+import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X } from 'lucide-react'
 import SectionEditor from './SectionEditor'
+import Image from 'next/image'
 
 interface SchemaProperty {
   type: string
@@ -49,6 +50,9 @@ interface Page {
   meta_description: string | null
   is_published: boolean
   is_homepage: boolean
+  og_title: string | null
+  og_description: string | null
+  og_image_url: string | null
 }
 
 interface PageEditorProps {
@@ -65,6 +69,8 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const [addingSection, setAddingSection] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [ogImageUploading, setOgImageUploading] = useState(false)
+  const ogImageInputRef = useRef<HTMLInputElement>(null)
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
     setNotification({ message, type })
@@ -75,6 +81,28 @@ export default function PageEditor({ page, sections: initialSections, templates 
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
+
+  const handleOgImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setOgImageUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData })
+      const json = await res.json()
+      if (json.url) {
+        setPageData({ ...pageData, og_image_url: json.url })
+      } else {
+        showNotification('Upload failed', 'error')
+      }
+    } catch {
+      showNotification('Upload failed', 'error')
+    } finally {
+      setOgImageUploading(false)
+    }
+  }
 
   const savePageSettings = async () => {
     setSaving(true)
@@ -87,6 +115,9 @@ export default function PageEditor({ page, sections: initialSections, templates 
           meta_description: pageData.meta_description,
           is_published: pageData.is_published,
           is_homepage: pageData.is_homepage,
+          og_title: pageData.og_title || null,
+          og_description: pageData.og_description || null,
+          og_image_url: pageData.og_image_url || null,
         })
         .eq('id', page.id)
 
@@ -351,6 +382,126 @@ export default function PageEditor({ page, sections: initialSections, templates 
           className="mt-4 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50"
         >
           {saving ? 'Saving...' : 'Save Settings'}
+        </button>
+      </div>
+
+      {/* Social Sharing */}
+      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6 mb-8">
+        <div className="flex items-center gap-2 mb-1">
+          <Share2 className="size-4 text-neutral-500" />
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Social Sharing</h2>
+        </div>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">
+          Customize how this page appears when shared on social media (Facebook, X, iMessage, etc). If left empty, the page title and default site image will be used.
+        </p>
+
+        <div className="grid gap-4">
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              Social Title
+            </label>
+            <input
+              type="text"
+              value={pageData.og_title || ''}
+              onChange={(e) => setPageData({ ...pageData, og_title: e.target.value })}
+              placeholder={pageData.title}
+              className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              Social Description
+            </label>
+            <textarea
+              value={pageData.og_description || ''}
+              onChange={(e) => setPageData({ ...pageData, og_description: e.target.value })}
+              rows={3}
+              placeholder={pageData.meta_description || 'Enter a short description for social sharing...'}
+              className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 resize-none"
+            />
+            <p className="text-xs text-neutral-400 mt-1">{(pageData.og_description || '').length}/200 characters recommended</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+              Social Image <span className="text-neutral-400 font-normal">(recommended: 1200×630px)</span>
+            </label>
+
+            {pageData.og_image_url ? (
+              <div className="relative w-full max-w-md">
+                <div className="relative aspect-[1200/630] rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100">
+                  <Image
+                    src={pageData.og_image_url}
+                    alt="Social sharing image"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <button
+                  onClick={() => setPageData({ ...pageData, og_image_url: null })}
+                  className="absolute top-2 right-2 p-1 bg-white dark:bg-neutral-900 rounded-full shadow border border-neutral-200 dark:border-neutral-700 text-neutral-600 hover:text-red-500 transition-colors"
+                >
+                  <X className="size-4" />
+                </button>
+                <button
+                  onClick={() => ogImageInputRef.current?.click()}
+                  className="mt-2 text-sm text-primary-600 hover:text-primary-700"
+                >
+                  Replace image
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => ogImageInputRef.current?.click()}
+                disabled={ogImageUploading}
+                className="flex items-center gap-2 px-4 py-2.5 border border-dashed border-neutral-300 dark:border-neutral-600 rounded-xl text-sm text-neutral-600 dark:text-neutral-400 hover:border-primary-400 hover:text-primary-600 transition-colors disabled:opacity-50"
+              >
+                <Upload className="size-4" />
+                {ogImageUploading ? 'Uploading...' : 'Upload social image'}
+              </button>
+            )}
+
+            <input
+              ref={ogImageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleOgImageUpload}
+            />
+          </div>
+        </div>
+
+        {/* Preview card */}
+        {(pageData.og_title || pageData.og_description || pageData.og_image_url) && (
+          <div className="mt-5 border border-neutral-200 dark:border-neutral-700 rounded-xl overflow-hidden max-w-md">
+            <p className="text-xs font-medium text-neutral-400 uppercase tracking-wide px-3 pt-3 pb-1">Preview</p>
+            {pageData.og_image_url && (
+              <div className="relative aspect-[1200/630] bg-neutral-100">
+                <Image src={pageData.og_image_url} alt="" fill className="object-cover" unoptimized />
+              </div>
+            )}
+            <div className="p-3 bg-neutral-50 dark:bg-neutral-800">
+              <p className="text-xs text-neutral-400 uppercase">theadoptedson.com</p>
+              <p className="font-semibold text-neutral-900 dark:text-neutral-100 text-sm mt-0.5 line-clamp-1">
+                {pageData.og_title || pageData.title}
+              </p>
+              {(pageData.og_description || pageData.meta_description) && (
+                <p className="text-xs text-neutral-500 mt-0.5 line-clamp-2">
+                  {pageData.og_description || pageData.meta_description}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={savePageSettings}
+          disabled={saving}
+          className="mt-5 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50"
+        >
+          {saving ? 'Saving...' : 'Save Social Settings'}
         </button>
       </div>
 

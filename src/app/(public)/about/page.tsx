@@ -1,33 +1,36 @@
 import { getSiteSettings, getPageWithSections } from '@/lib/site-settings'
 import PageRenderer from '@/components/PageRenderer'
+import type { Metadata } from 'next'
 
-export const metadata = {
-  title: 'About',
-  description: 'Learn more about The Adopted Son — a daily devotional ministry rooted in faith, Scripture, and the love of God.',
-  openGraph: {
-    title: 'About — The Adopted Son',
-    description: 'Learn more about The Adopted Son — a daily devotional ministry rooted in faith, Scripture, and the love of God.',
-    type: 'website',
-    url: 'https://www.theadoptedson.com/about',
-    siteName: 'The Adopted Son',
-    images: [
-      {
-        url: 'https://www.theadoptedson.com/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'About — The Adopted Son',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'About — The Adopted Son',
-    description: 'Learn more about The Adopted Son — a daily devotional ministry rooted in faith, Scripture, and the love of God.',
-    images: ['https://www.theadoptedson.com/og-image.jpg'],
-  },
-  alternates: {
-    canonical: 'https://www.theadoptedson.com/about',
-  },
+const DEFAULT_OG = 'https://www.theadoptedson.com/og-image.jpg'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await getPageWithSections('about')
+  const page = data?.page as any
+
+  const title = page?.og_title || 'About'
+  const description = page?.og_description || 'Learn more about The Adopted Son — a daily devotional ministry rooted in faith, Scripture, and the love of God.'
+  const ogImage = page?.og_image_url || DEFAULT_OG
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} — The Adopted Son`,
+      description,
+      type: 'website',
+      url: 'https://www.theadoptedson.com/about',
+      siteName: 'The Adopted Son',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} — The Adopted Son`,
+      description,
+      images: [ogImage],
+    },
+    alternates: { canonical: 'https://www.theadoptedson.com/about' },
+  }
 }
 
 export default async function AboutPage() {
