@@ -7,6 +7,8 @@ import type { ComponentType } from 'react'
 export const sectionComponents: Record<string, ComponentType<{ data: any }>> = {
   Home1: dynamic(() => import('./Home1'), { ssr: false }),
   TextSection: dynamic(() => import('./TextSection'), { ssr: false }),
+  BlogGallery1: dynamic(() => import('./BlogGallery1')),
+  NewsletterSignUp: dynamic(() => import('./NewsletterSignUp'), { ssr: false }),
 }
 
 // Get a section component by name

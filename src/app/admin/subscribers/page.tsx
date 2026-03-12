@@ -9,6 +9,12 @@ export default async function AdminSubscribersPage() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 
+  // Newsletter subscribers
+  const { data: newsletterSubscribers } = await supabase
+    .from('newsletter_subscribers')
+    .select('id, email, first_name, subscribed_at, is_active')
+    .order('subscribed_at', { ascending: false })
+
   const { data: subscribers } = await supabase
     .from('profiles')
     .select('id, email, full_name, subscription_status, subscription_plan, subscription_period_end, created_at')
@@ -24,6 +30,44 @@ export default async function AdminSubscribersPage() {
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Subscribers</h1>
+
+      {/* Newsletter subscribers */}
+      <section>
+        <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200 mb-4">
+          Newsletter Subscribers ({newsletterSubscribers?.length ?? 0})
+        </h2>
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50">
+              <tr>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">First Name</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Email</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Subscribed</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
+              {newsletterSubscribers?.map((s) => (
+                <tr key={s.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/30">
+                  <td className="px-5 py-3.5 text-neutral-900 dark:text-neutral-100">{s.first_name ?? '—'}</td>
+                  <td className="px-5 py-3.5 text-neutral-500">{s.email}</td>
+                  <td className="px-5 py-3.5 text-neutral-400 text-xs">
+                    {new Date(s.subscribed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.is_active ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400' : 'bg-neutral-100 text-neutral-500'}`}>
+                      {s.is_active ? 'Active' : 'Unsubscribed'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {(!newsletterSubscribers || newsletterSubscribers.length === 0) && (
+                <tr><td colSpan={4} className="px-5 py-8 text-center text-neutral-400 text-sm">No newsletter subscribers yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       {/* Paid subscribers */}
       <section>
