@@ -30,7 +30,7 @@ export default function Home1({ data }: Home1Props) {
       style={{ backgroundColor: data.background_color || '#F5F5F0' }}
     >
       {/* Quote */}
-      <h1 className="max-w-4xl text-4xl font-medium leading-tight tracking-tight text-neutral-900 md:text-5xl lg:text-6xl font-heading">
+      <h1 className="max-w-full text-4xl font-medium leading-tight tracking-tight text-neutral-900 md:text-5xl lg:text-6xl font-heading">
         {data.quote_before}
         <em className="relative not-italic">
           <span className="relative z-10">{data.quote_highlight}</span>
@@ -44,21 +44,23 @@ export default function Home1({ data }: Home1Props) {
 
       {/* Image with overlapping card */}
       <div className="relative mt-12 md:mt-16 lg:mt-20">
-        {/* Main Image */}
-        <div className="relative aspect-[4/3] w-full md:w-3/4 lg:w-2/3">
+        {/* Main Image - positioned on the left */}
+        <div className="relative aspect-[4/3] w-full md:mr-auto md:w-3/4 lg:w-2/3">
           {data.image_url && (
             <Image
               src={data.image_url}
               alt={data.image_alt || 'Hero image'}
               fill
+              priority
+              loading="eager"
               className="object-cover"
               unoptimized={data.image_url.includes('blob.vercel-storage.com')}
             />
           )}
         </div>
 
-        {/* Overlapping Card */}
-        <div className="relative -mt-16 ml-auto w-11/12 bg-white p-8 shadow-sm md:absolute md:bottom-0 md:right-0 md:mt-0 md:w-1/2 md:p-10 lg:w-5/12 lg:p-12">
+        {/* Overlapping Card - vertically centered, overlapping right side of image */}
+        <div className="relative -mt-16 ml-auto w-11/12 bg-white p-8 shadow-sm md:absolute md:right-0 md:top-1/2 md:mt-0 md:-translate-y-1/2 md:w-1/2 md:p-10 lg:w-5/12 lg:p-12">
           {/* Label */}
           <span className="text-xs font-medium tracking-[0.2em] text-neutral-500">
             {data.card_label}

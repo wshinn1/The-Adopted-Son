@@ -3,6 +3,12 @@
 import { stripe } from '@/lib/stripe'
 import { PLANS } from '@/lib/plans'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+
+const supabaseAdmin = createAdminClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function startCheckoutSession(planId: string) {
   const plan = PLANS.find((p) => p.id === planId)
@@ -10,8 +16,6 @@ export async function startCheckoutSession(planId: string) {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
   const session = await stripe.checkout.sessions.create({
     ui_mode: 'embedded',
@@ -32,5 +36,29 @@ export async function startCheckoutSession(planId: string) {
     },
   })
 
+  if (!session.client_secret) {
+    throw new Error('Failed to create checkout session')
+  }
+
   return session.client_secret
+}
+
+export async function createCustomerPortalSession(userId: string) {
+  // Get user's stripe_customer_id from profiles
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('stripe_customer_id')
+    .eq('id', userId)
+    .single()
+
+  if (!profile?.stripe_customer_id) {
+    throw new Error('No Stripe customer found for this user')
+  }
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: profile.stripe_customer_id,
+    return_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://theadoptedson.com'}/account`,
+  })
+
+  return session.url
 }

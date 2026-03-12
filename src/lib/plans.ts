@@ -9,16 +9,15 @@ export interface Plan {
   badge?: string
 }
 
-// Update stripePriceId values with your real Stripe price IDs after creating
-// products in the Stripe dashboard or via the admin settings page.
+// Stripe price IDs are set via environment variables
 export const PLANS: Plan[] = [
   {
     id: 'monthly',
     name: 'Monthly',
     description: 'Full access to all devotionals, billed monthly.',
-    priceInCents: 999,
+    priceInCents: 299, // $2.99
     interval: 'month',
-    stripePriceId: process.env.STRIPE_PRICE_MONTHLY ?? 'price_monthly_placeholder',
+    stripePriceId: process.env.STRIPE_MONTHLY_PRICE_ID ?? '',
     features: [
       'Unlimited devotionals',
       'Daily email delivery',
@@ -29,14 +28,14 @@ export const PLANS: Plan[] = [
   {
     id: 'annual',
     name: 'Annual',
-    description: 'Best value — save 33% with an annual plan.',
-    priceInCents: 7999,
+    description: 'Best value — save 58% with an annual plan.',
+    priceInCents: 1499, // $14.99
     interval: 'year',
-    stripePriceId: process.env.STRIPE_PRICE_ANNUAL ?? 'price_annual_placeholder',
+    stripePriceId: process.env.STRIPE_ANNUAL_PRICE_ID ?? '',
     badge: 'Best Value',
     features: [
       'Everything in Monthly',
-      'Save 33% vs monthly',
+      'Save 58% vs monthly',
       'Priority support',
       'Bonus content',
     ],

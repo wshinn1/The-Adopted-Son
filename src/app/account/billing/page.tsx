@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import ManageSubscriptionButton from '../ManageSubscriptionButton'
 
 export default async function AccountBillingPage() {
   const supabase = await createClient()
@@ -51,11 +52,11 @@ export default async function AccountBillingPage() {
                 </span>
               </div>
             )}
-            <div className="pt-3 border-t border-neutral-100 dark:border-neutral-800">
-              <p className="text-xs text-neutral-400">
-                To cancel or update your subscription, contact support or manage via the Stripe customer portal.
-              </p>
-            </div>
+            {profile?.stripe_customer_id && (
+              <div className="pt-3 border-t border-neutral-100 dark:border-neutral-800">
+                <ManageSubscriptionButton userId={user!.id} />
+              </div>
+            )}
           </div>
         ) : (
           <div>
