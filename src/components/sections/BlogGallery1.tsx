@@ -32,11 +32,19 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
   const showBanner = data.show_featured_banner !== false
 
   // Use server-pre-fetched devotionals if available, otherwise fetch client-side
-  const [devotionals, setDevotionals] = useState<Devotional[]>(data._devotionals ?? [])
-  const [loading, setLoading] = useState(!data._devotionals)
+  const hasPreFetchedData = !!(data._devotionals && data._devotionals.length > 0)
+  const [devotionals, setDevotionals] = useState<Devotional[]>(hasPreFetchedData ? data._devotionals! : [])
+  const [loading, setLoading] = useState(!hasPreFetchedData)
 
   useEffect(() => {
-    if (data._devotionals && data._devotionals.length > 0) return
+    // If pre-fetched devotionals exist, sync to state and stop
+    if (data._devotionals && data._devotionals.length > 0) {
+      setDevotionals(data._devotionals)
+      setLoading(false)
+      return
+    }
+    // Otherwise always fetch client-side
+    setLoading(true)
     const fetchLimit = showBanner ? count + 1 : count
     fetch(`/api/devotionals/recent?limit=${fetchLimit}`)
       .then((r) => r.json())
@@ -53,7 +61,7 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
   if (loading) {
     return (
       <section className="w-full py-16 px-6 md:px-12 lg:px-24">
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-3">
           {Array.from({ length: count }).map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="aspect-[4/3] rounded-xl bg-neutral-200 mb-4" />
@@ -116,7 +124,7 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
       )}
 
       {/* Card grid */}
-      <div className={`grid gap-8 ${count === 2 ? 'md:grid-cols-2' : count >= 3 ? 'md:grid-cols-3' : 'grid-cols-1'}`}>
+      <div className={`grid grid-cols-1 gap-6 sm:gap-8 ${count === 2 ? 'md:grid-cols-2' : count >= 3 ? 'md:grid-cols-3' : ''}`}>
         {grid.map((post) => {
           const date = post.published_at
             ? new Date(post.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
