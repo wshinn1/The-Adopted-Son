@@ -52,6 +52,8 @@ export default function SiteSettingsPage() {
   const [logoType, setLogoType] = useState<'text' | 'image'>('text')
   const [logoUrl, setLogoUrl] = useState('')
   const [footerText, setFooterText] = useState('')
+  const [footerLinks, setFooterLinks] = useState<{ label: string; url: string }[]>([])
+  const [faviconUrl, setFaviconUrl] = useState('')
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   const [headingFont, setHeadingFont] = useState('font-sans')
   const [bodyFont, setBodyFont] = useState('font-serif')
@@ -133,6 +135,8 @@ export default function SiteSettingsPage() {
       setLogoType(settings.logo_type || 'text')
       setLogoUrl(settings.logo_url || '')
       setFooterText(settings.footer_text || '')
+      setFooterLinks(settings.footer_links || [])
+      setFaviconUrl(settings.favicon_url || '')
       setSocialLinks(settings.social_links || [])
       setHeadingFont(settings.typography?.heading_font || 'font-sans')
       setBodyFont(settings.typography?.body_font || 'font-serif')
@@ -159,6 +163,8 @@ export default function SiteSettingsPage() {
       await saveSetting('logo_type', logoType)
       await saveSetting('logo_url', logoType === 'image' ? logoUrl : '')
       await saveSetting('footer_text', footerText)
+      await saveSetting('footer_links', footerLinks)
+      await saveSetting('favicon_url', faviconUrl)
       await saveSetting('social_links', socialLinks)
       await saveSetting('typography', { heading_font: headingFont, body_font: bodyFont })
       alert('Settings saved!')
@@ -403,21 +409,117 @@ export default function SiteSettingsPage() {
           </div>
         </div>
 
+        {/* Favicon */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">Favicon</h2>
+          <div className="flex items-center gap-4">
+            {faviconUrl && (
+              <img src={faviconUrl} alt="Favicon" className="size-8 rounded object-contain border border-neutral-200" />
+            )}
+            <div className="flex-1 flex items-center gap-3">
+              <input
+                type="text"
+                value={faviconUrl}
+                onChange={(e) => setFaviconUrl(e.target.value)}
+                placeholder="Favicon URL (.ico, .png, .svg)"
+                className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+              />
+              <label className="flex items-center gap-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-700 rounded-lg cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors">
+                <Upload className="size-4" />
+                <span className="text-sm">Upload</span>
+                <input
+                  type="file"
+                  accept="image/x-icon,image/png,image/svg+xml"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    const formData = new FormData()
+                    formData.append('file', file)
+                    const res = await fetch('/api/media/upload', { method: 'POST', body: formData })
+                    if (res.ok) {
+                      const { url } = await res.json()
+                      setFaviconUrl(url)
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+          <p className="text-xs text-neutral-500 mt-2">Recommended: 32×32px .ico or .png file.</p>
+        </div>
+
         {/* Footer */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
           <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">Footer</h2>
-          
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              Footer Text
-            </label>
-            <input
-              type="text"
-              value={footerText}
-              onChange={(e) => setFooterText(e.target.value)}
-              placeholder="© 2026 Your Site. All rights reserved."
-              className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-            />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Copyright Text
+              </label>
+              <input
+                type="text"
+                value={footerText}
+                onChange={(e) => setFooterText(e.target.value)}
+                placeholder={`Copyright © ${new Date().getFullYear()} The Adopted Son`}
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+              />
+            </div>
+
+            {/* Footer Links */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Footer Links
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setFooterLinks([...footerLinks, { label: '', url: '' }])}
+                  className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700"
+                >
+                  <Plus className="size-4" />
+                  Add Link
+                </button>
+              </div>
+              <div className="space-y-2">
+                {footerLinks.map((link, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={link.label}
+                      onChange={(e) => {
+                        const updated = [...footerLinks]
+                        updated[i].label = e.target.value
+                        setFooterLinks(updated)
+                      }}
+                      placeholder="Label"
+                      className="w-32 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    />
+                    <input
+                      type="text"
+                      value={link.url}
+                      onChange={(e) => {
+                        const updated = [...footerLinks]
+                        updated[i].url = e.target.value
+                        setFooterLinks(updated)
+                      }}
+                      placeholder="/page or https://..."
+                      className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFooterLinks(footerLinks.filter((_, j) => j !== i))}
+                      className="p-2 text-red-500 hover:text-red-600"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                ))}
+                {footerLinks.length === 0 && (
+                  <p className="text-sm text-neutral-500">No footer links added yet.</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
