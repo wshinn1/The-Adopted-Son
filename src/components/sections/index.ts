@@ -7,6 +7,7 @@ export const AVAILABLE_SECTIONS = [
   'TextSection',
   'BlogGallery1',
   'NewsletterSignUp',
+  'ContactForm1',
 ] as const
 
 export type SectionName = typeof AVAILABLE_SECTIONS[number]
