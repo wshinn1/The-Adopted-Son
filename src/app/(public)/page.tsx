@@ -2,11 +2,35 @@ import { getHomepage, getSiteSettings } from '@/lib/site-settings'
 import PageRenderer from '@/components/PageRenderer'
 import type { Metadata } from 'next'
 
+const DEFAULT_OG = 'https://www.theadoptedson.com/og-image.jpg'
+const BASE_URL = 'https://www.theadoptedson.com'
+
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings()
+  const [settings, homepage] = await Promise.all([getSiteSettings(), getHomepage()])
+  const page = homepage?.page as any
+
+  const title = page?.og_title || settings.site_name || 'The Adopted Son'
+  const description = page?.og_description || settings.site_tagline || 'Faith-filled daily devotionals to draw you closer to God.'
+  const ogImage = page?.og_image_url || DEFAULT_OG
+
   return {
-    title: settings.site_name,
-    description: settings.site_tagline,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: BASE_URL,
+      siteName: 'The Adopted Son',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
+    },
+    alternates: { canonical: BASE_URL },
   }
 }
 

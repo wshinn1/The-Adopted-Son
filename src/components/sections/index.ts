@@ -1,20 +1,16 @@
-import dynamic from 'next/dynamic'
-import type { ComponentType } from 'react'
+// Registry of available section component names.
+// The actual dynamic imports live in PageRenderer.tsx to avoid
+// Turbopack statically tracing server-only modules into the client bundle.
 
-// Registry of all available section components
-// Add new sections here as they are created
-// Using ssr: false to prevent HMR issues with dynamic imports
-export const sectionComponents: Record<string, ComponentType<{ data: any }>> = {
-  Home1: dynamic(() => import('./Home1'), { ssr: false }),
-  TextSection: dynamic(() => import('./TextSection'), { ssr: false }),
-}
+export const AVAILABLE_SECTIONS = [
+  'Home1',
+  'TextSection',
+  'BlogGallery1',
+  'NewsletterSignUp',
+] as const
 
-// Get a section component by name
-export function getSectionComponent(componentName: string): ComponentType<{ data: any }> | null {
-  return sectionComponents[componentName] || null
-}
+export type SectionName = typeof AVAILABLE_SECTIONS[number]
 
-// List all available section names
 export function getAvailableSections(): string[] {
-  return Object.keys(sectionComponents)
+  return [...AVAILABLE_SECTIONS]
 }

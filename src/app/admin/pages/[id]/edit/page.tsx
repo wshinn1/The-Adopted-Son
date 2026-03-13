@@ -50,8 +50,6 @@ export default async function EditPagePage({
     .select('*')
     .order('name', { ascending: true })
 
-  console.log('[v0] Templates loaded:', templates?.length, 'Error:', templatesError?.message)
-
   return (
     <PageEditor
       page={page}

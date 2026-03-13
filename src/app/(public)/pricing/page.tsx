@@ -1,11 +1,39 @@
 import { PLANS } from '@/lib/plans'
 import { createClient } from '@/lib/supabase/server'
+import { getPageWithSections } from '@/lib/site-settings'
 import { Check } from 'lucide-react'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 
-export const metadata = {
-  title: 'Pricing — The Adopted Son',
-  description: 'Subscribe to access all devotionals',
+const DEFAULT_OG = 'https://www.theadoptedson.com/og-image.jpg'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await getPageWithSections('pricing')
+  const page = data?.page as any
+
+  const title = page?.og_title || 'Pricing'
+  const description = page?.og_description || 'Subscribe to The Adopted Son for full access to all devotionals. Start with a 14-day free trial.'
+  const ogImage = page?.og_image_url || DEFAULT_OG
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} — The Adopted Son`,
+      description,
+      type: 'website',
+      url: 'https://www.theadoptedson.com/pricing',
+      siteName: 'The Adopted Son',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} — The Adopted Son`,
+      description,
+      images: [ogImage],
+    },
+    alternates: { canonical: 'https://www.theadoptedson.com/pricing' },
+  }
 }
 
 export default async function PricingPage() {

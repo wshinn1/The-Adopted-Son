@@ -9,8 +9,32 @@ import TrialBanner from '@/components/devotional/TrialBanner'
 import HamburgerHeader from '@/components/HamburgerHeader'
 
 export const metadata: Metadata = {
-  title: 'All Devotionals — The Adopted Son',
-  description: 'Browse all daily devotionals from The Adopted Son.',
+  title: 'Devotionals',
+  description: 'Browse all daily devotionals from The Adopted Son. Faith-filled readings to draw you closer to God.',
+  openGraph: {
+    title: 'Devotionals — The Adopted Son',
+    description: 'Browse all daily devotionals from The Adopted Son. Faith-filled readings to draw you closer to God.',
+    type: 'website',
+    url: 'https://www.theadoptedson.com/devotionals',
+    siteName: 'The Adopted Son',
+    images: [
+      {
+        url: 'https://www.theadoptedson.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Devotionals — The Adopted Son',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Devotionals — The Adopted Son',
+    description: 'Browse all daily devotionals from The Adopted Son.',
+    images: ['https://www.theadoptedson.com/og-image.jpg'],
+  },
+  alternates: {
+    canonical: 'https://www.theadoptedson.com/devotionals',
+  },
 }
 
 interface Props {
@@ -52,85 +76,124 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     return devotionals
   }
 
-  // Fetch featured post (prioritize is_featured, fallback to most recent)
-  let featuredData = null
-  
-  // First try to get a post marked as featured
-  const { data: markedFeatured } = await supabase
-    .from('devotionals')
-    .select('*')
-    .eq('is_published', true)
-    .eq('is_featured', true)
-    .order('published_at', { ascending: false })
-    .limit(1)
-    .single()
-  
-  if (markedFeatured) {
-    featuredData = markedFeatured
+  // --- SEARCH MODE: bypass featured/sidebar layout entirely ---
+  let featuredPost = null
+  let sidebarPosts: ReturnType<typeof devotionalToPost>[] = []
+  let gridPosts: ReturnType<typeof devotionalToPost>[] = []
+  let totalPages = 1
+
+  if (search && search.trim().length > 0) {
+    // Search across title, excerpt, content, and categories
+    // First get matching devotional IDs from categories
+    const { data: categoryMatches } = await supabase
+      .from('devotional_categories')
+      .select('devotional_id, categories(name)')
+      .ilike('categories.name', `%${search}%`)
+
+    const categoryMatchIds = (categoryMatches || [])
+      .filter((m: any) => m.categories)
+      .map((m: any) => m.devotional_id)
+
+    // Build search query across title, excerpt, content
+    let searchQuery = supabase
+      .from('devotionals')
+      .select('*', { count: 'exact' })
+      .eq('is_published', true)
+      .or(`title.ilike.%${search}%,excerpt.ilike.%${search}%,content.ilike.%${search}%`)
+      .order('published_at', { ascending: false })
+      .range(offset, offset + POSTS_PER_PAGE - 1)
+
+    const { data: searchData, count: searchCount } = await searchQuery
+    let results = searchData || []
+
+    // Also fetch category matches not already included
+    if (categoryMatchIds.length > 0) {
+      const existingIds = new Set(results.map((r: any) => r.id))
+      const newIds = categoryMatchIds.filter((id: string) => !existingIds.has(id))
+      if (newIds.length > 0) {
+        const { data: catResults } = await supabase
+          .from('devotionals')
+          .select('*')
+          .eq('is_published', true)
+          .in('id', newIds)
+        results = [...results, ...(catResults || [])]
+      }
+    }
+
+    const withAuthors = await attachAuthors(results)
+    gridPosts = withAuthors.map((d: Devotional) => devotionalToPost(d))
+    totalPages = Math.ceil(((searchCount ?? 0) + categoryMatchIds.length) / POSTS_PER_PAGE)
+
   } else {
-    // Fallback to most recent post
-    const { data: mostRecent } = await supabase
+    // --- NORMAL MODE: featured + sidebar + grid ---
+
+    // Fetch featured post (prioritize is_featured, fallback to most recent)
+    let featuredData = null
+    
+    const { data: markedFeatured } = await supabase
+      .from('devotionals')
+      .select('*')
+      .eq('is_published', true)
+      .eq('is_featured', true)
+      .order('published_at', { ascending: false })
+      .limit(1)
+      .single()
+    
+    if (markedFeatured) {
+      featuredData = markedFeatured
+    } else {
+      const { data: mostRecent } = await supabase
+        .from('devotionals')
+        .select('*')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .single()
+      featuredData = mostRecent
+    }
+
+    if (featuredData) {
+      const withAuthor = await attachAuthors([featuredData])
+      featuredData = withAuthor[0]
+    }
+
+    featuredPost = featuredData ? devotionalToPost(featuredData as Devotional) : null
+    const featuredId = featuredData?.id
+
+    let sidebarQuery = supabase
       .from('devotionals')
       .select('*')
       .eq('is_published', true)
       .order('published_at', { ascending: false })
-      .limit(1)
-      .single()
-    featuredData = mostRecent
+      .limit(2)
+    
+    if (featuredId) {
+      sidebarQuery = sidebarQuery.neq('id', featuredId)
+    }
+    
+    const { data: sidebarData } = await sidebarQuery
+    const sidebarWithAuthors = await attachAuthors(sidebarData || [])
+    sidebarPosts = sidebarWithAuthors.map((d: Devotional) => devotionalToPost(d))
+    
+    const excludeIds = [featuredId, ...sidebarPosts.map(p => p.id)].filter(Boolean)
+
+    let query = supabase
+      .from('devotionals')
+      .select('*', { count: 'exact' })
+      .eq('is_published', true)
+    
+    if (excludeIds.length > 0) {
+      query = query.not('id', 'in', `(${excludeIds.join(',')})`)
+    }
+    
+    query = query.order('published_at', { ascending: false })
+      .range(offset, offset + POSTS_PER_PAGE - 1)
+
+    const { data: gridData, count } = await query
+    const gridWithAuthors = await attachAuthors(gridData || [])
+    gridPosts = gridWithAuthors.map((d: Devotional) => devotionalToPost(d))
+    totalPages = Math.ceil((count ?? 0) / POSTS_PER_PAGE)
   }
-
-  // Attach author to featured post
-  if (featuredData) {
-    const withAuthor = await attachAuthors([featuredData])
-    featuredData = withAuthor[0]
-  }
-
-  const featuredPost = featuredData ? devotionalToPost(featuredData as Devotional) : null
-  const featuredId = featuredData?.id
-
-  // Fetch sidebar posts (next 2 most recent, excluding featured)
-  let sidebarQuery = supabase
-    .from('devotionals')
-    .select('*')
-    .eq('is_published', true)
-    .order('published_at', { ascending: false })
-    .limit(2)
-  
-  if (featuredId) {
-    sidebarQuery = sidebarQuery.neq('id', featuredId)
-  }
-  
-  const { data: sidebarData } = await sidebarQuery
-  const sidebarWithAuthors = await attachAuthors(sidebarData || [])
-
-  const sidebarPosts = sidebarWithAuthors.map((d: Devotional) => devotionalToPost(d))
-  
-  // Exclude featured and sidebar posts from the grid (so grid continues sequentially)
-  const excludeIds = [featuredId, ...sidebarPosts.map(p => p.id)].filter(Boolean)
-
-  // Build query for main grid (excluding featured and sidebar posts)
-  let query = supabase
-    .from('devotionals')
-    .select('*', { count: 'exact' })
-    .eq('is_published', true)
-  
-  if (excludeIds.length > 0) {
-    query = query.not('id', 'in', `(${excludeIds.join(',')})`)
-  }
-  
-  query = query.order('published_at', { ascending: false })
-    .range(offset, offset + POSTS_PER_PAGE - 1)
-
-  // Apply search filter if provided
-  if (search) {
-    query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`)
-  }
-
-  const { data: gridData, count } = await query
-  const gridWithAuthors = await attachAuthors(gridData || [])
-
-  const gridPosts = gridWithAuthors.map((d: Devotional) => devotionalToPost(d))
-  const totalPages = Math.ceil((count ?? 0) / POSTS_PER_PAGE)
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', { 
@@ -168,6 +231,94 @@ export default async function DevotionalsPage({ searchParams }: Props) {
             />
           </form>
         </div>
+
+        {/* Search Results or Normal Layout */}
+        {search && search.trim().length > 0 ? (
+          <section className="mb-16">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-1 h-8 bg-blue-500 rounded-full" />
+              <h2 className="text-2xl font-bold text-gray-900 font-heading">
+                {gridPosts.length > 0 ? `Results for "${search}"` : `No results for "${search}"`}
+              </h2>
+            </div>
+
+            {gridPosts.length > 0 ? (
+              <>
+                <div className="grid md:grid-cols-2 gap-8">
+                  {gridPosts.map((post, index) => {
+                    const postDate = new Date(post.date)
+                    const day = postDate.getDate()
+                    const month = postDate.toLocaleDateString('en-US', { month: 'short' })
+                    return (
+                      <Link key={post.id} href={`/devotionals/${post.handle}`} className="group block">
+                        <article>
+                          <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-4">
+                            <Image
+                              src={typeof post.featuredImage === 'string' ? post.featuredImage : post.featuredImage.src}
+                              alt={post.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              priority={index < 2}
+                              unoptimized
+                            />
+                            <div className="absolute top-4 left-4 bg-gray-800/80 text-white px-4 py-2 rounded-lg text-center">
+                              <div className="text-2xl font-bold leading-none">{day}</div>
+                              <div className="text-xs uppercase">{month}</div>
+                            </div>
+                          </div>
+                          {post.categories && post.categories.length > 0 && (
+                            <div className="flex flex-wrap gap-3 mb-3">
+                              {post.categories.slice(0, 3).map((cat, i) => (
+                                <span key={i} className="text-sm font-medium text-rose-500">
+                                  #{cat.name.toLowerCase().replace(/\s+/g, '')}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors font-heading">
+                            {post.title}
+                          </h3>
+                          {post.excerpt && (
+                            <p className="text-gray-600 line-clamp-3 font-body leading-relaxed">{post.excerpt}</p>
+                          )}
+                        </article>
+                      </Link>
+                    )
+                  })}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-12">
+                    {currentPage > 1 && (
+                      <Link href={`/devotionals?page=${currentPage - 1}&search=${search}`} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors font-body">
+                        <ChevronLeft className="size-4" /> Previous
+                      </Link>
+                    )}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <Link key={pageNum} href={`/devotionals?page=${pageNum}&search=${search}`}
+                        className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors font-body ${pageNum === currentPage ? 'bg-blue-500 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
+                        {pageNum}
+                      </Link>
+                    ))}
+                    {currentPage < totalPages && (
+                      <Link href={`/devotionals?page=${currentPage + 1}&search=${search}`} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors font-body">
+                        Next <ChevronRight className="size-4" />
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="py-20 text-center bg-white rounded-2xl">
+                <p className="text-gray-600 font-body">Try a different search term.</p>
+                <Link href="/devotionals" className="mt-6 inline-block px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors">
+                  View all devotionals
+                </Link>
+              </div>
+            )}
+          </section>
+        ) : (
+        <>
 
         {/* Devotionals Section */}
         <section className="mb-16">
@@ -410,6 +561,9 @@ export default async function DevotionalsPage({ searchParams }: Props) {
             </div>
           )}
         </section>
+        </>
+        )}
+
       </div>
     </div>
   )
