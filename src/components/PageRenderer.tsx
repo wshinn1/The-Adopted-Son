@@ -16,7 +16,7 @@ interface PageRendererProps {
 }
 
 // PageRenderer is a Server Component — it passes serializable section data
-// down to SectionRenderer which is a Client Component with dynamic imports.
+// down to SectionRenderer (client component) which handles dynamic imports.
 export default function PageRenderer({ sections }: PageRendererProps) {
   return <SectionRenderer sections={sections} />
 }

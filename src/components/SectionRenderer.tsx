@@ -4,8 +4,8 @@ import dynamic from 'next/dynamic'
 import type { ComponentType } from 'react'
 
 // This MUST be a client component — ssr: false requires 'use client'.
-// All section dynamic imports live here so this directive can never be
-// accidentally removed by a merge that touches PageRenderer.
+// All section dynamic imports live here, isolated from PageRenderer,
+// so a merge can never accidentally drop the 'use client' directive.
 
 const Home1 = dynamic(() => import('@/components/sections/Home1'), { ssr: false })
 const TextSection = dynamic(() => import('@/components/sections/TextSection'), { ssr: false })
