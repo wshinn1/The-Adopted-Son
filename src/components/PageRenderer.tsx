@@ -3,10 +3,10 @@
 import dynamic from 'next/dynamic'
 import type { ComponentType } from 'react'
 
-const Home1 = dynamic(() => import('@/components/sections/Home1'), { ssr: false })
-const TextSection = dynamic(() => import('@/components/sections/TextSection'), { ssr: false })
-const BlogGallery1 = dynamic(() => import('@/components/sections/BlogGallery1'), { ssr: false })
-const NewsletterSignUp = dynamic(() => import('@/components/sections/NewsletterSignUp'), { ssr: false })
+const Home1 = dynamic(() => import('@/components/sections/Home1'))
+const TextSection = dynamic(() => import('@/components/sections/TextSection'))
+const BlogGallery1 = dynamic(() => import('@/components/sections/BlogGallery1'))
+const NewsletterSignUp = dynamic(() => import('@/components/sections/NewsletterSignUp'))
 
 const SECTION_MAP: Record<string, ComponentType<{ data: any }>> = {
   Home1,
