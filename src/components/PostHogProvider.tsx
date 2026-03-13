@@ -31,7 +31,6 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
 
     posthog.init(key, {
       api_host: host ?? 'https://us.i.posthog.com',
-      person_distinct_id_type: 'uuid',
       capture_pageview: false, // We handle this manually above
       capture_pageleave: true,
       loaded: (ph) => {
