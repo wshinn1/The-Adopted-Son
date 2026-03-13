@@ -8,7 +8,7 @@ import { FC } from 'react'
 import AudioPlayerButton from './AudioPlayerButton'
 import GalleryImages from './GalleryImages'
 import SingleMeta from './SingleMeta'
-import { SingleMetaAction } from './SingleMetaAction'
+import { SingleMetaAction, type ShareSettings } from './SingleMetaAction'
 import SingleTitle from './SingleTitle'
 import VideoPlayer from './VideoPlayer'
 
@@ -16,9 +16,10 @@ interface Props {
   className?: string
   post: TPostDetail
   headerStyle?: 'style1' | 'style2' | 'style3' | 'audio' | 'video' | 'gallery'
+  shareSettings?: ShareSettings
 }
 
-const TitleAndMeta = ({ className, post }: Omit<Props, 'headerStyle'>) => {
+const TitleAndMeta = ({ className, post, shareSettings }: Omit<Props, 'headerStyle'>) => {
   const { categories, date, author, readingTime, commentCount, handle, likeCount, liked, title, excerpt } = post
 
   return (
@@ -39,13 +40,14 @@ const TitleAndMeta = ({ className, post }: Omit<Props, 'headerStyle'>) => {
           liked={liked}
           author={author}
           title={title}
+          shareSettings={shareSettings}
         />
       </div>
     </div>
   )
 }
 
-const HeaderStyle1 = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
+const HeaderStyle1 = ({ className, post, shareSettings }: Omit<Props, 'headerStyle'>) => {
   const { featuredImage, title } = post
 
   return (
@@ -55,7 +57,7 @@ const HeaderStyle1 = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
       </div>
       <header className={clsx('single-header-style-1 container mt-8 lg:mt-16', className)}>
         <div className="mx-auto max-w-4xl">
-          <TitleAndMeta post={post} />
+          <TitleAndMeta post={post} shareSettings={shareSettings} />
         </div>
 
         {featuredImage.src && (
@@ -75,7 +77,7 @@ const HeaderStyle1 = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
   )
 }
 
-const HeaderStyle2 = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
+const HeaderStyle2 = ({ className, post, shareSettings }: Omit<Props, 'headerStyle'>) => {
   return (
     <header
       className={clsx(
@@ -85,7 +87,7 @@ const HeaderStyle2 = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
     >
       <div className="dark relative grow pt-16 pr-4 pl-container text-white lg:py-20 xl:py-28">
         <div className="max-w-(--breakpoint-md)">
-          <TitleAndMeta post={post} />
+          <TitleAndMeta post={post} shareSettings={shareSettings} />
         </div>
       </div>
 
@@ -108,7 +110,7 @@ const HeaderStyle2 = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
   )
 }
 
-const HeaderStyle3 = ({ post, className }: Omit<Props, 'defaultStyle'>) => {
+const HeaderStyle3 = ({ post, className, shareSettings }: Omit<Props, 'headerStyle'>) => {
   const {
     commentCount,
     handle,
@@ -157,6 +159,7 @@ const HeaderStyle3 = ({ post, className }: Omit<Props, 'defaultStyle'>) => {
             liked={liked}
             title={title}
             author={author}
+            shareSettings={shareSettings}
           />
         </div>
         <Divider className="mx-auto mt-10 max-w-4xl" />
@@ -165,7 +168,7 @@ const HeaderStyle3 = ({ post, className }: Omit<Props, 'defaultStyle'>) => {
   )
 }
 
-const HeaderAudio = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
+const HeaderAudio = ({ className, post, shareSettings }: Omit<Props, 'headerStyle'>) => {
   const { title, author, date, readingTime, commentCount, handle, likeCount, liked } = post
   return (
     <header className={clsx('relative bg-neutral-100/90 py-10 sm:py-16 dark:bg-neutral-800', className)}>
@@ -186,6 +189,7 @@ const HeaderAudio = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
               liked={liked}
               title={title}
               author={author}
+              shareSettings={shareSettings}
             />
           </div>
         </div>

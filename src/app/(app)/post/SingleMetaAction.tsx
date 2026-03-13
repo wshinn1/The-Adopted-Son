@@ -120,24 +120,48 @@ function ActionDropdown({ handle, title, author }: { handle: string; title: stri
   )
 }
 
-function ShareDropdown({ handle }: { handle: string }) {
+interface ShareSettings {
+  enabled: boolean
+  facebook: boolean
+  twitter: boolean
+  linkedin: boolean
+  email: boolean
+}
+
+function ShareDropdown({ handle, title, shareSettings }: { handle: string; title?: string; shareSettings?: ShareSettings }) {
+  const defaultSettings: ShareSettings = {
+    enabled: true,
+    facebook: true,
+    twitter: true,
+    linkedin: false,
+    email: true,
+  }
+  const settings = shareSettings || defaultSettings
+  
+  if (!settings.enabled) return null
+
+  const shareUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''
+  const shareTitle = encodeURIComponent(title || '')
+
   const socialsShare = [
-    {
+    settings.facebook && {
       name: 'Facebook',
-      href: '#',
+      href: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
       icon: Facebook01Icon,
     },
-    {
-      name: 'Email',
-      href: '#',
-      icon: Mail01Icon,
-    },
-    {
+    settings.twitter && {
       name: 'Twitter',
-      href: '#',
+      href: `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`,
       icon: NewTwitterIcon,
     },
-  ]
+    settings.email && {
+      name: 'Email',
+      href: `mailto:?subject=${shareTitle}&body=Check out this article: ${shareUrl}`,
+      icon: Mail01Icon,
+    },
+  ].filter(Boolean) as { name: string; href: string; icon: typeof Facebook01Icon }[]
+
+  if (socialsShare.length === 0) return null
 
   return (
     <Dropdown>
@@ -149,7 +173,7 @@ function ShareDropdown({ handle }: { handle: string }) {
       </DropdownButton>
       <DropdownMenu>
         {socialsShare.map((item, index) => (
-          <DropdownItem key={index} href={item.href}>
+          <DropdownItem key={index} href={item.href} target="_blank" rel="noopener noreferrer">
             <HugeiconsIcon icon={item.icon} size={20} data-slot="icon" />
             {item.name}
           </DropdownItem>
@@ -161,9 +185,10 @@ function ShareDropdown({ handle }: { handle: string }) {
 
 interface Props extends Pick<TPostDetail, 'likeCount' | 'liked' | 'commentCount' | 'handle' | 'title' | 'author'> {
   className?: string
+  shareSettings?: ShareSettings
 }
 
-const SingleMetaAction: FC<Props> = ({ className, likeCount, liked, commentCount, handle, title, author }) => {
+const SingleMetaAction: FC<Props> = ({ className, likeCount, liked, commentCount, handle, title, author, shareSettings }) => {
   return (
     <div className={clsx('single-meta-action', className)}>
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
@@ -171,7 +196,7 @@ const SingleMetaAction: FC<Props> = ({ className, likeCount, liked, commentCount
         <PostCardCommentBtn commentCount={commentCount} handle={handle} />
         <p className="font-light text-neutral-400 sm:mx-1">/</p>
         <BookmarkBtn className="size-8.5!" />
-        <ShareDropdown handle={handle} />
+        <ShareDropdown handle={handle} title={title} shareSettings={shareSettings} />
         <ActionDropdown handle={handle} title={title} author={author} />
       </div>
     </div>
@@ -179,3 +204,4 @@ const SingleMetaAction: FC<Props> = ({ className, likeCount, liked, commentCount
 }
 
 export { ActionDropdown, ShareDropdown, SingleMetaAction }
+export type { ShareSettings }
