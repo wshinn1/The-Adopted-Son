@@ -3,6 +3,18 @@
 import dynamic from 'next/dynamic'
 import type { ComponentType } from 'react'
 
+const Home1 = dynamic(() => import('@/components/sections/Home1'), { ssr: false })
+const TextSection = dynamic(() => import('@/components/sections/TextSection'), { ssr: false })
+const BlogGallery1 = dynamic(() => import('@/components/sections/BlogGallery1'), { ssr: false })
+const NewsletterSignUp = dynamic(() => import('@/components/sections/NewsletterSignUp'), { ssr: false })
+
+const SECTION_MAP: Record<string, ComponentType<{ data: any }>> = {
+  Home1,
+  TextSection,
+  BlogGallery1,
+  NewsletterSignUp,
+}
+
 interface PageSection {
   id: string
   template_id: string
@@ -18,40 +30,29 @@ interface PageRendererProps {
   sections: PageSection[]
 }
 
-const Home1 = dynamic(() => import('@/components/sections/Home1'), { ssr: false })
-const TextSection = dynamic(() => import('@/components/sections/TextSection'), { ssr: false })
-const BlogGallery1 = dynamic(() => import('@/components/sections/BlogGallery1'), { ssr: false })
-const NewsletterSignUp = dynamic(() => import('@/components/sections/NewsletterSignUp'), { ssr: false })
-
-const SECTION_MAP: Record<string, ComponentType<{ data: any }>> = {
-  Home1,
-  TextSection,
-  BlogGallery1,
-  NewsletterSignUp,
-}
-
 export default function PageRenderer({ sections }: PageRendererProps) {
-  const sortedSections = [...sections].sort((a, b) => a.sort_order - b.sort_order)
+  console.log('[v0] PageRenderer rendering, sections count:', sections?.length)
+
+  const visible = sections
+    .filter((s) => s.is_visible)
+    .sort((a, b) => a.sort_order - b.sort_order)
+
+  console.log('[v0] PageRenderer visible sections:', visible.map((s) => {
+    const t = Array.isArray(s.section_templates) ? s.section_templates[0] : s.section_templates
+    return t?.component_name
+  }))
 
   return (
     <>
-      {sortedSections.map((section) => {
-        if (!section.is_visible) return null
-
+      {visible.map((section) => {
         const template = Array.isArray(section.section_templates)
           ? section.section_templates[0]
           : section.section_templates
-
-        if (!template) return null
-
-        const Component = SECTION_MAP[template.component_name]
+        const componentName = template?.component_name
+        console.log('[v0] Rendering section:', componentName, '— found in SECTION_MAP:', !!SECTION_MAP[componentName ?? ''])
+        const Component = componentName ? SECTION_MAP[componentName] : null
         if (!Component) return null
-
-        const mergedData = {
-          ...template.default_data,
-          ...section.data,
-        }
-
+        const mergedData = { ...(template?.default_data ?? {}), ...section.data }
         return <Component key={section.id} data={mergedData} />
       })}
     </>
