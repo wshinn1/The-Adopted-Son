@@ -4,17 +4,30 @@ const PROJECT_ID = '341992'
 const POSTHOG_URL = 'https://us.posthog.com'
 
 async function runQuery(query: string) {
+  const apiKey = process.env.POSTHOG_PERSONAL_API_KEY
+  if (!apiKey) {
+    console.error('[v0] POSTHOG_PERSONAL_API_KEY is not set')
+    return []
+  }
+  
   const res = await fetch(`${POSTHOG_URL}/api/projects/${PROJECT_ID}/query/`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${process.env.POSTHOG_PERSONAL_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ query: { kind: 'HogQLQuery', query } }),
-    next: { revalidate: 300 }, // cache 5 mins
+    cache: 'no-store', // always fetch fresh for real-time data
   })
-  if (!res.ok) throw new Error(`PostHog query failed: ${res.status}`)
+  
+  if (!res.ok) {
+    const text = await res.text()
+    console.error('[v0] PostHog query failed:', res.status, text)
+    throw new Error(`PostHog query failed: ${res.status}`)
+  }
+  
   const json = await res.json()
+  console.log('[v0] PostHog query result:', JSON.stringify(json).slice(0, 500))
   return json.results ?? []
 }
 
