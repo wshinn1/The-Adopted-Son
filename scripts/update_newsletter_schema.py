@@ -4,21 +4,31 @@ Adds background_image_url field to the Newsletter Sign Up section template schem
 """
 import os
 import json
-from supabase import create_client
+import urllib.request
+import urllib.error
 
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
-supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+def supabase_request(method, path, body=None):
+    url = f"{SUPABASE_URL}/rest/v1/{path}"
+    data = json.dumps(body).encode() if body else None
+    req = urllib.request.Request(url, data=data, method=method)
+    req.add_header("apikey", SUPABASE_SERVICE_KEY)
+    req.add_header("Authorization", f"Bearer {SUPABASE_SERVICE_KEY}")
+    req.add_header("Content-Type", "application/json")
+    req.add_header("Prefer", "return=representation")
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read().decode())
 
 # Fetch current template
-result = supabase.table("section_templates").select("*").eq("component_name", "NewsletterSignUp").execute()
+rows = supabase_request("GET", "section_templates?component_name=eq.NewsletterSignUp&select=*")
 
-if not result.data:
+if not rows:
     print("ERROR: NewsletterSignUp template not found")
     exit(1)
 
-template = result.data[0]
+template = rows[0]
 schema = template.get("schema", {})
 default_data = template.get("default_data", {})
 
@@ -50,10 +60,10 @@ schema["properties"] = final
 default_data["background_image_url"] = ""
 
 # Update template
-update_result = supabase.table("section_templates").update({
+supabase_request("PATCH", "section_templates?component_name=eq.NewsletterSignUp", {
     "schema": schema,
     "default_data": default_data
-}).eq("component_name", "NewsletterSignUp").execute()
+})
 
 print("Updated schema properties:", list(schema["properties"].keys()))
 print("SUCCESS: NewsletterSignUp template updated with background_image_url field")
