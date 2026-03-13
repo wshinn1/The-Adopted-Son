@@ -1,26 +1,8 @@
 'use client'
 
 import posthog from 'posthog-js'
-import { PostHogProvider as PHProvider, usePostHog } from 'posthog-js/react'
-import { usePathname, useSearchParams } from 'next/navigation'
-import { useEffect, Suspense } from 'react'
-
-// Track page views on route changes
-function PostHogPageView() {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const ph = usePostHog()
-
-  useEffect(() => {
-    if (!pathname) return
-    let url = window.origin + pathname
-    const search = searchParams?.toString()
-    if (search) url += '?' + search
-    ph?.capture('$pageview', { $current_url: url })
-  }, [pathname, searchParams, ph])
-
-  return null
-}
+import { PostHogProvider as PHProvider } from 'posthog-js/react'
+import { useEffect } from 'react'
 
 export default function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -31,20 +13,10 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
 
     posthog.init(key, {
       api_host: host ?? 'https://us.i.posthog.com',
-      capture_pageview: false, // We handle this manually above
+      capture_pageview: true, // Let PostHog handle page views automatically
       capture_pageleave: true,
-      loaded: (ph) => {
-        if (process.env.NODE_ENV === 'development') ph.debug()
-      },
     })
   }, [])
 
-  return (
-    <PHProvider client={posthog}>
-      <Suspense fallback={null}>
-        <PostHogPageView />
-      </Suspense>
-      {children}
-    </PHProvider>
-  )
+  return <PHProvider client={posthog}>{children}</PHProvider>
 }
