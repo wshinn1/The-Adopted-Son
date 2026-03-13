@@ -11,6 +11,7 @@ const navItems = [
   { label: 'Authors', href: '/admin/authors', icon: '✎' },
   { label: 'Media', href: '/admin/media', icon: '▣' },
   { label: 'Subscribers', href: '/admin/subscribers', icon: '◎' },
+  { label: 'Analytics', href: '/admin/analytics', icon: '↗' },
   { label: 'Backups', href: '/admin/backups', icon: '↺' },
   { label: 'Menu', href: '/admin/menu', icon: '☰' },
   { label: 'Site Settings', href: '/admin/site-settings', icon: '⚙' },

@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --no-turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -61,6 +61,7 @@
     "react-stately": "^3.39.0",
     "react-swipeable": "^7.0.2",
     "react-use": "^17.6.0",
+    "posthog-js": "^1.240.6",
     "resend": "^4.0.0",
     "sass": "^1.97.2",
     "server-only": "^0.0.1",

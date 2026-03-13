@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import { Be_Vietnam_Pro } from 'next/font/google'
 import ThemeProvider from './theme-provider'
 import FontProvider from '@/components/FontProvider'
+import PostHogProvider from '@/components/PostHogProvider'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { createClient } from '@/lib/supabase/server'
 
@@ -64,11 +65,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {faviconUrl && <link rel="icon" href={faviconUrl} />}
       </head>
       <body className="bg-white text-base text-neutral-900 dark:bg-neutral-900 dark:text-neutral-200">
-        <ThemeProvider>
-          <FontProvider>
-            <div>{children}</div>
-          </FontProvider>
-        </ThemeProvider>
+        <PostHogProvider>
+          <ThemeProvider>
+            <FontProvider>
+              <div>{children}</div>
+            </FontProvider>
+          </ThemeProvider>
+        </PostHogProvider>
         <SpeedInsights />
       </body>
     </html>

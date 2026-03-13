@@ -1,13 +1,10 @@
-'use client'
-
-import dynamic from 'next/dynamic'
+// static imports — no dynamic() to avoid Turbopack workspace root misdetection
 import type { ComponentType } from 'react'
-
-const Home1 = dynamic(() => import('@/components/sections/Home1'))
-const TextSection = dynamic(() => import('@/components/sections/TextSection'))
-const BlogGallery1 = dynamic(() => import('@/components/sections/BlogGallery1'))
-const NewsletterSignUp = dynamic(() => import('@/components/sections/NewsletterSignUp'))
-const ContactForm1 = dynamic(() => import('@/components/sections/ContactForm1'))
+import Home1 from '@/components/sections/Home1'
+import TextSection from '@/components/sections/TextSection'
+import BlogGallery1 from '@/components/sections/BlogGallery1'
+import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
+import ContactForm1 from '@/components/sections/ContactForm1'
 
 const SECTION_MAP: Record<string, ComponentType<{ data: any }>> = {
   Home1,
