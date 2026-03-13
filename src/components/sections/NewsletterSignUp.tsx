@@ -8,6 +8,7 @@ export interface NewsletterSignUpData {
   button_text: string
   success_message: string
   background_color: string
+  background_image_url: string
   text_color: string
 }
 
@@ -48,12 +49,20 @@ export default function NewsletterSignUp({ data }: NewsletterSignUpProps) {
   }
 
   const bgColor = data.background_color || '#F5F2ED'
+  const bgImage = data.background_image_url
   const textColor = data.text_color || '#1a1a1a'
 
   return (
     <section
-      className="w-full py-20 px-6 md:px-12 lg:px-24"
-      style={{ backgroundColor: bgColor }}
+      className="relative w-full py-20 px-6 md:px-12 lg:px-24 overflow-hidden"
+      style={{
+        backgroundColor: bgColor,
+        ...(bgImage && {
+          backgroundImage: `url(${bgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }),
+      }}
     >
       <div className="max-w-2xl mx-auto text-center">
         {data.heading && (
