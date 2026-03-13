@@ -35,13 +35,21 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
 
   useEffect(() => {
     const fetchLimit = showBanner ? count + 1 : count
+    console.log('[v0] BlogGallery1 mounting, fetching', fetchLimit, 'devotionals')
     fetch(`/api/devotionals/recent?limit=${fetchLimit}`)
-      .then((r) => r.json())
-      .then(({ devotionals: rows }) => {
+      .then((r) => {
+        console.log('[v0] BlogGallery1 API response status:', r.status)
+        return r.json()
+      })
+      .then(({ devotionals: rows, error }) => {
+        console.log('[v0] BlogGallery1 devotionals received:', rows?.length, 'error:', error)
         setDevotionals(rows || [])
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch((err) => {
+        console.log('[v0] BlogGallery1 fetch error:', err.message)
+        setLoading(false)
+      })
   }, [count, showBanner])
 
   const featured = showBanner ? devotionals[0] : null
