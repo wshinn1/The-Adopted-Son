@@ -42,14 +42,15 @@ export async function POST(request: NextRequest) {
     access: 'public',
   })
 
-  // Save to media table
+  // Save to media table - column names must match schema
   const { data: mediaRecord, error } = await supabase
     .from('media')
     .insert({
       filename: file.name,
-      pathname: blob.pathname,
-      url: blob.url,
-      content_type: file.type,
+      original_name: file.name,
+      blob_pathname: blob.pathname,
+      blob_url: blob.url,
+      mime_type: file.type,
       size_bytes: file.size,
       alt_text: altText ?? '',
       uploaded_by: user.id,

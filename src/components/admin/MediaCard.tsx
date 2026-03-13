@@ -7,10 +7,14 @@ import { useRouter } from 'next/navigation'
 interface MediaItem {
   id: string
   filename: string
-  original_name: string
-  blob_url: string
-  blob_pathname: string
-  mime_type: string
+  original_name?: string
+  blob_url?: string
+  blob_pathname?: string
+  mime_type?: string
+  // Legacy column names from old uploads
+  url?: string
+  pathname?: string
+  content_type?: string
   alt_text: string | null
   size_bytes: number | null
   created_at: string
@@ -23,8 +27,12 @@ export default function MediaCard({ item }: { item: MediaItem }) {
   const [saving, setSaving] = useState(false)
   const [copied, setCopied] = useState(false)
 
+  // Support both new and legacy column names
+  const imageUrl = item.blob_url || item.url || ''
+  const mimeType = item.mime_type || item.content_type || ''
+
   const copyUrl = async () => {
-    await navigator.clipboard.writeText(item.blob_url)
+    await navigator.clipboard.writeText(imageUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -46,7 +54,7 @@ export default function MediaCard({ item }: { item: MediaItem }) {
     await fetch('/api/media/delete', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: item.id, url: item.blob_url }),
+      body: JSON.stringify({ id: item.id, url: imageUrl }),
     })
     router.refresh()
   }
@@ -61,17 +69,18 @@ export default function MediaCard({ item }: { item: MediaItem }) {
   return (
     <div className="group relative rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
       {/* Image preview */}
-      <div className="aspect-square relative">
-        {item.blob_url && item.mime_type?.startsWith('image/') ? (
+      <div className="aspect-square relative bg-neutral-200 dark:bg-neutral-700">
+        {imageUrl && mimeType?.startsWith('image/') ? (
           <Image
-            src={item.blob_url}
+            src={imageUrl}
             alt={item.alt_text ?? item.filename}
             fill
             className="object-cover"
+            unoptimized
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-4xl text-neutral-400">
-            {item.mime_type?.startsWith('video/') ? '▶' : '▣'}
+            {mimeType?.startsWith('video/') ? '▶' : '▣'}
           </div>
         )}
 
@@ -123,9 +132,9 @@ export default function MediaCard({ item }: { item: MediaItem }) {
             </h3>
             
             {/* Preview */}
-            {item.blob_url && item.mime_type?.startsWith('image/') && (
+            {imageUrl && mimeType?.startsWith('image/') && (
               <div className="relative aspect-video rounded-lg overflow-hidden mb-4 bg-neutral-100 dark:bg-neutral-800">
-                <Image src={item.blob_url} alt={item.alt_text ?? item.filename} fill className="object-contain" />
+                <Image src={imageUrl} alt={item.alt_text ?? item.filename} fill className="object-contain" unoptimized />
               </div>
             )}
 
@@ -165,7 +174,7 @@ export default function MediaCard({ item }: { item: MediaItem }) {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    value={item.blob_url}
+                    value={imageUrl}
                     disabled
                     className="flex-1 px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-800 text-neutral-500 text-sm truncate"
                   />
