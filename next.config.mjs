@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+// webpack mode (no-turbopack) — see package.json dev script
 const nextConfig = {
   images: {
     minimumCacheTTL: 2678400 * 6,
