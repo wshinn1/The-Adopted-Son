@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { BarChart2, Users, Eye, TrendingUp, ExternalLink } from 'lucide-react'
+import { BarChart2, Users, Eye, TrendingUp, ExternalLink, Globe, MapPin } from 'lucide-react'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -109,6 +109,65 @@ export default function AnalyticsStats() {
             </ul>
           ) : (
             <p className="text-sm text-neutral-400">No data yet. Data will appear as visitors browse your site.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Location data */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top countries */}
+        <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 flex items-center gap-2">
+            <Globe className="w-4 h-4 text-primary-500" />
+            Top Countries (Last 30 Days)
+          </h2>
+          {isLoading ? (
+            <SkeletonList rows={5} />
+          ) : error ? (
+            <ErrorMsg />
+          ) : data?.topCountries?.length ? (
+            <ul className="space-y-2">
+              {data.topCountries.map((c: { country: string; views: number }, i: number) => (
+                <li key={i} className="flex items-center justify-between gap-2 text-sm">
+                  <span className="truncate text-neutral-700 dark:text-neutral-300">
+                    {c.country}
+                  </span>
+                  <span className="flex-shrink-0 font-semibold text-neutral-900 dark:text-neutral-100">
+                    {c.views.toLocaleString()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-neutral-400">No location data yet.</p>
+          )}
+        </div>
+
+        {/* Top cities */}
+        <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-primary-500" />
+            Top Cities (Last 30 Days)
+          </h2>
+          {isLoading ? (
+            <SkeletonList rows={5} />
+          ) : error ? (
+            <ErrorMsg />
+          ) : data?.topCities?.length ? (
+            <ul className="space-y-2">
+              {data.topCities.map((c: { city: string; state: string; countryCode: string; views: number }, i: number) => (
+                <li key={i} className="flex items-center justify-between gap-2 text-sm">
+                  <span className="truncate text-neutral-700 dark:text-neutral-300">
+                    {c.city}{c.state ? `, ${c.state}` : ''} <span className="text-neutral-400 text-xs">({c.countryCode})</span>
+                  </span>
+                  <span className="flex-shrink-0 font-semibold text-neutral-900 dark:text-neutral-100">
+                    {c.views.toLocaleString()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-neutral-400">No location data yet.</p>
           )}
         </div>
       </div>
