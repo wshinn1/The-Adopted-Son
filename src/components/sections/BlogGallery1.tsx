@@ -47,8 +47,8 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
       .catch(() => setLoading(false))
   }, [count, showBanner, data._devotionals])
 
-  const featured = showBanner ? devotionals[0] : null
-  const grid = showBanner ? devotionals.slice(1, count + 1) : devotionals.slice(0, count)
+  const featured = showBanner && devotionals.length > count ? devotionals[0] : null
+  const grid = featured ? devotionals.slice(1, count + 1) : devotionals.slice(0, count)
 
   if (loading) {
     return (
@@ -125,36 +125,37 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
           return (
             <Link key={post.id} href={`/devotionals/${post.slug}`} className="group block">
               <article>
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-4 bg-neutral-100">
-                  {post.cover_image_url ? (
-                    <>
+                {/* Image with category badge overlapping the bottom edge */}
+                <div className="relative">
+                  <div className="relative aspect-[3/2] overflow-hidden bg-neutral-100">
+                    {post.cover_image_url ? (
                       <Image
                         src={post.cover_image_url}
                         alt={post.title}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                         unoptimized
                       />
-                      {post.category && (
-                        <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4">
-                          <span className="bg-primary-600 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5">
-                            {post.category}
-                          </span>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
-                      <span className="text-neutral-400 text-sm">No image</span>
+                    ) : (
+                      <div className="w-full h-full bg-neutral-200" />
+                    )}
+                  </div>
+                  {post.category && (
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-center translate-y-1/2 z-10">
+                      <span className="bg-primary-600 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5">
+                        {post.category}
+                      </span>
                     </div>
                   )}
                 </div>
-                <h3 className="text-lg font-bold text-neutral-900 font-heading text-center leading-snug group-hover:text-primary-600 transition-colors">
-                  {post.title}
-                </h3>
-                {date && (
-                  <p className="text-sm text-neutral-400 font-body text-center mt-2">{date}</p>
-                )}
+                <div className="pt-8 pb-2 text-center">
+                  <h3 className="text-xl font-bold text-neutral-900 font-heading leading-snug group-hover:text-primary-600 transition-colors text-balance">
+                    {post.title}
+                  </h3>
+                  {date && (
+                    <p className="text-sm text-neutral-400 font-body mt-2">{date}</p>
+                  )}
+                </div>
               </article>
             </Link>
           )
