@@ -10,6 +10,7 @@ export interface BlogGallery1Data {
   post_count: number
   background_color: string
   show_featured_banner: boolean
+  _devotionals?: Devotional[]
 }
 
 interface Devotional {
@@ -27,13 +28,15 @@ interface BlogGallery1Props {
 }
 
 export default function BlogGallery1({ data }: BlogGallery1Props) {
-  const [devotionals, setDevotionals] = useState<Devotional[]>([])
-  const [loading, setLoading] = useState(true)
-
   const count = data.post_count || 3
   const showBanner = data.show_featured_banner !== false
 
+  // Use server-pre-fetched devotionals if available, otherwise fetch client-side
+  const [devotionals, setDevotionals] = useState<Devotional[]>(data._devotionals ?? [])
+  const [loading, setLoading] = useState(!data._devotionals)
+
   useEffect(() => {
+    if (data._devotionals && data._devotionals.length > 0) return
     const fetchLimit = showBanner ? count + 1 : count
     fetch(`/api/devotionals/recent?limit=${fetchLimit}`)
       .then((r) => r.json())
@@ -42,7 +45,7 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [count, showBanner])
+  }, [count, showBanner, data._devotionals])
 
   const featured = showBanner ? devotionals[0] : null
   const grid = showBanner ? devotionals.slice(1, count + 1) : devotionals.slice(0, count)
