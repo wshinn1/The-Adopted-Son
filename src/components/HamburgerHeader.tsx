@@ -59,7 +59,7 @@ export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, 
               unoptimized={logoUrl.includes('blob.vercel-storage.com')}
             />
           ) : (
-            <span className="font-heading text-xl font-semibold">{siteName}</span>
+            <span className="font-heading text-xl font-semibold">{siteName.replace(/^["'"']|["'"']$/g, '')}</span>
           )}
         </Link>
 

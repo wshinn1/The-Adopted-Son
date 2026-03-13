@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Metadata } from 'next'
-import { Home } from 'lucide-react'
+import PagesTable from '@/components/admin/PagesTable'
 
 export const metadata: Metadata = { title: 'Pages — Admin' }
 
@@ -26,52 +26,7 @@ export default async function AdminPagesPage() {
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50">
-            <tr>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Title</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Slug</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Status</th>
-              <th className="px-5 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
-            {pages?.map((page) => (
-              <tr key={page.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/30 transition-colors">
-                <td className="px-5 py-3.5 font-medium text-neutral-900 dark:text-neutral-100">
-                  <span className="flex items-center gap-2">
-                    {page.is_homepage && (
-                      <Home className="size-4 text-primary-600" />
-                    )}
-                    {page.title}
-                  </span>
-                </td>
-                <td className="px-5 py-3.5 text-neutral-500">
-                  {page.is_homepage ? '/ (homepage)' : `/${page.slug}`}
-                </td>
-                <td className="px-5 py-3.5">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${page.is_published ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400' : 'bg-neutral-100 text-neutral-500'}`}>
-                    {page.is_published ? 'Published' : 'Draft'}
-                  </span>
-                </td>
-                <td className="px-5 py-3.5 text-right">
-                  <Link href={`/admin/pages/${page.id}/edit`} className="text-xs text-primary-600 hover:text-primary-700 font-medium">
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {(!pages || pages.length === 0) && (
-              <tr>
-                <td colSpan={4} className="px-5 py-8 text-center text-neutral-500">
-                  No pages yet. Create your first page.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <PagesTable initialPages={pages ?? []} />
     </div>
   )
 }

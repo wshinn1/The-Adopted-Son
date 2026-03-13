@@ -4,6 +4,7 @@ import { Be_Vietnam_Pro } from 'next/font/google'
 import ThemeProvider from './theme-provider'
 import FontProvider from '@/components/FontProvider'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { createClient } from '@/lib/supabase/server'
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ['latin'],
@@ -48,9 +49,20 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient()
+  const { data: row } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'favicon_url')
+    .single()
+  const faviconUrl = typeof row?.value === 'string' ? row.value.replace(/^"|"$/g, '') : null
+
   return (
     <html lang="en" className={beVietnamPro.className}>
+      <head>
+        {faviconUrl && <link rel="icon" href={faviconUrl} />}
+      </head>
       <body className="bg-white text-base text-neutral-900 dark:bg-neutral-900 dark:text-neutral-200">
         <ThemeProvider>
           <FontProvider>
