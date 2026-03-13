@@ -9,22 +9,15 @@ interface PageSection {
   data: Record<string, any>
   sort_order: number
   is_visible: boolean
-  section_templates: {
-    component_name: string
-    default_data: Record<string, any>
-  } | {
-    component_name: string
-    default_data: Record<string, any>
-  }[]
+  section_templates:
+    | { component_name: string; default_data: Record<string, any> }
+    | { component_name: string; default_data: Record<string, any> }[]
 }
 
 interface PageRendererProps {
   sections: PageSection[]
 }
 
-// Each section is loaded independently so no server-only module
-// can bleed across boundaries. ssr:false prevents next/headers usage
-// from being traced into the client bundle.
 const Home1 = dynamic(() => import('@/components/sections/Home1'), { ssr: false })
 const TextSection = dynamic(() => import('@/components/sections/TextSection'), { ssr: false })
 const BlogGallery1 = dynamic(() => import('@/components/sections/BlogGallery1'), { ssr: false })
@@ -52,11 +45,7 @@ export default function PageRenderer({ sections }: PageRendererProps) {
         if (!template) return null
 
         const Component = SECTION_MAP[template.component_name]
-
-        if (!Component) {
-          console.warn(`Section component "${template.component_name}" not found`)
-          return null
-        }
+        if (!Component) return null
 
         const mergedData = {
           ...template.default_data,
