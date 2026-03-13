@@ -219,6 +219,65 @@ export async function sendPaymentReceiptEmail(
   }
 }
 
+export async function sendNewsletterWelcomeEmail(email: string, firstName: string) {
+  try {
+    await resend.emails.send({
+      from: NOREPLY_EMAIL,
+      to: email,
+      subject: 'You\'re in — Welcome to The Adopted Son Newsletter',
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Georgia, serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+  <h1 style="font-size: 28px; font-weight: normal; margin-bottom: 8px;">Welcome, ${firstName}.</h1>
+  <p style="font-size: 18px; color: #555; margin-bottom: 32px; font-style: italic;">You're now subscribed to The Adopted Son.</p>
+
+  <p style="font-size: 16px; margin-bottom: 16px;">
+    Thank you for signing up. You'll receive new devotionals and updates directly in your inbox — words written to encourage you in your identity as a child of God.
+  </p>
+
+  <p style="font-size: 16px; margin-bottom: 32px;">
+    While you're here, we'd love to invite you to create a free account. With an account you can save your favorite devotionals, track your reading, and access exclusive subscriber content.
+  </p>
+
+  <div style="background: #f5f2ed; padding: 28px; border-radius: 12px; margin: 0 0 32px 0;">
+    <h3 style="font-size: 18px; font-weight: bold; margin: 0 0 12px 0;">What you get with an account:</h3>
+    <ul style="margin: 0; padding-left: 20px; font-size: 15px; color: #333;">
+      <li style="margin-bottom: 8px;">Free 14-day trial of all premium content</li>
+      <li style="margin-bottom: 8px;">Save and bookmark devotionals</li>
+      <li style="margin-bottom: 8px;">Full access to the devotional archive</li>
+      <li style="margin-bottom: 8px;">Ad-free reading experience</li>
+    </ul>
+  </div>
+
+  <a href="https://theadoptedson.com/signup" style="display: inline-block; background: #1a1a1a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
+    Create Your Free Account
+  </a>
+
+  <p style="font-size: 14px; color: #999; margin-top: 8px;">
+    Already have an account? <a href="https://theadoptedson.com/login" style="color: #555;">Sign in here</a>.
+  </p>
+
+  <p style="font-size: 14px; color: #aaa; margin-top: 48px; padding-top: 24px; border-top: 1px solid #e5e5e5;">
+    You're receiving this because you signed up at theadoptedson.com.<br>
+    <a href="https://theadoptedson.com/unsubscribe?email=${encodeURIComponent(email)}" style="color: #aaa;">Unsubscribe</a> &nbsp;·&nbsp;
+    <a href="https://theadoptedson.com" style="color: #aaa;">theadoptedson.com</a>
+  </p>
+</body>
+</html>
+      `,
+    })
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send newsletter welcome email:', error)
+    return { success: false, error }
+  }
+}
+
 export async function sendTrialEndingSoonEmail(email: string, daysLeft: number) {
   try {
     await resend.emails.send({

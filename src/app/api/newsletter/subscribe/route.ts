@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { sendNewsletterWelcomeEmail } from '@/lib/email'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,7 +30,12 @@ export async function POST(request: NextRequest) {
       console.error('[newsletter] DB error:', dbError)
     }
 
-    // 2. Add to Moosend
+    // 2. Send welcome email (only on first-time subscribe, not re-subscribe)
+    if (!dbError) {
+      await sendNewsletterWelcomeEmail(email.toLowerCase().trim(), firstName.trim())
+    }
+
+    // 3. Add to Moosend
     const moosendApiKey = process.env.MOOSEND_API_KEY
     const moosendListId = process.env.MOOSEND_LIST_ID
 
