@@ -198,18 +198,18 @@ const HeaderAudio = ({ className, post, shareSettings }: Omit<Props, 'headerStyl
   )
 }
 
-const HeaderVideo = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
+const HeaderVideo = ({ className, post, shareSettings }: Omit<Props, 'headerStyle'>) => {
   return (
     <div className={clsx('single-header-style-video', className)}>
       <VideoPlayer videoUrl={post.videoUrl} />
       <div className="container mt-10 pb-5">
-        <TitleAndMeta post={post} />
+        <TitleAndMeta post={post} shareSettings={shareSettings} />
       </div>
     </div>
   )
 }
 
-const HeaderGallery = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
+const HeaderGallery = ({ className, post, shareSettings }: Omit<Props, 'headerStyle'>) => {
   return (
     <>
       <div className="container">
@@ -218,7 +218,7 @@ const HeaderGallery = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
       <div className={clsx('single-header-style-gallery mt-10 lg:mt-16', className)}>
         <div className="container">
           <div className="mx-auto max-w-4xl">
-            <TitleAndMeta post={post} />
+            <TitleAndMeta post={post} shareSettings={shareSettings} />
           </div>
         </div>
         <GalleryImages images={post.galleryImgs} gridType="grid3" />
@@ -227,24 +227,24 @@ const HeaderGallery = ({ className, post }: Omit<Props, 'defaultStyle'>) => {
   )
 }
 
-const SingleHeaderContainer: FC<Props> = ({ className, post, headerStyle = 'style1' }) => {
+const SingleHeaderContainer: FC<Props> = ({ className, post, headerStyle = 'style1', shareSettings }) => {
   if ((post.postType === 'audio' && post.audioUrl) || headerStyle === 'audio') {
-    return <HeaderAudio className={className} post={post} />
+    return <HeaderAudio className={className} post={post} shareSettings={shareSettings} />
   }
 
   if ((post.postType === 'video' && post.videoUrl) || headerStyle === 'video') {
-    return <HeaderVideo className={className} post={post} />
+    return <HeaderVideo className={className} post={post} shareSettings={shareSettings} />
   }
 
   if ((post.postType === 'gallery' && post.galleryImgs) || headerStyle === 'gallery') {
-    return <HeaderGallery className={className} post={post} />
+    return <HeaderGallery className={className} post={post} shareSettings={shareSettings} />
   }
 
   return (
     <>
-      {headerStyle === 'style1' && <HeaderStyle1 className={className} post={post} />}
-      {headerStyle === 'style2' && <HeaderStyle2 className={className} post={post} />}
-      {headerStyle === 'style3' && <HeaderStyle3 className={className} post={post} />}
+      {headerStyle === 'style1' && <HeaderStyle1 className={className} post={post} shareSettings={shareSettings} />}
+      {headerStyle === 'style2' && <HeaderStyle2 className={className} post={post} shareSettings={shareSettings} />}
+      {headerStyle === 'style3' && <HeaderStyle3 className={className} post={post} shareSettings={shareSettings} />}
     </>
   )
 }

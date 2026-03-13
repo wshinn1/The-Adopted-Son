@@ -2,9 +2,11 @@ import WidgetAuthors from '@/components/WidgetAuthors'
 import WidgetCategories from '@/components/WidgetCategories'
 import WidgetPosts from '@/components/WidgetPosts'
 import WidgetTags from '@/components/WidgetTags'
+import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
 import { getAuthors } from '@/data/authors'
 import { getCategories, getTags } from '@/data/categories'
 import { getAllPosts, getCommentsByPostId, getPostByHandle } from '@/data/posts'
+import { getSiteSettings } from '@/lib/site-settings'
 import { Metadata } from 'next'
 import SingleContentContainer from '../SingleContentContainer'
 import SingleHeaderContainer from '../SingleHeaderContainer'
@@ -31,6 +33,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const comments = await getCommentsByPostId(post.id)
   const relatedPosts = (await getAllPosts()).slice(0, 6)
   const moreFromAuthorPosts = (await getAllPosts()).slice(1, 7)
+  const settings = await getSiteSettings()
 
   const widgetPosts = (await getAllPosts()).slice(0, 6)
   const widgetCategories = (await getCategories()).slice(0, 6)
@@ -40,7 +43,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   return (
     <>
       <div className="single-post-page">
-        <SingleHeaderContainer post={post} />
+        <SingleHeaderContainer post={post} shareSettings={settings.share_buttons} />
 
         <div className="container mt-12 flex flex-col lg:flex-row">
           <div className="w-full lg:w-3/5 xl:w-2/3 xl:pe-20">
@@ -55,6 +58,21 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
             </div>
           </div>
         </div>
+
+        {/* Newsletter Signup */}
+        {settings.show_newsletter_on_posts && (
+          <NewsletterSignUp
+            data={{
+              heading: 'Stay Connected',
+              subheading: 'Get the latest posts and updates delivered to your inbox.',
+              button_text: 'Subscribe',
+              success_message: 'Thank you for subscribing! Check your inbox for confirmation.',
+              background_color: '#F5F2ED',
+              background_image_url: '',
+              text_color: '#1a1a1a',
+            }}
+          />
+        )}
 
         <SingleRelatedPosts relatedPosts={relatedPosts} moreFromAuthorPosts={moreFromAuthorPosts} />
       </div>
