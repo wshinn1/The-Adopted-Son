@@ -31,27 +31,43 @@ export async function POST(request: NextRequest) {
     .eq('id', profileId)
     .single()
 
+  // If no subscription ID in DB, just clean up the DB record and return success
   if (!sub?.stripe_subscription_id) {
-    return NextResponse.json({ error: 'No Stripe subscription found for this user' }, { status: 404 })
-  }
-
-  // Cancel in Stripe
-  const cancelled = await stripe.subscriptions.update(sub.stripe_subscription_id, {
-    cancel_at_period_end: atPeriodEnd,
-  })
-
-  // If immediate cancellation, also update Supabase directly (webhook will confirm)
-  if (!atPeriodEnd) {
-    await stripe.subscriptions.cancel(sub.stripe_subscription_id)
     await supabaseAdmin
       .from('profiles')
-      .update({ subscription_status: 'canceled', subscription_plan: null })
+      .update({ subscription_status: 'canceled', subscription_plan: null, stripe_subscription_id: null })
       .eq('id', profileId)
+    return NextResponse.json({ success: true, stale: true })
   }
 
-  return NextResponse.json({
-    success: true,
-    cancelAtPeriodEnd: cancelled.cancel_at_period_end,
-    periodEnd: new Date(cancelled.current_period_end * 1000).toISOString(),
-  })
+  // Try to cancel in Stripe — if subscription doesn't exist (e.g. sandbox ID in live mode), clean up DB anyway
+  try {
+    if (atPeriodEnd) {
+      const cancelled = await stripe.subscriptions.update(sub.stripe_subscription_id, {
+        cancel_at_period_end: true,
+      })
+      return NextResponse.json({
+        success: true,
+        cancelAtPeriodEnd: cancelled.cancel_at_period_end,
+        periodEnd: new Date(cancelled.current_period_end * 1000).toISOString(),
+      })
+    } else {
+      await stripe.subscriptions.cancel(sub.stripe_subscription_id)
+      await supabaseAdmin
+        .from('profiles')
+        .update({ subscription_status: 'canceled', subscription_plan: null, stripe_subscription_id: null })
+        .eq('id', profileId)
+      return NextResponse.json({ success: true, cancelAtPeriodEnd: false })
+    }
+  } catch (err: any) {
+    // Stripe subscription not found (e.g. stale test/sandbox ID) — clean up DB record
+    if (err?.code === 'resource_missing' || err?.statusCode === 404) {
+      await supabaseAdmin
+        .from('profiles')
+        .update({ subscription_status: 'canceled', subscription_plan: null, stripe_subscription_id: null })
+        .eq('id', profileId)
+      return NextResponse.json({ success: true, stale: true })
+    }
+    throw err
+  }
 }
