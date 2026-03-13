@@ -10,7 +10,9 @@ const POSTHOG_URL = 'https://us.posthog.com'
 
 export default function AnalyticsStats() {
   const { data, error, isLoading } = useSWR('/api/analytics', fetcher, {
-    refreshInterval: 60000, // refresh every 60s for near-realtime
+    refreshInterval: 10000, // refresh every 10s for near-realtime updates
+    revalidateOnFocus: true,
+    dedupingInterval: 5000,
   })
 
   return (
