@@ -25,7 +25,7 @@ export default function NewPagePage() {
     setSlug(generatedSlug)
   }
 
-  const handleCreate = async () => {
+  const handleCreate = async (publish: boolean) => {
     if (!title.trim() || !slug.trim()) {
       alert('Please enter a title and slug')
       return
@@ -39,7 +39,7 @@ export default function NewPagePage() {
           title: title.trim(),
           slug: slug.trim(),
           content: {},
-          is_published: false,
+          is_published: publish,
           is_homepage: false,
         })
         .select()
@@ -104,13 +104,20 @@ export default function NewPagePage() {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center gap-3">
+        <div className="mt-6 flex items-center gap-3 flex-wrap">
           <button
-            onClick={handleCreate}
+            onClick={() => handleCreate(true)}
+            disabled={saving || !title.trim() || !slug.trim()}
+            className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50"
+          >
+            {saving ? 'Creating...' : 'Create & Publish'}
+          </button>
+          <button
+            onClick={() => handleCreate(false)}
             disabled={saving || !title.trim() || !slug.trim()}
             className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50"
           >
-            {saving ? 'Creating...' : 'Create Page & Add Sections'}
+            {saving ? 'Creating...' : 'Save as Draft'}
           </button>
           <button
             onClick={() => router.back()}

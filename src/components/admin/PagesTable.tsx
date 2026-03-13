@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Home, Trash2 } from 'lucide-react'
+import { Home, Trash2, Globe, FileText } from 'lucide-react'
+import { createBrowserClient } from '@supabase/ssr'
 
 interface Page {
   id: string
@@ -22,7 +23,27 @@ export default function PagesTable({ initialPages }: Props) {
   const [pages, setPages] = useState<Page[]>(initialPages)
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  const togglePublish = async (page: Page) => {
+    setTogglingId(page.id)
+    const newStatus = !page.is_published
+    const { error } = await supabase
+      .from('pages')
+      .update({ is_published: newStatus })
+      .eq('id', page.id)
+    if (!error) {
+      setPages((prev) => prev.map((p) => p.id === page.id ? { ...p, is_published: newStatus } : p))
+      router.refresh()
+    }
+    setTogglingId(null)
+  }
 
   const pageToDelete = pages.find((p) => p.id === confirmId)
 
@@ -72,9 +93,15 @@ export default function PagesTable({ initialPages }: Props) {
                   {page.is_homepage ? '/ (homepage)' : `/${page.slug}`}
                 </td>
                 <td className="px-5 py-3.5">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${page.is_published ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400' : 'bg-neutral-100 text-neutral-500'}`}>
+                  <button
+                    onClick={() => togglePublish(page)}
+                    disabled={togglingId === page.id}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${page.is_published ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-950 dark:text-green-400' : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 dark:bg-neutral-800'}`}
+                    title={page.is_published ? 'Click to revert to draft' : 'Click to publish'}
+                  >
+                    {page.is_published ? <Globe className="size-3" /> : <FileText className="size-3" />}
                     {page.is_published ? 'Published' : 'Draft'}
-                  </span>
+                  </button>
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center justify-end gap-3">
