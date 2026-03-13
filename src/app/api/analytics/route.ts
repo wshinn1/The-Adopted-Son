@@ -33,7 +33,7 @@ async function runQuery(query: string) {
 
 export async function GET() {
   try {
-    const [pageviewRows, uniqueRows, topPagesRows, last30Rows] = await Promise.all([
+    const [pageviewRows, uniqueRows, topPagesRows, last30Rows, countriesRows, citiesRows] = await Promise.all([
       // Total pageviews last 30 days
       runQuery(`
         SELECT count() as total
@@ -48,7 +48,7 @@ export async function GET() {
         WHERE event = '$pageview'
           AND timestamp >= now() - interval 30 day
       `),
-      // Top 5 pages last 30 days
+      // Top 10 pages last 30 days
       runQuery(`
         SELECT properties.$pathname as page, count() as views
         FROM events
@@ -56,7 +56,7 @@ export async function GET() {
           AND timestamp >= now() - interval 30 day
         GROUP BY page
         ORDER BY views DESC
-        LIMIT 5
+        LIMIT 10
       `),
       // Pageviews per day last 7 days
       runQuery(`
@@ -67,6 +67,32 @@ export async function GET() {
         GROUP BY day
         ORDER BY day ASC
       `),
+      // Top countries last 30 days
+      runQuery(`
+        SELECT properties.$geoip_country_name as country, count() as views
+        FROM events
+        WHERE event = '$pageview'
+          AND timestamp >= now() - interval 30 day
+          AND properties.$geoip_country_name IS NOT NULL
+        GROUP BY country
+        ORDER BY views DESC
+        LIMIT 10
+      `),
+      // Top cities (with state/country) last 30 days
+      runQuery(`
+        SELECT 
+          properties.$geoip_city_name as city,
+          properties.$geoip_subdivision_1_name as state,
+          properties.$geoip_country_code as country_code,
+          count() as views
+        FROM events
+        WHERE event = '$pageview'
+          AND timestamp >= now() - interval 30 day
+          AND properties.$geoip_city_name IS NOT NULL
+        GROUP BY city, state, country_code
+        ORDER BY views DESC
+        LIMIT 10
+      `),
     ])
 
     return NextResponse.json({
@@ -74,6 +100,13 @@ export async function GET() {
       uniqueVisitors: uniqueRows?.[0]?.[0] ?? 0,
       topPages: topPagesRows?.map((r: [string, number]) => ({ page: r[0], views: r[1] })) ?? [],
       dailyViews: last30Rows?.map((r: [string, number]) => ({ day: r[0], views: r[1] })) ?? [],
+      topCountries: countriesRows?.map((r: [string, number]) => ({ country: r[0], views: r[1] })) ?? [],
+      topCities: citiesRows?.map((r: [string, string, string, number]) => ({ 
+        city: r[0], 
+        state: r[1], 
+        countryCode: r[2], 
+        views: r[3] 
+      })) ?? [],
     })
   } catch (e) {
     console.error('[v0] PostHog API error:', e)
