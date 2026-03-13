@@ -1,6 +1,9 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createBrowserClient } from '@supabase/ssr'
 
 export interface BlogGallery1Data {
   heading: string
@@ -10,33 +13,68 @@ export interface BlogGallery1Data {
   show_featured_banner: boolean
 }
 
-async function getRecentDevotionals(count: number) {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('devotionals')
-    .select(`
-      id, title, slug, excerpt, cover_image_url, published_at,
-      devotional_categories (
-        categories ( name )
-      )
-    `)
-    .eq('is_published', true)
-    .order('published_at', { ascending: false })
-    .limit(count + 1) // fetch one extra for featured banner
-  return data || []
+interface Devotional {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  cover_image_url: string | null
+  published_at: string | null
+  devotional_categories: { categories: { name: string } | null }[]
 }
 
 interface BlogGallery1Props {
   data: BlogGallery1Data
 }
 
-export default async function BlogGallery1({ data }: BlogGallery1Props) {
+export default function BlogGallery1({ data }: BlogGallery1Props) {
+  const [devotionals, setDevotionals] = useState<Devotional[]>([])
+  const [loading, setLoading] = useState(true)
+
   const count = data.post_count || 3
   const showBanner = data.show_featured_banner !== false
-  const devotionals = await getRecentDevotionals(showBanner ? count + 1 : count)
+
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    )
+
+    supabase
+      .from('devotionals')
+      .select(`
+        id, title, slug, excerpt, cover_image_url, published_at,
+        devotional_categories (
+          categories ( name )
+        )
+      `)
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .limit(showBanner ? count + 1 : count)
+      .then(({ data: rows }) => {
+        setDevotionals(rows || [])
+        setLoading(false)
+      })
+  }, [count, showBanner])
 
   const featured = showBanner ? devotionals[0] : null
   const grid = showBanner ? devotionals.slice(1, count + 1) : devotionals.slice(0, count)
+
+  if (loading) {
+    return (
+      <section className="w-full py-16 px-6 md:px-12 lg:px-24">
+        <div className="grid gap-8 md:grid-cols-3">
+          {Array.from({ length: count }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-[4/3] rounded-xl bg-neutral-200 mb-4" />
+              <div className="h-4 bg-neutral-200 rounded mb-2 w-3/4 mx-auto" />
+              <div className="h-3 bg-neutral-100 rounded w-1/3 mx-auto" />
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section
@@ -90,7 +128,7 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
 
       {/* Card grid */}
       <div className={`grid gap-8 ${count === 2 ? 'md:grid-cols-2' : count >= 3 ? 'md:grid-cols-3' : 'grid-cols-1'}`}>
-        {grid.map((post: any) => {
+        {grid.map((post) => {
           const category = post.devotional_categories?.[0]?.categories?.name
           const date = post.published_at
             ? new Date(post.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -99,7 +137,6 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
           return (
             <Link key={post.id} href={`/devotionals/${post.slug}`} className="group block">
               <article>
-                {/* Image */}
                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-4 bg-neutral-100">
                   {post.cover_image_url ? (
                     <>
@@ -110,7 +147,6 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                         unoptimized
                       />
-                      {/* Category badge overlay */}
                       {category && (
                         <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4">
                           <span className="bg-primary-600 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5">
@@ -125,13 +161,9 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                     </div>
                   )}
                 </div>
-
-                {/* Title */}
                 <h3 className="text-lg font-bold text-neutral-900 font-heading text-center leading-snug group-hover:text-primary-600 transition-colors">
                   {post.title}
                 </h3>
-
-                {/* Date */}
                 {date && (
                   <p className="text-sm text-neutral-400 font-body text-center mt-2">{date}</p>
                 )}
