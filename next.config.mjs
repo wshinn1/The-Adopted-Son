@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    // Force Turbopack cache invalidation
+    turbotrace: { logLevel: 'error' },
+  },
   images: {
     minimumCacheTTL: 2678400 * 6,
     remotePatterns: [
