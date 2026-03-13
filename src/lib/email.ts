@@ -254,12 +254,12 @@ export async function sendNewsletterWelcomeEmail(email: string, firstName: strin
     </ul>
   </div>
 
-  <a href="https://theadoptedson.com/signup" style="display: inline-block; background: #1a1a1a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
+  <a href="https://theadoptedson.com/auth/sign-up" style="display: inline-block; background: #1a1a1a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
     Create Your Free Account
   </a>
 
   <p style="font-size: 14px; color: #999; margin-top: 8px;">
-    Already have an account? <a href="https://theadoptedson.com/login" style="color: #555;">Sign in here</a>.
+    Already have an account? <a href="https://theadoptedson.com/auth/login" style="color: #555;">Sign in here</a>.
   </p>
 
   <p style="font-size: 14px; color: #aaa; margin-top: 48px; padding-top: 24px; border-top: 1px solid #e5e5e5;">
@@ -274,6 +274,106 @@ export async function sendNewsletterWelcomeEmail(email: string, firstName: strin
     return { success: true }
   } catch (error) {
     console.error('Failed to send newsletter welcome email:', error)
+    return { success: false, error }
+  }
+}
+
+export async function sendContactFormAdmin({
+  name,
+  email,
+  message,
+}: {
+  name: string
+  email: string
+  message: string
+}) {
+  try {
+    await resend.emails.send({
+      from: NOREPLY_EMAIL,
+      to: ADMIN_EMAIL,
+      replyTo: email,
+      subject: `New Contact Form Submission from ${name}`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: -apple-system, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+  <h2 style="margin-bottom: 24px;">New Contact Form Submission</h2>
+  <p><strong>Name:</strong> ${name}</p>
+  <p><strong>Email:</strong> <a href="mailto:${email}" style="color: #1a1a1a;">${email}</a></p>
+  <div style="background: #f5f2ed; padding: 20px; border-radius: 8px; margin-top: 16px;">
+    <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+  </div>
+  <p style="font-size: 13px; color: #999; margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e5e5;">
+    Submitted ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} ET
+  </p>
+</body>
+</html>
+      `,
+    })
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send contact admin email:', error)
+    return { success: false, error }
+  }
+}
+
+export async function sendContactFormConfirmation({
+  name,
+  email,
+}: {
+  name: string
+  email: string
+}) {
+  try {
+    await resend.emails.send({
+      from: NOREPLY_EMAIL,
+      to: email,
+      subject: 'We received your message — The Adopted Son',
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Georgia, serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+  <h1 style="font-size: 26px; font-weight: normal; margin-bottom: 8px;">Thanks for reaching out, ${name}.</h1>
+  <p style="font-size: 16px; color: #555; margin-bottom: 24px;">
+    We received your message and will get back to you as soon as possible.
+  </p>
+
+  <p style="font-size: 16px; margin-bottom: 16px;">
+    While you wait, we'd love to invite you to explore The Adopted Son — a collection of devotionals written to encourage you in your identity as a child of God.
+  </p>
+
+  <div style="background: #f5f2ed; padding: 28px; border-radius: 12px; margin: 24px 0;">
+    <h3 style="font-size: 17px; font-weight: bold; margin: 0 0 12px 0;">Start with a free account:</h3>
+    <ul style="margin: 0; padding-left: 20px; font-size: 15px; color: #333;">
+      <li style="margin-bottom: 8px;">Free 14-day trial of all premium content</li>
+      <li style="margin-bottom: 8px;">New devotionals delivered to your inbox</li>
+      <li style="margin-bottom: 8px;">Save and bookmark your favorites</li>
+    </ul>
+  </div>
+
+  <a href="https://theadoptedson.com/auth/sign-up" style="display: inline-block; background: #1a1a1a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
+    Create a Free Account
+  </a>
+
+  <p style="font-size: 14px; color: #999; margin-top: 8px;">
+    Already have an account? <a href="https://theadoptedson.com/auth/login" style="color: #555;">Sign in here</a>.
+  </p>
+
+  <p style="font-size: 14px; color: #aaa; margin-top: 48px; padding-top: 24px; border-top: 1px solid #e5e5e5;">
+    <a href="https://theadoptedson.com" style="color: #aaa;">theadoptedson.com</a>
+  </p>
+</body>
+</html>
+      `,
+    })
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to send contact confirmation email:', error)
     return { success: false, error }
   }
 }
