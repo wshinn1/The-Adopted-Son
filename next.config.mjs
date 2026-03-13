@@ -1,9 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: '/vercel/share/v0-project/.next',
-  turbopack: {
-    root: '/vercel/share/v0-project',
-  },
   images: {
     minimumCacheTTL: 2678400 * 6,
     remotePatterns: [
