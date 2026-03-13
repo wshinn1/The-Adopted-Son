@@ -5,8 +5,15 @@ import { PostHogProvider as PHProvider } from 'posthog-js/react'
 import { useEffect, useRef } from 'react'
 import { getConsentStatus, type ConsentStatus } from './CookieConsent'
 
-// Module-level flag to prevent re-initialization across re-renders
-let posthogInitialized = false
+// Check if PostHog is already initialized using its internal state
+const isPostHogInitialized = () => {
+  try {
+    // PostHog sets __loaded when initialized
+    return !!(posthog as unknown as { __loaded?: boolean }).__loaded
+  } catch {
+    return false
+  }
+}
 
 export default function PostHogProvider({ children }: { children: React.ReactNode }) {
   const hasSetupListener = useRef(false)
@@ -16,7 +23,8 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
     hasSetupListener.current = true
 
     const initPostHog = () => {
-      if (posthogInitialized) return
+      // Check PostHog's internal state to prevent re-init
+      if (isPostHogInitialized()) return
       
       const key = process.env.NEXT_PUBLIC_POSTHOG_KEY
       const host = process.env.NEXT_PUBLIC_POSTHOG_HOST
@@ -29,7 +37,6 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
         capture_pageleave: true,
         persistence: 'localStorage+cookie',
       })
-      posthogInitialized = true
     }
 
     // Check initial consent status
@@ -42,7 +49,7 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
     const handleConsentChange = (e: CustomEvent<ConsentStatus>) => {
       if (e.detail === 'accepted') {
         initPostHog()
-      } else if (e.detail === 'declined' && posthogInitialized) {
+      } else if (e.detail === 'declined' && isPostHogInitialized()) {
         posthog.opt_out_capturing()
       }
     }
