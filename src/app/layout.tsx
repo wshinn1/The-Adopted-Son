@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import { Be_Vietnam_Pro } from 'next/font/google'
 import ThemeProvider from './theme-provider'
 import FontProvider from '@/components/FontProvider'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ['latin'],
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div>{children}</div>
           </FontProvider>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   )
