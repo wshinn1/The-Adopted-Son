@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  distDir: '/vercel/share/v0-project/.next',
   turbopack: {
     root: '/vercel/share/v0-project',
   },
