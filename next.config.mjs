@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  turbopack: {
-    root: '/vercel/share/v0-project',
+  experimental: {
+    // Force Turbopack cache invalidation
+    turbotrace: { logLevel: 'error' },
   },
   images: {
     minimumCacheTTL: 2678400 * 6,

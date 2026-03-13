@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --no-turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -54,6 +54,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.577.0",
     "next": "^16.1.1",
+    "posthog-js": "^1.240.6",
     "react": "^19.2.3",
     "react-aria": "^3.41.1",
     "react-dom": "^19.2.3",
@@ -61,12 +62,12 @@
     "react-stately": "^3.39.0",
     "react-swipeable": "^7.0.2",
     "react-use": "^17.6.0",
-    "posthog-js": "^1.240.6",
     "resend": "^4.0.0",
     "sass": "^1.97.2",
     "server-only": "^0.0.1",
     "sharp": "^0.33.5",
     "stripe": "^17.7.0",
+    "swr": "^2.4.1",
     "typescript": "5.2.2"
   },
   "devDependencies": {
