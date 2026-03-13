@@ -9,12 +9,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('devotionals')
-    .select(`
-      id, title, slug, excerpt, cover_image_url, published_at,
-      devotional_categories (
-        categories ( name )
-      )
-    `)
+    .select('id, title, slug, excerpt, cover_image_url, published_at, category')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
     .limit(limit)

@@ -19,7 +19,7 @@ interface Devotional {
   excerpt: string | null
   cover_image_url: string | null
   published_at: string | null
-  devotional_categories: { categories: { name: string } | null }[]
+  category: string | null
 }
 
 interface BlogGallery1Props {
@@ -35,21 +35,13 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
 
   useEffect(() => {
     const fetchLimit = showBanner ? count + 1 : count
-    console.log('[v0] BlogGallery1 mounting, fetching', fetchLimit, 'devotionals')
     fetch(`/api/devotionals/recent?limit=${fetchLimit}`)
-      .then((r) => {
-        console.log('[v0] BlogGallery1 API response status:', r.status)
-        return r.json()
-      })
-      .then(({ devotionals: rows, error }) => {
-        console.log('[v0] BlogGallery1 devotionals received:', rows?.length, 'error:', error)
+      .then((r) => r.json())
+      .then(({ devotionals: rows }) => {
         setDevotionals(rows || [])
         setLoading(false)
       })
-      .catch((err) => {
-        console.log('[v0] BlogGallery1 fetch error:', err.message)
-        setLoading(false)
-      })
+      .catch(() => setLoading(false))
   }, [count, showBanner])
 
   const featured = showBanner ? devotionals[0] : null
@@ -76,7 +68,6 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
       className="w-full py-16 px-6 md:px-12 lg:px-24"
       style={{ backgroundColor: data.background_color || '#ffffff' }}
     >
-      {/* Section heading */}
       {(data.heading || data.subheading) && (
         <div className="mb-10 text-center">
           {data.heading && (
@@ -106,9 +97,9 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
           </div>
           <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-12 max-w-2xl">
-            {(featured.devotional_categories as any)?.[0]?.categories?.name && (
+            {featured.category && (
               <span className="inline-block bg-primary-600 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded mb-3 w-fit">
-                {(featured.devotional_categories as any)[0].categories.name}
+                {featured.category}
               </span>
             )}
             <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold font-heading leading-snug mb-4">
@@ -124,7 +115,6 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
       {/* Card grid */}
       <div className={`grid gap-8 ${count === 2 ? 'md:grid-cols-2' : count >= 3 ? 'md:grid-cols-3' : 'grid-cols-1'}`}>
         {grid.map((post) => {
-          const category = post.devotional_categories?.[0]?.categories?.name
           const date = post.published_at
             ? new Date(post.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
             : null
@@ -142,10 +132,10 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                         unoptimized
                       />
-                      {category && (
+                      {post.category && (
                         <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4">
                           <span className="bg-primary-600 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5">
-                            {category}
+                            {post.category}
                           </span>
                         </div>
                       )}
