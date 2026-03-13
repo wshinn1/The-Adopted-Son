@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
-import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X } from 'lucide-react'
+import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X, Globe, FileText } from 'lucide-react'
 import SectionEditor from './SectionEditor'
 import Image from 'next/image'
 
@@ -101,6 +101,25 @@ export default function PageEditor({ page, sections: initialSections, templates 
       showNotification('Upload failed', 'error')
     } finally {
       setOgImageUploading(false)
+    }
+  }
+
+  const togglePublish = async () => {
+    const newStatus = !pageData.is_published
+    setSaving(true)
+    try {
+      const { error } = await supabase
+        .from('pages')
+        .update({ is_published: newStatus })
+        .eq('id', page.id)
+      if (error) throw error
+      setPageData({ ...pageData, is_published: newStatus })
+      router.refresh()
+      showNotification(newStatus ? 'Page published successfully!' : 'Page saved as draft.')
+    } catch {
+      showNotification('Error updating publish status', 'error')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -299,17 +318,46 @@ export default function PageEditor({ page, sections: initialSections, templates 
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-          Edit Page: {page.title}
-        </h1>
-        <a
-          href={page.is_homepage ? '/' : `/${page.slug}`}
-          target="_blank"
-          className="text-sm text-primary-600 hover:text-primary-700"
-        >
-          View page →
-        </a>
+      <div className="flex items-start justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+            Edit Page: {page.title}
+          </h1>
+          <div className="flex items-center gap-3 mt-2">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${pageData.is_published ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400' : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800'}`}>
+              {pageData.is_published ? <Globe className="size-3" /> : <FileText className="size-3" />}
+              {pageData.is_published ? 'Published' : 'Draft'}
+            </span>
+            <a
+              href={page.is_homepage ? '/' : `/${page.slug}`}
+              target="_blank"
+              className="text-sm text-primary-600 hover:text-primary-700"
+            >
+              View page →
+            </a>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {pageData.is_published ? (
+            <button
+              onClick={togglePublish}
+              disabled={saving}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+            >
+              <FileText className="size-4" />
+              Revert to Draft
+            </button>
+          ) : (
+            <button
+              onClick={togglePublish}
+              disabled={saving}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+            >
+              <Globe className="size-4" />
+              Publish Page
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Page Settings */}
@@ -354,18 +402,8 @@ export default function PageEditor({ page, sections: initialSections, templates 
           />
         </div>
 
-        <div className="mt-4 flex items-center gap-6">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={pageData.is_published}
-              onChange={(e) => setPageData({ ...pageData, is_published: e.target.checked })}
-              className="rounded"
-            />
-            <span className="text-sm text-neutral-700 dark:text-neutral-300">Published</span>
-          </label>
-          
-          <label className="flex items-center gap-2 cursor-pointer">
+        <div className="mt-4">
+          <label className="flex items-center gap-2 cursor-pointer w-fit">
             <input
               type="checkbox"
               checked={pageData.is_homepage}
