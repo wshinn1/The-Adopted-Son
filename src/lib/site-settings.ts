@@ -13,6 +13,7 @@ export interface SiteSettings {
     heading_font: string
     body_font: string
   }
+  show_newsletter_on_posts: boolean
 }
 
 const defaults: SiteSettings = {
@@ -32,6 +33,7 @@ const defaults: SiteSettings = {
     heading_font: 'font-sans',
     body_font: 'font-serif',
   },
+  show_newsletter_on_posts: true,
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -65,6 +67,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     footer_text: settings.footer_text || defaults.footer_text,
     social_links: settings.social_links || defaults.social_links,
     typography: settings.typography || defaults.typography,
+    show_newsletter_on_posts: settings.show_newsletter_on_posts !== false,
   }
 }
 

@@ -2,6 +2,7 @@ import BlogPostPage from '@/components/blog/BlogPostPage'
 import PaywallGate from '@/components/devotional/PaywallGate'
 import TrialBanner from '@/components/devotional/TrialBanner'
 import HamburgerHeader from '@/components/HamburgerHeader'
+import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
 import { getSiteSettings } from '@/lib/site-settings'
 import { checkAccess } from '@/lib/trial'
@@ -162,6 +163,21 @@ export default async function DevotionalPage({ params }: Props) {
             <PaywallGate reason={access.reason} />
           </div>
         )}
+
+      {/* Newsletter Signup */}
+      {settings.show_newsletter_on_posts && canRead && (
+        <NewsletterSignUp
+          data={{
+            heading: 'Stay Connected',
+            subheading: 'Get daily devotionals and spiritual encouragement delivered to your inbox.',
+            button_text: 'Subscribe',
+            success_message: 'Thank you for subscribing! Check your inbox for confirmation.',
+            background_color: '#F5F2ED',
+            background_image_url: '',
+            text_color: '#1a1a1a',
+          }}
+        />
+      )}
 
       {/* Related Posts */}
       {relatedPosts.length > 0 && canRead && (

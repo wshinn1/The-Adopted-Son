@@ -57,6 +57,7 @@ export default function SiteSettingsPage() {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   const [headingFont, setHeadingFont] = useState('font-sans')
   const [bodyFont, setBodyFont] = useState('font-serif')
+  const [showNewsletterOnPosts, setShowNewsletterOnPosts] = useState(true)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [seedingTemplates, setSeedingTemplates] = useState(false)
@@ -140,6 +141,7 @@ export default function SiteSettingsPage() {
       setSocialLinks(settings.social_links || [])
       setHeadingFont(settings.typography?.heading_font || 'font-sans')
       setBodyFont(settings.typography?.body_font || 'font-serif')
+      setShowNewsletterOnPosts(settings.show_newsletter_on_posts !== false)
     } catch (err) {
       console.error('Error loading settings:', err)
     } finally {
@@ -167,6 +169,7 @@ export default function SiteSettingsPage() {
       await saveSetting('favicon_url', faviconUrl)
       await saveSetting('social_links', socialLinks)
       await saveSetting('typography', { heading_font: headingFont, body_font: bodyFont })
+      await saveSetting('show_newsletter_on_posts', showNewsletterOnPosts)
       alert('Settings saved!')
     } catch (err) {
       console.error('Error saving settings:', err)
@@ -570,6 +573,37 @@ export default function SiteSettingsPage() {
             {socialLinks.length === 0 && (
               <p className="text-sm text-neutral-500">No social links added yet.</p>
             )}
+          </div>
+        </div>
+
+        {/* Blog Settings */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">Blog Settings</h2>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Newsletter Signup on Posts
+                </label>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Show email subscribe form at the end of blog posts and devotionals
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowNewsletterOnPosts(!showNewsletterOnPosts)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  showNewsletterOnPosts ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    showNewsletterOnPosts ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
 
