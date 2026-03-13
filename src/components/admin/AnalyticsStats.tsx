@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { BarChart2, Users, Eye, TrendingUp, ExternalLink, Globe, MapPin, RefreshCw } from 'lucide-react'
+import { BarChart2, Users, Eye, TrendingUp, ExternalLink, Globe, MapPin, RefreshCw, Activity } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -44,6 +44,27 @@ export default function AnalyticsStats() {
           Refresh now
         </button>
       </div>
+      {/* Active users - real-time indicator */}
+      <div className="rounded-xl border-2 border-green-500/30 bg-green-50 dark:bg-green-950/20 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Activity className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            </div>
+            <div>
+              <p className="text-xs text-green-700 dark:text-green-400 font-medium">Active Now (last 5 min)</p>
+              <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                {isLoading ? '...' : error ? '—' : data?.activeUsers ?? 0}
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-green-600/70 dark:text-green-400/70">
+            Visitors must accept cookies to be tracked
+          </p>
+        </div>
+      </div>
+
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard

@@ -3,6 +3,39 @@ import { NextResponse } from 'next/server'
 const PROJECT_ID = '341992'
 const POSTHOG_URL = 'https://us.posthog.com'
 
+// Fetch active users in the last 5 minutes (more real-time)
+async function getActiveUsers() {
+  const apiKey = process.env.POSTHOG_PERSONAL_API_KEY
+  if (!apiKey) return 0
+  
+  try {
+    const res = await fetch(`${POSTHOG_URL}/api/projects/${PROJECT_ID}/query/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: `
+            SELECT count(distinct distinct_id) as active
+            FROM events
+            WHERE timestamp >= now() - interval 5 minute
+          `
+        }
+      }),
+      cache: 'no-store',
+    })
+    
+    if (!res.ok) return 0
+    const json = await res.json()
+    return json.results?.[0]?.[0] ?? 0
+  } catch {
+    return 0
+  }
+}
+
 async function runQuery(query: string) {
   const apiKey = process.env.POSTHOG_PERSONAL_API_KEY
   if (!apiKey) {
@@ -33,7 +66,8 @@ async function runQuery(query: string) {
 
 export async function GET() {
   try {
-    const [pageviewRows, uniqueRows, topPagesRows, last30Rows, countriesRows, citiesRows] = await Promise.all([
+    const [activeUsers, pageviewRows, uniqueRows, topPagesRows, last30Rows, countriesRows, citiesRows] = await Promise.all([
+      getActiveUsers(),
       // Total pageviews last 30 days
       runQuery(`
         SELECT count() as total
@@ -96,6 +130,7 @@ export async function GET() {
     ])
 
     return NextResponse.json({
+      activeUsers,
       pageviews: pageviewRows?.[0]?.[0] ?? 0,
       uniqueVisitors: uniqueRows?.[0]?.[0] ?? 0,
       topPages: topPagesRows?.map((r: [string, number]) => ({ page: r[0], views: r[1] })) ?? [],

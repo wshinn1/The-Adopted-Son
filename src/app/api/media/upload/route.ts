@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     access: 'public',
   })
 
-  // Save to media table
+  // Save to media table - use actual database columns
   const { data: mediaRecord, error } = await supabase
     .from('media')
     .insert({
