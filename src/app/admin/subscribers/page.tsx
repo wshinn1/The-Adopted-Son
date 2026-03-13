@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Metadata } from 'next'
 import NewsletterSubscribersTable from '@/components/admin/NewsletterSubscribersTable'
+import PaidSubscribersTable from '@/components/admin/PaidSubscribersTable'
 
 export const metadata: Metadata = { title: 'Subscribers — Admin' }
 
@@ -45,37 +46,7 @@ export default async function AdminSubscribersPage() {
         <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200 mb-4">
           Paid Subscribers ({subscribers?.length ?? 0})
         </h2>
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50">
-              <tr>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Name</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Email</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Plan</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Renews</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
-              {subscribers?.map((s) => (
-                <tr key={s.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/30">
-                  <td className="px-5 py-3.5 text-neutral-900 dark:text-neutral-100">{s.full_name ?? '—'}</td>
-                  <td className="px-5 py-3.5 text-neutral-500">{s.email}</td>
-                  <td className="px-5 py-3.5">
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 capitalize">
-                      {s.subscription_plan ?? s.subscription_status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-neutral-400 text-xs">
-                    {s.subscription_period_end ? new Date(s.subscription_period_end).toLocaleDateString() : '—'}
-                  </td>
-                </tr>
-              ))}
-              {(!subscribers || subscribers.length === 0) && (
-                <tr><td colSpan={4} className="px-5 py-8 text-center text-neutral-400 text-sm">No paid subscribers yet.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <PaidSubscribersTable initialSubscribers={subscribers ?? []} />
       </section>
 
       {/* Trial visitors */}
