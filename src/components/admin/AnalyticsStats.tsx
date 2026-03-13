@@ -70,7 +70,7 @@ export default function AnalyticsStats() {
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-neutral-400">No data yet.</p>
+            <p className="text-sm text-neutral-400">No data yet. Data will appear as visitors browse your site.</p>
           )}
         </div>
 
@@ -106,7 +106,7 @@ export default function AnalyticsStats() {
               })}
             </ul>
           ) : (
-            <p className="text-sm text-neutral-400">No data yet.</p>
+            <p className="text-sm text-neutral-400">No data yet. Data will appear as visitors browse your site.</p>
           )}
         </div>
       </div>

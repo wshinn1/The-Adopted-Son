@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export interface BlogGallery1Data {
   heading?: string
@@ -30,9 +30,8 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
   const showBanner = data.show_featured_banner !== false
   const fetchLimit = showBanner ? count + 1 : count
 
-  // Always fetch directly from Supabase — same as the devotionals listing page
-  const supabase = await createClient()
-  const { data: rows } = await supabase
+  // Use admin client to bypass RLS — same as the devotionals listing page
+  const { data: rows } = await supabaseAdmin
     .from('devotionals')
     .select('id, title, slug, excerpt, cover_image_url, published_at, category')
     .eq('is_published', true)
