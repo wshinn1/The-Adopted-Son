@@ -90,7 +90,7 @@ export default function PageEditor({ page, sections: initialSections, templates 
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData })
+      const res = await fetch('/api/media/upload', { method: 'POST', body: formData })
       const json = await res.json()
       if (json.url) {
         setPageData({ ...pageData, og_image_url: json.url })
