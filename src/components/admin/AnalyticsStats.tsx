@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { BarChart2, Users, Eye, TrendingUp, ExternalLink, Globe, MapPin } from 'lucide-react'
+import { BarChart2, Users, Eye, TrendingUp, ExternalLink, Globe, MapPin, RefreshCw } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -9,14 +10,40 @@ const PROJECT_ID = '341992'
 const POSTHOG_URL = 'https://us.posthog.com'
 
 export default function AnalyticsStats() {
-  const { data, error, isLoading } = useSWR('/api/analytics', fetcher, {
+  const { data, error, isLoading, isValidating, mutate } = useSWR('/api/analytics', fetcher, {
     refreshInterval: 10000, // refresh every 10s for near-realtime updates
     revalidateOnFocus: true,
     dedupingInterval: 5000,
   })
+  
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  
+  useEffect(() => {
+    if (data && !isLoading) {
+      setLastUpdated(new Date())
+    }
+  }, [data, isLoading])
 
   return (
     <div className="space-y-8">
+      {/* Status bar */}
+      <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
+        <div className="flex items-center gap-2">
+          {isValidating && (
+            <RefreshCw className="w-3 h-3 animate-spin" />
+          )}
+          <span>
+            {isLoading ? 'Loading...' : isValidating ? 'Updating...' : lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : ''}
+          </span>
+        </div>
+        <button 
+          onClick={() => mutate()}
+          className="flex items-center gap-1 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+        >
+          <RefreshCw className="w-3 h-3" />
+          Refresh now
+        </button>
+      </div>
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
