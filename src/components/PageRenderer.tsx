@@ -1,7 +1,4 @@
-'use client'
-
-import dynamic from 'next/dynamic'
-import type { ComponentType } from 'react'
+import SectionRenderer from '@/components/SectionRenderer'
 
 interface PageSection {
   id: string
@@ -18,42 +15,8 @@ interface PageRendererProps {
   sections: PageSection[]
 }
 
-const Home1 = dynamic(() => import('@/components/sections/Home1'), { ssr: false })
-const TextSection = dynamic(() => import('@/components/sections/TextSection'), { ssr: false })
-const BlogGallery1 = dynamic(() => import('@/components/sections/BlogGallery1'), { ssr: false })
-const NewsletterSignUp = dynamic(() => import('@/components/sections/NewsletterSignUp'), { ssr: false })
-
-const SECTION_MAP: Record<string, ComponentType<{ data: any }>> = {
-  Home1,
-  TextSection,
-  BlogGallery1,
-  NewsletterSignUp,
-}
-
+// PageRenderer is a Server Component — it passes serializable section data
+// down to SectionRenderer which is a Client Component with dynamic imports.
 export default function PageRenderer({ sections }: PageRendererProps) {
-  const sortedSections = [...sections].sort((a, b) => a.sort_order - b.sort_order)
-
-  return (
-    <>
-      {sortedSections.map((section) => {
-        if (!section.is_visible) return null
-
-        const template = Array.isArray(section.section_templates)
-          ? section.section_templates[0]
-          : section.section_templates
-
-        if (!template) return null
-
-        const Component = SECTION_MAP[template.component_name]
-        if (!Component) return null
-
-        const mergedData = {
-          ...template.default_data,
-          ...section.data,
-        }
-
-        return <Component key={section.id} data={mergedData} />
-      })}
-    </>
-  )
+  return <SectionRenderer sections={sections} />
 }
