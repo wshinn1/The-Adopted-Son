@@ -254,12 +254,12 @@ export async function sendNewsletterWelcomeEmail(email: string, firstName: strin
     </ul>
   </div>
 
-  <a href="https://theadoptedson.com/signup" style="display: inline-block; background: #1a1a1a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
+  <a href="https://theadoptedson.com/auth/sign-up" style="display: inline-block; background: #1a1a1a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; margin-bottom: 16px;">
     Create Your Free Account
   </a>
 
   <p style="font-size: 14px; color: #999; margin-top: 8px;">
-    Already have an account? <a href="https://theadoptedson.com/login" style="color: #555;">Sign in here</a>.
+    Already have an account? <a href="https://theadoptedson.com/auth/login" style="color: #555;">Sign in here</a>.
   </p>
 
   <p style="font-size: 14px; color: #aaa; margin-top: 48px; padding-top: 24px; border-top: 1px solid #e5e5e5;">
