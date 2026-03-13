@@ -62,22 +62,22 @@ export default function ContactForm1({ data }: ContactForm1Props) {
 
   return (
     <section
-      className="w-full py-16 px-6 md:px-12 lg:px-24"
+      className="w-full py-20 px-6"
       style={{ backgroundColor: bgColor, color: textColor }}
     >
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Heading */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-14">
           <h2
-            className="text-4xl font-bold font-heading mb-4 text-balance"
+            className="text-4xl font-bold font-heading mb-5 text-balance"
             style={{ color: textColor }}
           >
             {heading}
           </h2>
           {subheading && (
             <p
-              className="text-base leading-relaxed max-w-xl mx-auto font-body"
-              style={{ color: textColor, opacity: 0.75 }}
+              className="text-base leading-relaxed max-w-2xl mx-auto font-body"
+              style={{ color: textColor, opacity: 0.7 }}
             >
               {subheading}
             </p>
@@ -93,11 +93,11 @@ export default function ContactForm1({ data }: ContactForm1Props) {
         ) : (
           <form onSubmit={handleSubmit} noValidate>
             {/* Name + Email row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <div>
                 <label
                   htmlFor="contact-name"
-                  className="block text-sm font-medium mb-2 font-body"
+                  className="block text-sm font-semibold mb-2 font-body"
                   style={{ color: textColor }}
                 >
                   Name
@@ -108,14 +108,14 @@ export default function ContactForm1({ data }: ContactForm1Props) {
                   type="text"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-500 transition-colors"
+                  className="w-full border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-400 transition-colors rounded-sm"
                   autoComplete="name"
                 />
               </div>
               <div>
                 <label
                   htmlFor="contact-email"
-                  className="block text-sm font-medium mb-2 font-body"
+                  className="block text-sm font-semibold mb-2 font-body"
                   style={{ color: textColor }}
                 >
                   Email
@@ -126,17 +126,17 @@ export default function ContactForm1({ data }: ContactForm1Props) {
                   type="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-500 transition-colors"
+                  className="w-full border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-400 transition-colors rounded-sm"
                   autoComplete="email"
                 />
               </div>
             </div>
 
             {/* Message */}
-            <div className="mb-8">
+            <div className="mb-10">
               <label
                 htmlFor="contact-message"
-                className="block text-sm font-medium mb-2 font-body"
+                className="block text-sm font-semibold mb-2 font-body"
                 style={{ color: textColor }}
               >
                 Message
@@ -146,8 +146,8 @@ export default function ContactForm1({ data }: ContactForm1Props) {
                 name="message"
                 value={form.message}
                 onChange={handleChange}
-                rows={8}
-                className="w-full border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-500 transition-colors resize-none"
+                rows={9}
+                className="w-full border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-400 transition-colors resize-none rounded-sm"
               />
             </div>
 
@@ -155,12 +155,12 @@ export default function ContactForm1({ data }: ContactForm1Props) {
               <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
             )}
 
-            {/* Submit */}
+            {/* Submit — centered black pill button */}
             <div className="flex justify-center">
               <button
                 type="submit"
                 disabled={status === 'submitting'}
-                className="bg-neutral-900 text-white px-10 py-3 text-sm font-medium font-body hover:bg-neutral-700 transition-colors disabled:opacity-60"
+                className="bg-neutral-900 text-white px-14 py-3.5 text-sm font-medium font-body hover:bg-neutral-700 transition-colors disabled:opacity-60 rounded-sm"
               >
                 {status === 'submitting' ? 'Sending...' : buttonText}
               </button>
