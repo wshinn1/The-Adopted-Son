@@ -155,7 +155,7 @@ export default async function DevotionalPage({ params }: Props) {
       <TrialBanner />
         
       {/* Main Blog Post */}
-      <BlogPostPage post={post} />
+        <BlogPostPage post={post} shareSettings={settings.share_buttons} />
 
         {/* Paywall (if premium and no access) */}
         {!canRead && (

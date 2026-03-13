@@ -14,6 +14,13 @@ export interface SiteSettings {
     body_font: string
   }
   show_newsletter_on_posts: boolean
+  share_buttons: {
+    enabled: boolean
+    facebook: boolean
+    twitter: boolean
+    linkedin: boolean
+    email: boolean
+  }
 }
 
 const defaults: SiteSettings = {
@@ -34,6 +41,13 @@ const defaults: SiteSettings = {
     body_font: 'font-serif',
   },
   show_newsletter_on_posts: true,
+  share_buttons: {
+    enabled: true,
+    facebook: true,
+    twitter: true,
+    linkedin: false,
+    email: true,
+  },
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -68,6 +82,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     social_links: settings.social_links || defaults.social_links,
     typography: settings.typography || defaults.typography,
     show_newsletter_on_posts: settings.show_newsletter_on_posts !== false,
+    share_buttons: settings.share_buttons || defaults.share_buttons,
   }
 }
 

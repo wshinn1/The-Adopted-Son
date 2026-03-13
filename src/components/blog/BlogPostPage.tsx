@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Facebook, Twitter, Share2, ArrowLeft } from 'lucide-react'
+import { Facebook, Twitter, Linkedin, Mail, ArrowLeft } from 'lucide-react'
 
 interface Author {
   id?: string
@@ -31,11 +31,28 @@ interface BlogPost {
   author_name?: string | null
 }
 
-interface Props {
-  post: BlogPost
+interface ShareSettings {
+  enabled: boolean
+  facebook: boolean
+  twitter: boolean
+  linkedin: boolean
+  email: boolean
 }
 
-export default function BlogPostPage({ post }: Props) {
+interface Props {
+  post: BlogPost
+  shareSettings?: ShareSettings
+}
+
+export default function BlogPostPage({ post, shareSettings }: Props) {
+  const defaultShareSettings: ShareSettings = {
+    enabled: true,
+    facebook: true,
+    twitter: true,
+    linkedin: false,
+    email: true,
+  }
+  const share = shareSettings || defaultShareSettings
   const publishedDate = post.published_at
     ? new Date(post.published_at).toLocaleDateString('en-US', {
         day: 'numeric',
@@ -122,36 +139,53 @@ export default function BlogPostPage({ post }: Props) {
           </div>
 
           {/* Share buttons */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-neutral-500 mr-1">Share this:</span>
-            <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="size-9 rounded-full bg-[#1877F2] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
-              aria-label="Share on Facebook"
-            >
-              <Facebook className="size-4" />
-            </a>
-            <a
-              href={`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="size-9 rounded-full bg-[#1DA1F2] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
-              aria-label="Share on Twitter"
-            >
-              <Twitter className="size-4" />
-            </a>
-            <a
-              href={`https://pinterest.com/pin/create/button/?url=${shareUrl}&description=${shareTitle}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="size-9 rounded-full bg-[#E60023] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
-              aria-label="Share on Pinterest"
-            >
-              <Share2 className="size-4" />
-            </a>
-          </div>
+          {share.enabled && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-neutral-500 mr-1">Share this:</span>
+              {share.facebook && (
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="size-9 rounded-full bg-[#1877F2] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+                  aria-label="Share on Facebook"
+                >
+                  <Facebook className="size-4" />
+                </a>
+              )}
+              {share.twitter && (
+                <a
+                  href={`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="size-9 rounded-full bg-[#1DA1F2] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+                  aria-label="Share on Twitter"
+                >
+                  <Twitter className="size-4" />
+                </a>
+              )}
+              {share.linkedin && (
+                <a
+                  href={`https://www.linkedin.com/shareArticle?mini=true&url=${shareUrl}&title=${shareTitle}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="size-9 rounded-full bg-[#0A66C2] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+                  aria-label="Share on LinkedIn"
+                >
+                  <Linkedin className="size-4" />
+                </a>
+              )}
+              {share.email && (
+                <a
+                  href={`mailto:?subject=${shareTitle}&body=Check out this article: ${shareUrl}`}
+                  className="size-9 rounded-full bg-neutral-500 flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+                  aria-label="Share via Email"
+                >
+                  <Mail className="size-4" />
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Featured Image */}
