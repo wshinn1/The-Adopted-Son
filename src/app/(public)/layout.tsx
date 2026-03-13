@@ -1,4 +1,5 @@
-import { getSiteSettings } from '@/lib/site-settings'
+import 'server-only'
+import { createClient } from '@/lib/supabase/server'
 import HamburgerHeader from '@/components/HamburgerHeader'
 
 export default async function PublicLayout({
@@ -6,15 +7,19 @@ export default async function PublicLayout({
 }: {
   children: React.ReactNode
 }) {
-  const settings = await getSiteSettings()
+  const supabase = await createClient()
+  const { data: settings } = await supabase
+    .from('site_settings')
+    .select('site_name, logo_type, logo_url, nav_links')
+    .single()
 
   return (
     <div className="min-h-screen">
       <HamburgerHeader
-        siteName={settings.site_name}
-        logoType={settings.logo_type}
-        logoUrl={settings.logo_url || undefined}
-        navLinks={settings.nav_links}
+        siteName={settings?.site_name ?? 'The Adopted Son'}
+        logoType={settings?.logo_type ?? 'text'}
+        logoUrl={settings?.logo_url ?? undefined}
+        navLinks={settings?.nav_links ?? []}
       />
       <main>{children}</main>
     </div>
