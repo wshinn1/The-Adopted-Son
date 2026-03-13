@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const title = page?.og_title || settings.site_name || 'The Adopted Son'
   const description = page?.og_description || settings.site_tagline || 'Faith-filled daily devotionals to draw you closer to God.'
-  const ogImage = page?.og_image_url || settings.og_image_url || DEFAULT_OG
+  const ogImage = page?.og_image_url || DEFAULT_OG
 
   return {
     title,
