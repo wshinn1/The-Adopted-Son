@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createBrowserClient } from '@supabase/ssr'
 
 export interface BlogGallery1Data {
   heading: string
@@ -35,26 +34,14 @@ export default function BlogGallery1({ data }: BlogGallery1Props) {
   const showBanner = data.show_featured_banner !== false
 
   useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
-
-    supabase
-      .from('devotionals')
-      .select(`
-        id, title, slug, excerpt, cover_image_url, published_at,
-        devotional_categories (
-          categories ( name )
-        )
-      `)
-      .eq('is_published', true)
-      .order('published_at', { ascending: false })
-      .limit(showBanner ? count + 1 : count)
-      .then(({ data: rows }) => {
+    const fetchLimit = showBanner ? count + 1 : count
+    fetch(`/api/devotionals/recent?limit=${fetchLimit}`)
+      .then((r) => r.json())
+      .then(({ devotionals: rows }) => {
         setDevotionals(rows || [])
         setLoading(false)
       })
+      .catch(() => setLoading(false))
   }, [count, showBanner])
 
   const featured = showBanner ? devotionals[0] : null
