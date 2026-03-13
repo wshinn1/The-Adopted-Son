@@ -32,10 +32,10 @@ export default function PaidSubscribersTable({ initialSubscribers }: Props) {
     setError(null)
 
     try {
-      const res = await fetch('/api/admin/cancel-subscription', {
+      const res = await fetch('/api/admin/subscribers/cancel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: confirmId, cancelImmediately }),
+        body: JSON.stringify({ profileId: confirmId, atPeriodEnd: !cancelImmediately }),
       })
 
       const data = await res.json()
