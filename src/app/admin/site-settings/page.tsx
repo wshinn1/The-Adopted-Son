@@ -57,6 +57,14 @@ export default function SiteSettingsPage() {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   const [headingFont, setHeadingFont] = useState('font-sans')
   const [bodyFont, setBodyFont] = useState('font-serif')
+  const [showNewsletterOnPosts, setShowNewsletterOnPosts] = useState(true)
+  const [shareButtons, setShareButtons] = useState({
+    enabled: true,
+    facebook: true,
+    twitter: true,
+    linkedin: false,
+    email: true,
+  })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [seedingTemplates, setSeedingTemplates] = useState(false)
@@ -140,6 +148,10 @@ export default function SiteSettingsPage() {
       setSocialLinks(settings.social_links || [])
       setHeadingFont(settings.typography?.heading_font || 'font-sans')
       setBodyFont(settings.typography?.body_font || 'font-serif')
+      setShowNewsletterOnPosts(settings.show_newsletter_on_posts !== false)
+      if (settings.share_buttons) {
+        setShareButtons(settings.share_buttons)
+      }
     } catch (err) {
       console.error('Error loading settings:', err)
     } finally {
@@ -167,6 +179,8 @@ export default function SiteSettingsPage() {
       await saveSetting('favicon_url', faviconUrl)
       await saveSetting('social_links', socialLinks)
       await saveSetting('typography', { heading_font: headingFont, body_font: bodyFont })
+      await saveSetting('show_newsletter_on_posts', showNewsletterOnPosts)
+      await saveSetting('share_buttons', shareButtons)
       alert('Settings saved!')
     } catch (err) {
       console.error('Error saving settings:', err)
@@ -570,6 +584,99 @@ export default function SiteSettingsPage() {
             {socialLinks.length === 0 && (
               <p className="text-sm text-neutral-500">No social links added yet.</p>
             )}
+          </div>
+        </div>
+
+        {/* Blog Settings */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">Blog Settings</h2>
+          
+          <div className="space-y-6">
+            {/* Newsletter toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Newsletter Signup on Posts
+                </label>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Show email subscribe form at the end of blog posts and devotionals
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowNewsletterOnPosts(!showNewsletterOnPosts)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  showNewsletterOnPosts ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    showNewsletterOnPosts ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Share buttons section */}
+            <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Share Buttons
+                  </label>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Show social share buttons on blog posts and devotionals
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShareButtons({ ...shareButtons, enabled: !shareButtons.enabled })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    shareButtons.enabled ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      shareButtons.enabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {shareButtons.enabled && (
+                <div className="ml-4 space-y-3">
+                  {[
+                    { key: 'facebook', label: 'Facebook', color: '#1877F2' },
+                    { key: 'twitter', label: 'Twitter / X', color: '#1DA1F2' },
+                    { key: 'linkedin', label: 'LinkedIn', color: '#0A66C2' },
+                    { key: 'email', label: 'Email', color: '#6B7280' },
+                  ].map(({ key, label, color }) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded-full" 
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="text-sm text-neutral-600 dark:text-neutral-400">{label}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShareButtons({ ...shareButtons, [key]: !shareButtons[key as keyof typeof shareButtons] })}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                          shareButtons[key as keyof typeof shareButtons] ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                            shareButtons[key as keyof typeof shareButtons] ? 'translate-x-5' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
