@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 
-const PROJECT_ID = '341992'
-const POSTHOG_URL = 'https://us.posthog.com'
+// PostHog Project ID - get from PostHog dashboard > Project Settings
+const PROJECT_ID = process.env.POSTHOG_PROJECT_ID || '341992'
+const POSTHOG_URL = process.env.POSTHOG_API_URL || 'https://us.posthog.com'
 
 // Fetch active users in the last 5 minutes (more real-time)
 async function getActiveUsers() {
@@ -43,6 +44,8 @@ async function runQuery(query: string) {
     return []
   }
   
+  console.log('[v0] PostHog query - Project:', PROJECT_ID, 'URL:', POSTHOG_URL)
+  
   const res = await fetch(`${POSTHOG_URL}/api/projects/${PROJECT_ID}/query/`, {
     method: 'POST',
     headers: {
@@ -56,11 +59,11 @@ async function runQuery(query: string) {
   if (!res.ok) {
     const text = await res.text()
     console.error('[v0] PostHog query failed:', res.status, text)
-    throw new Error(`PostHog query failed: ${res.status}`)
+    // Return empty instead of throwing to prevent entire dashboard from failing
+    return []
   }
   
   const json = await res.json()
-  console.log('[v0] PostHog query result:', JSON.stringify(json).slice(0, 500))
   return json.results ?? []
 }
 
