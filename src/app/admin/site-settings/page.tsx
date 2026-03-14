@@ -720,16 +720,19 @@ export default function SiteSettingsPage() {
                         onChange={async (e) => {
                           const file = e.target.files?.[0]
                           if (!file) return
-                          const fileExt = file.name.split('.').pop()
-                          const fileName = `newsletter-bg-${Date.now()}.${fileExt}`
-                          const { error } = await supabase.storage
-                            .from('site-assets')
-                            .upload(fileName, file)
-                          if (!error) {
-                            const { data: urlData } = supabase.storage
-                              .from('site-assets')
-                              .getPublicUrl(fileName)
-                            setNewsletterSettings({ ...newsletterSettings, background_image_url: urlData.publicUrl })
+                          const formData = new FormData()
+                          formData.append('file', file)
+                          try {
+                            const res = await fetch('/api/upload', {
+                              method: 'POST',
+                              body: formData,
+                            })
+                            const data = await res.json()
+                            if (data.url) {
+                              setNewsletterSettings({ ...newsletterSettings, background_image_url: data.url })
+                            }
+                          } catch (err) {
+                            console.error('Upload failed:', err)
                           }
                         }}
                       />
