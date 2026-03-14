@@ -8,6 +8,7 @@ export interface Devotional {
   excerpt: string | null
   content: any // TipTap JSON
   cover_image_url: string | null
+  cover_image_caption: string | null
   cover_image_pathname: string | null
   author_id: string | null
   author_name: string | null

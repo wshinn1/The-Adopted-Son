@@ -115,7 +115,7 @@ export default function AnalyticsStats() {
         <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5">
           <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 flex items-center gap-2">
             <BarChart2 className="w-4 h-4 text-primary-500" />
-            Top Pages (Last 30 Days)
+            Top Pages (Last {data?.lookbackDays || 7} Days)
           </h2>
           {isLoading ? (
             <SkeletonList rows={5} />
@@ -139,6 +139,40 @@ export default function AnalyticsStats() {
           )}
         </div>
 
+        {/* Top devotionals */}
+        <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5">
+          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 flex items-center gap-2">
+            <BarChart2 className="w-4 h-4 text-green-500" />
+            Top Devotionals (Last {data?.lookbackDays || 7} Days)
+          </h2>
+          {isLoading ? (
+            <SkeletonList rows={5} />
+          ) : error ? (
+            <ErrorMsg />
+          ) : data?.topDevotionals?.length ? (
+            <ul className="space-y-2">
+              {data.topDevotionals.map((p: { page: string; views: number }, i: number) => {
+                // Extract the slug from the URL for a cleaner display
+                const slug = p.page?.split('/devotionals/').pop()?.split('?')[0] || p.page
+                return (
+                  <li key={i} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="truncate text-neutral-700 dark:text-neutral-300 text-xs" title={p.page}>
+                      {slug}
+                    </span>
+                    <span className="flex-shrink-0 font-semibold text-neutral-900 dark:text-neutral-100">
+                      {p.views.toLocaleString()}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p className="text-sm text-neutral-400">No devotional views yet.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily views sparkline */}
         <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5">
           <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 flex items-center gap-2">

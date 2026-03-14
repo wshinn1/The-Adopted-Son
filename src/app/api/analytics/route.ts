@@ -91,7 +91,26 @@ export async function GET() {
     
     await new Promise(r => setTimeout(r, 100))
     
-    // Batch 3: Geo data (run in parallel, max 2)
+    // Batch 3: Top devotionals
+    const [topDevotionalsRows] = await Promise.all([
+      runQuery(`
+        SELECT 
+          properties['$current_url'] as page, 
+          count() as views
+        FROM events
+        WHERE event = '$pageview'
+          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
+          AND properties['$current_url'] LIKE '%/devotionals/%'
+          AND NOT properties['$current_url'] LIKE '%/admin/%'
+        GROUP BY page
+        ORDER BY views DESC
+        LIMIT 10
+      `),
+    ])
+
+    await new Promise(r => setTimeout(r, 100))
+
+    // Batch 4: Geo data (run in parallel, max 2)
     // PostHog stores geo data with $geoip_ prefix on event properties
     const [countriesRows, citiesRows] = await Promise.all([
       runQuery(`
@@ -135,6 +154,7 @@ export async function GET() {
       pageviews,
       uniqueVisitors,
       topPages: (topPagesRows ?? []).map((r: [string, number]) => ({ page: r[0], views: r[1] })),
+      topDevotionals: (topDevotionalsRows ?? []).map((r: [string, number]) => ({ page: r[0], views: r[1] })),
       dailyViews: (last7Rows ?? []).map((r: [string, number]) => ({ day: r[0], views: r[1] })),
       topCountries: (countriesRows ?? []).map((r: [string, string, number]) => ({ 
         country: r[0], 

@@ -19,6 +19,7 @@ interface Devotional {
   excerpt?: string | null
   content?: unknown
   cover_image_url?: string | null
+  cover_image_caption?: string | null
   scripture_reference?: string | null
   scripture_text?: string | null
   category?: string | null
@@ -54,6 +55,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   const [slug, setSlug] = useState(devotional?.slug ?? '')
   const [excerpt, setExcerpt] = useState(devotional?.excerpt ?? '')
   const [coverImageUrl, setCoverImageUrl] = useState(devotional?.cover_image_url ?? '')
+  const [coverImageCaption, setCoverImageCaption] = useState(devotional?.cover_image_caption ?? '')
   const [scriptureRef, setScriptureRef] = useState(devotional?.scripture_reference ?? '')
   const [scriptureText, setScriptureText] = useState(devotional?.scripture_text ?? '')
   const [category, setCategory] = useState(devotional?.category ?? '')
@@ -132,6 +134,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
       excerpt,
       content: editorContent ?? null,
       cover_image_url: coverImageUrl || null,
+      cover_image_caption: coverImageCaption || null,
       scripture_reference: scriptureRef || null,
       scripture_text: scriptureText || null,
       category: category || null,
@@ -305,6 +308,19 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
               />
             </label>
           )}
+          {/* Image Caption */}
+          <div className="mt-3">
+            <label className="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">
+              Image Caption (optional)
+            </label>
+            <input
+              type="text"
+              value={coverImageCaption}
+              onChange={(e) => setCoverImageCaption(e.target.value)}
+              placeholder="Photo credit or description..."
+              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
         </div>
 
         {/* Publish */}
