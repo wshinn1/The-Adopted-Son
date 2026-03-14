@@ -10,6 +10,18 @@ export interface NewsletterSettings {
   text_color: string
 }
 
+export interface PopupSettings {
+  enabled: boolean
+  delay_seconds: number
+  reshow_days: number
+  heading: string
+  subheading: string
+  button_text: string
+  background_color: string
+  text_color: string
+  accent_color: string
+}
+
 export interface SiteSettings {
   site_name: string
   site_tagline: string
@@ -31,6 +43,7 @@ export interface SiteSettings {
     linkedin: boolean
     email: boolean
   }
+  popup_settings: PopupSettings
 }
 
 const defaults: SiteSettings = {
@@ -65,6 +78,17 @@ const defaults: SiteSettings = {
     twitter: true,
     linkedin: false,
     email: true,
+  },
+  popup_settings: {
+    enabled: false,
+    delay_seconds: 7,
+    reshow_days: 4,
+    heading: 'Stay Connected',
+    subheading: 'Subscribe to receive daily devotionals and spiritual encouragement.',
+    button_text: 'Subscribe',
+    background_color: '#FFFFFF',
+    text_color: '#1a1a1a',
+    accent_color: '#8B5A2B',
   },
 }
 
@@ -102,6 +126,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     show_newsletter_on_posts: settings.show_newsletter_on_posts !== false,
     newsletter_settings: settings.newsletter_settings || defaults.newsletter_settings,
     share_buttons: settings.share_buttons || defaults.share_buttons,
+    popup_settings: settings.popup_settings || defaults.popup_settings,
   }
 }
 
