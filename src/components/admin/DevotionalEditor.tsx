@@ -266,13 +266,11 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
           {coverImageUrl && coverImageUrl.trim().length > 0 ? (
             <div className="relative">
               <div className="aspect-video relative rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={coverImageUrl}
                   alt="Cover preview"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 300px"
-                  unoptimized
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               </div>
               <button
