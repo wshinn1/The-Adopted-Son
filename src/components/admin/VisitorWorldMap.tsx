@@ -11,18 +11,23 @@ import { X, Globe, MapPin } from 'lucide-react'
 
 const geoUrl = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
 
-// ISO Alpha-2 to ISO Alpha-3 mapping for country codes
-const alpha2ToAlpha3: Record<string, string> = {
-  'US': 'USA', 'CA': 'CAN', 'GB': 'GBR', 'DE': 'DEU', 'FR': 'FRA', 'IT': 'ITA', 
-  'ES': 'ESP', 'PT': 'PRT', 'NL': 'NLD', 'BE': 'BEL', 'CH': 'CHE', 'AT': 'AUT',
-  'AU': 'AUS', 'NZ': 'NZL', 'JP': 'JPN', 'KR': 'KOR', 'CN': 'CHN', 'IN': 'IND',
-  'BR': 'BRA', 'MX': 'MEX', 'AR': 'ARG', 'CL': 'CHL', 'CO': 'COL', 'PE': 'PER',
-  'RU': 'RUS', 'UA': 'UKR', 'PL': 'POL', 'SE': 'SWE', 'NO': 'NOR', 'DK': 'DNK',
-  'FI': 'FIN', 'IE': 'IRL', 'ZA': 'ZAF', 'EG': 'EGY', 'NG': 'NGA', 'KE': 'KEN',
-  'IL': 'ISR', 'AE': 'ARE', 'SA': 'SAU', 'TR': 'TUR', 'GR': 'GRC', 'CZ': 'CZE',
-  'HU': 'HUN', 'RO': 'ROU', 'TH': 'THA', 'VN': 'VNM', 'MY': 'MYS', 'SG': 'SGP',
-  'ID': 'IDN', 'PH': 'PHL', 'PK': 'PAK', 'BD': 'BGD', 'HK': 'HKG', 'TW': 'TWN',
+// ISO Alpha-3 to ISO Alpha-2 mapping for reverse lookup
+const alpha3ToAlpha2: Record<string, string> = {
+  'USA': 'US', 'CAN': 'CA', 'GBR': 'GB', 'DEU': 'DE', 'FRA': 'FR', 'ITA': 'IT', 
+  'ESP': 'ES', 'PRT': 'PT', 'NLD': 'NL', 'BEL': 'BE', 'CHE': 'CH', 'AUT': 'AT',
+  'AUS': 'AU', 'NZL': 'NZ', 'JPN': 'JP', 'KOR': 'KR', 'CHN': 'CN', 'IND': 'IN',
+  'BRA': 'BR', 'MEX': 'MX', 'ARG': 'AR', 'CHL': 'CL', 'COL': 'CO', 'PER': 'PE',
+  'RUS': 'RU', 'UKR': 'UA', 'POL': 'PL', 'SWE': 'SE', 'NOR': 'NO', 'DNK': 'DK',
+  'FIN': 'FI', 'IRL': 'IE', 'ZAF': 'ZA', 'EGY': 'EG', 'NGA': 'NG', 'KEN': 'KE',
+  'ISR': 'IL', 'ARE': 'AE', 'SAU': 'SA', 'TUR': 'TR', 'GRC': 'GR', 'CZE': 'CZ',
+  'HUN': 'HU', 'ROU': 'RO', 'THA': 'TH', 'VNM': 'VN', 'MYS': 'MY', 'SGP': 'SG',
+  'IDN': 'ID', 'PHL': 'PH', 'PAK': 'PK', 'BGD': 'BD', 'HKG': 'HK', 'TWN': 'TW',
 }
+
+// ISO Alpha-2 to ISO Alpha-3 mapping for country codes
+const alpha2ToAlpha3: Record<string, string> = Object.fromEntries(
+  Object.entries(alpha3ToAlpha2).map(([k, v]) => [v, k])
+)
 
 interface CountryData {
   country: string
@@ -48,14 +53,18 @@ export default function VisitorWorldMap({ countries, cities }: VisitorWorldMapPr
   const [tooltipContent, setTooltipContent] = useState<string>('')
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
 
-  // Create lookup for country data by Alpha-3 code
+  // Create lookup for country data by both Alpha-2 and Alpha-3 codes
   const countryLookup = useMemo(() => {
     const lookup: Record<string, CountryData> = {}
     countries.forEach(c => {
       if (c.countryCode) {
-        const alpha3 = alpha2ToAlpha3[c.countryCode] || c.countryCode
-        lookup[alpha3] = c
+        // Store by Alpha-2 code (what PostHog returns, e.g., "US")
         lookup[c.countryCode] = c
+        // Also store by Alpha-3 code (what the map uses, e.g., "USA")
+        const alpha3 = alpha2ToAlpha3[c.countryCode]
+        if (alpha3) {
+          lookup[alpha3] = c
+        }
       }
     })
     return lookup
@@ -116,10 +125,12 @@ export default function VisitorWorldMap({ countries, cities }: VisitorWorldMapPr
               <Geographies geography={geoUrl}>
                 {({ geographies }) =>
                   geographies.map((geo) => {
-                    const rawCode = geo.properties?.['Alpha-3'] || geo.id
-                    const countryCode = typeof rawCode === 'string' ? rawCode : ''
-                    const rawName = geo.properties?.name
+                    // Map topology uses ISO-3166-1 numeric codes as IDs and Alpha-3 in properties
+                    const alpha3Code = geo.properties?.['ISO_A3'] || geo.properties?.['Alpha-3'] || ''
+                    const countryCode = typeof alpha3Code === 'string' ? alpha3Code : ''
+                    const rawName = geo.properties?.name || geo.properties?.NAME || ''
                     const countryName = typeof rawName === 'string' ? rawName : 'Unknown'
+                    // Look up data using the Alpha-3 code from the map
                     const data = countryCode ? countryLookup[countryCode] : undefined
                     const hasData = !!data
                     
@@ -147,6 +158,7 @@ export default function VisitorWorldMap({ countries, cities }: VisitorWorldMapPr
                         onMouseMove={(e) => handleMouseMove(e, countryName, data?.views)}
                         onMouseLeave={handleMouseLeave}
                         onClick={() => {
+                          console.log('[v0] Map click - countryCode:', countryCode, 'countryName:', countryName, 'data:', data)
                           if (data) {
                             setSelectedCountry(data)
                           }

@@ -38,6 +38,44 @@ const FONT_OPTIONS = [
   { value: 'Cormorant_Garamond', label: 'Cormorant Garamond', category: 'Serif' },
   { value: 'Bitter', label: 'Bitter', category: 'Serif' },
   { value: 'Spectral', label: 'Spectral', category: 'Serif' },
+  
+  // Monospace Google Fonts
+  { value: 'JetBrains_Mono', label: 'JetBrains Mono', category: 'Monospace' },
+  { value: 'Fira_Code', label: 'Fira Code', category: 'Monospace' },
+  { value: 'Source_Code_Pro', label: 'Source Code Pro', category: 'Monospace' },
+  { value: 'IBM_Plex_Mono', label: 'IBM Plex Mono', category: 'Monospace' },
+  { value: 'Space_Mono', label: 'Space Mono', category: 'Monospace' },
+  { value: 'Roboto_Mono', label: 'Roboto Mono', category: 'Monospace' },
+  { value: 'Courier_Prime', label: 'Courier Prime', category: 'Monospace' },
+  { value: 'Anonymous_Pro', label: 'Anonymous Pro', category: 'Monospace' },
+]
+
+const FONT_SIZE_OPTIONS = [
+  { value: '8', label: '8 pt' },
+  { value: '9', label: '9 pt' },
+  { value: '10', label: '10 pt' },
+  { value: '11', label: '11 pt' },
+  { value: '12', label: '12 pt (Default)' },
+  { value: '13', label: '13 pt' },
+  { value: '14', label: '14 pt' },
+  { value: '16', label: '16 pt' },
+  { value: '18', label: '18 pt' },
+  { value: '20', label: '20 pt' },
+  { value: '22', label: '22 pt' },
+  { value: '24', label: '24 pt' },
+]
+
+const HEADING_SIZE_OPTIONS = [
+  { value: '18', label: '18 pt' },
+  { value: '20', label: '20 pt' },
+  { value: '24', label: '24 pt' },
+  { value: '28', label: '28 pt' },
+  { value: '32', label: '32 pt (Default)' },
+  { value: '36', label: '36 pt' },
+  { value: '40', label: '40 pt' },
+  { value: '48', label: '48 pt' },
+  { value: '56', label: '56 pt' },
+  { value: '64', label: '64 pt' },
 ]
 
 const groupedFonts = FONT_OPTIONS.reduce((acc, font) => {
@@ -57,6 +95,10 @@ export default function SiteSettingsPage() {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   const [headingFont, setHeadingFont] = useState('font-sans')
   const [bodyFont, setBodyFont] = useState('font-serif')
+  const [accentFont, setAccentFont] = useState('Space_Mono')
+  const [headingSize, setHeadingSize] = useState('32')
+  const [bodySize, setBodySize] = useState('12')
+  const [accentSize, setAccentSize] = useState('10')
   const [showNewsletterOnPosts, setShowNewsletterOnPosts] = useState(true)
   const [newsletterSettings, setNewsletterSettings] = useState({
     heading: 'Stay Connected',
@@ -110,11 +152,21 @@ export default function SiteSettingsPage() {
       Cormorant_Garamond: 'Cormorant+Garamond:wght@400;700',
       Bitter: 'Bitter:wght@400;700',
       Spectral: 'Spectral:wght@400;700',
+      // Monospace fonts
+      JetBrains_Mono: 'JetBrains+Mono:wght@400;500;700',
+      Fira_Code: 'Fira+Code:wght@400;500;700',
+      Source_Code_Pro: 'Source+Code+Pro:wght@400;500;700',
+      IBM_Plex_Mono: 'IBM+Plex+Mono:wght@400;500;700',
+      Space_Mono: 'Space+Mono:wght@400;700',
+      Roboto_Mono: 'Roboto+Mono:wght@400;500;700',
+      Courier_Prime: 'Courier+Prime:wght@400;700',
+      Anonymous_Pro: 'Anonymous+Pro:wght@400;700',
     }
 
     const fontsToLoad: string[] = []
     if (GOOGLE_FONT_MAP[headingFont]) fontsToLoad.push(GOOGLE_FONT_MAP[headingFont])
     if (GOOGLE_FONT_MAP[bodyFont] && bodyFont !== headingFont) fontsToLoad.push(GOOGLE_FONT_MAP[bodyFont])
+    if (GOOGLE_FONT_MAP[accentFont] && accentFont !== headingFont && accentFont !== bodyFont) fontsToLoad.push(GOOGLE_FONT_MAP[accentFont])
 
     if (fontsToLoad.length > 0) {
       const linkId = 'admin-preview-fonts'
@@ -127,7 +179,7 @@ export default function SiteSettingsPage() {
       }
       link.href = `https://fonts.googleapis.com/css2?${fontsToLoad.map(f => `family=${f}`).join('&')}&display=swap`
     }
-  }, [headingFont, bodyFont])
+  }, [headingFont, bodyFont, accentFont])
 
   const loadSettings = async () => {
     try {
@@ -156,6 +208,10 @@ export default function SiteSettingsPage() {
       setSocialLinks(settings.social_links || [])
       setHeadingFont(settings.typography?.heading_font || 'font-sans')
       setBodyFont(settings.typography?.body_font || 'font-serif')
+      setAccentFont(settings.typography?.accent_font || 'Space_Mono')
+      setHeadingSize(settings.typography?.heading_size || '32')
+      setBodySize(settings.typography?.body_size || '12')
+      setAccentSize(settings.typography?.accent_size || '10')
       setShowNewsletterOnPosts(settings.show_newsletter_on_posts !== false)
       if (settings.newsletter_settings) {
         setNewsletterSettings(settings.newsletter_settings)
@@ -189,7 +245,14 @@ export default function SiteSettingsPage() {
       await saveSetting('footer_links', footerLinks)
       await saveSetting('favicon_url', faviconUrl)
       await saveSetting('social_links', socialLinks)
-      await saveSetting('typography', { heading_font: headingFont, body_font: bodyFont })
+      await saveSetting('typography', { 
+        heading_font: headingFont, 
+        body_font: bodyFont, 
+        accent_font: accentFont,
+        heading_size: headingSize,
+        body_size: bodySize,
+        accent_size: accentSize,
+      })
       await saveSetting('show_newsletter_on_posts', showNewsletterOnPosts)
       await saveSetting('newsletter_settings', newsletterSettings)
       await saveSetting('share_buttons', shareButtons)
@@ -371,54 +434,139 @@ export default function SiteSettingsPage() {
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
           <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">Typography</h2>
           
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Heading Font
-              </label>
-              <select
-                value={headingFont}
-                onChange={(e) => setHeadingFont(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-              >
-                {Object.entries(groupedFonts).map(([category, fonts]) => (
-                  <optgroup key={category} label={category}>
-                    {fonts.map((font) => (
-                      <option key={font.value} value={font.value}>
-                        {font.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              <p className="text-xs text-neutral-500 mt-1">Used for blog post titles and headings</p>
+          <div className="space-y-6">
+            {/* Heading Font */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Heading Font
+                </label>
+                <select
+                  value={headingFont}
+                  onChange={(e) => setHeadingFont(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {Object.entries(groupedFonts).map(([category, fonts]) => (
+                    <optgroup key={category} label={category}>
+                      {fonts.map((font) => (
+                        <option key={font.value} value={font.value}>
+                          {font.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                <p className="text-xs text-neutral-500 mt-1">Used for titles and headings</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Heading Size
+                </label>
+                <select
+                  value={headingSize}
+                  onChange={(e) => setHeadingSize(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {HEADING_SIZE_OPTIONS.map((size) => (
+                    <option key={size.value} value={size.value}>
+                      {size.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Body Font
-              </label>
-              <select
-                value={bodyFont}
-                onChange={(e) => setBodyFont(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-              >
-                {Object.entries(groupedFonts).map(([category, fonts]) => (
-                  <optgroup key={category} label={category}>
-                    {fonts.map((font) => (
-                      <option key={font.value} value={font.value}>
-                        {font.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              <p className="text-xs text-neutral-500 mt-1">Used for blog post body text and excerpts</p>
+            {/* Body Font */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Body Font
+                </label>
+                <select
+                  value={bodyFont}
+                  onChange={(e) => setBodyFont(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {Object.entries(groupedFonts).map(([category, fonts]) => (
+                    <optgroup key={category} label={category}>
+                      {fonts.map((font) => (
+                        <option key={font.value} value={font.value}>
+                          {font.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                <p className="text-xs text-neutral-500 mt-1">Used for body text and paragraphs</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Body Size
+                </label>
+                <select
+                  value={bodySize}
+                  onChange={(e) => setBodySize(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {FONT_SIZE_OPTIONS.map((size) => (
+                    <option key={size.value} value={size.value}>
+                      {size.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Accent Font */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Accent Font
+                </label>
+                <select
+                  value={accentFont}
+                  onChange={(e) => setAccentFont(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {Object.entries(groupedFonts).map(([category, fonts]) => (
+                    <optgroup key={category} label={category}>
+                      {fonts.map((font) => (
+                        <option key={font.value} value={font.value}>
+                          {font.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                <p className="text-xs text-neutral-500 mt-1">Used for taglines, labels, and decorative text</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Accent Size
+                </label>
+                <select
+                  value={accentSize}
+                  onChange={(e) => setAccentSize(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {FONT_SIZE_OPTIONS.map((size) => (
+                    <option key={size.value} value={size.value}>
+                      {size.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Font Preview */}
             <div className="mt-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
               <p className="text-xs text-neutral-500 mb-3">Preview (save to see changes on your site):</p>
+              <p 
+                className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-2"
+                style={{ fontFamily: `'${accentFont.replace(/_/g, ' ')}', monospace` }}
+              >
+                Accent text example
+              </p>
               <h3 
                 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-2"
                 style={{ fontFamily: `'${headingFont.replace(/_/g, ' ')}', sans-serif` }}

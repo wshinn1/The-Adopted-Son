@@ -10,6 +10,11 @@ const VisitorWorldMap = dynamic(() => import('./VisitorWorldMap'), {
   loading: () => <div className="h-[500px] bg-neutral-100 dark:bg-neutral-800 rounded-xl animate-pulse" />
 })
 
+const RealtimeVisitorsMap = dynamic(() => import('./RealtimeVisitorsMap'), { 
+  ssr: false,
+  loading: () => <div className="h-[400px] bg-neutral-100 dark:bg-neutral-800 rounded-xl animate-pulse" />
+})
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 const PROJECT_ID = '341992'
@@ -170,6 +175,9 @@ export default function AnalyticsStats() {
           )}
         </div>
       </div>
+
+      {/* Real-time Visitors Map */}
+      <RealtimeVisitorsMap />
 
       {/* World Map */}
       {!isLoading && !error && data?.topCountries?.length > 0 && (
