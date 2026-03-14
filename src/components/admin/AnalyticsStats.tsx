@@ -3,6 +3,12 @@
 import useSWR from 'swr'
 import { BarChart2, Users, Eye, TrendingUp, ExternalLink, Globe, MapPin, RefreshCw, Activity } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+
+const VisitorWorldMap = dynamic(() => import('./VisitorWorldMap'), { 
+  ssr: false,
+  loading: () => <div className="h-[500px] bg-neutral-100 dark:bg-neutral-800 rounded-xl animate-pulse" />
+})
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -165,13 +171,21 @@ export default function AnalyticsStats() {
         </div>
       </div>
 
+      {/* World Map */}
+      {!isLoading && !error && data?.topCountries?.length > 0 && (
+        <VisitorWorldMap 
+          countries={data.topCountries} 
+          cities={data.topCities || []} 
+        />
+      )}
+
       {/* Location data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top countries */}
         <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5">
           <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 flex items-center gap-2">
             <Globe className="w-4 h-4 text-primary-500" />
-            Top Countries (Last 30 Days)
+            Top Countries (Last {data?.lookbackDays || 7} Days)
           </h2>
           {isLoading ? (
             <SkeletonList rows={5} />
@@ -179,7 +193,7 @@ export default function AnalyticsStats() {
             <ErrorMsg />
           ) : data?.topCountries?.length ? (
             <ul className="space-y-2">
-              {data.topCountries.map((c: { country: string; views: number }, i: number) => (
+              {data.topCountries.slice(0, 10).map((c: { country: string; countryCode: string; views: number }, i: number) => (
                 <li key={i} className="flex items-center justify-between gap-2 text-sm">
                   <span className="truncate text-neutral-700 dark:text-neutral-300">
                     {c.country}
@@ -199,7 +213,7 @@ export default function AnalyticsStats() {
         <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5">
           <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary-500" />
-            Top Cities (Last 30 Days)
+            Top Cities (Last {data?.lookbackDays || 7} Days)
           </h2>
           {isLoading ? (
             <SkeletonList rows={5} />
@@ -207,7 +221,7 @@ export default function AnalyticsStats() {
             <ErrorMsg />
           ) : data?.topCities?.length ? (
             <ul className="space-y-2">
-              {data.topCities.map((c: { city: string; state: string; countryCode: string; views: number }, i: number) => (
+              {data.topCities.slice(0, 10).map((c: { city: string; state: string; countryCode: string; views: number }, i: number) => (
                 <li key={i} className="flex items-center justify-between gap-2 text-sm">
                   <span className="truncate text-neutral-700 dark:text-neutral-300">
                     {c.city}{c.state ? `, ${c.state}` : ''} <span className="text-neutral-400 text-xs">({c.countryCode})</span>
