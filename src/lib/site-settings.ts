@@ -6,6 +6,7 @@ export interface NewsletterSettings {
   subheading: string
   button_text: string
   background_color: string
+  background_image_url: string
   text_color: string
 }
 
@@ -55,6 +56,7 @@ const defaults: SiteSettings = {
     subheading: 'Get the latest devotionals and updates delivered to your inbox.',
     button_text: 'Subscribe',
     background_color: '#F5F2ED',
+    background_image_url: '',
     text_color: '#1a1a1a',
   },
   share_buttons: {

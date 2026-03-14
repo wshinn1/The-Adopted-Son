@@ -226,7 +226,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
             button_text: settings.newsletter_settings?.button_text || 'Subscribe',
             success_message: 'Thank you for subscribing! Check your inbox for confirmation.',
             background_color: settings.newsletter_settings?.background_color || '#F5F2ED',
-            background_image_url: '',
+            background_image_url: settings.newsletter_settings?.background_image_url || '',
             text_color: settings.newsletter_settings?.text_color || '#1a1a1a',
           }}
         />

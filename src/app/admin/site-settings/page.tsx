@@ -58,6 +58,14 @@ export default function SiteSettingsPage() {
   const [headingFont, setHeadingFont] = useState('font-sans')
   const [bodyFont, setBodyFont] = useState('font-serif')
   const [showNewsletterOnPosts, setShowNewsletterOnPosts] = useState(true)
+  const [newsletterSettings, setNewsletterSettings] = useState({
+    heading: 'Stay Connected',
+    subheading: 'Get the latest devotionals and updates delivered to your inbox.',
+    button_text: 'Subscribe',
+    background_color: '#F5F2ED',
+    background_image_url: '',
+    text_color: '#1a1a1a',
+  })
   const [shareButtons, setShareButtons] = useState({
     enabled: true,
     facebook: true,
@@ -691,6 +699,61 @@ export default function SiteSettingsPage() {
                     onChange={(e) => setNewsletterSettings({ ...newsletterSettings, button_text: e.target.value })}
                     className="w-full px-3 py-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-neutral-500 mb-1">Background Image (optional)</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={newsletterSettings.background_image_url}
+                      onChange={(e) => setNewsletterSettings({ ...newsletterSettings, background_image_url: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
+                      className="flex-1 px-3 py-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800"
+                    />
+                    <label className="flex items-center justify-center w-10 h-10 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700">
+                      <Upload className="w-4 h-4 text-neutral-500" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          const fileExt = file.name.split('.').pop()
+                          const fileName = `newsletter-bg-${Date.now()}.${fileExt}`
+                          const { error } = await supabase.storage
+                            .from('site-assets')
+                            .upload(fileName, file)
+                          if (!error) {
+                            const { data: urlData } = supabase.storage
+                              .from('site-assets')
+                              .getPublicUrl(fileName)
+                            setNewsletterSettings({ ...newsletterSettings, background_image_url: urlData.publicUrl })
+                          }
+                        }}
+                      />
+                    </label>
+                    {newsletterSettings.background_image_url && (
+                      <button
+                        type="button"
+                        onClick={() => setNewsletterSettings({ ...newsletterSettings, background_image_url: '' })}
+                        className="flex items-center justify-center w-10 h-10 border border-red-300 dark:border-red-600 rounded-lg bg-white dark:bg-neutral-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  {newsletterSettings.background_image_url && (
+                    <div className="mt-2 relative w-full h-20 rounded-lg overflow-hidden">
+                      <img
+                        src={newsletterSettings.background_image_url}
+                        alt="Newsletter background preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <p className="text-xs text-neutral-400 mt-1">If set, this image will be used as the newsletter section background instead of the solid color.</p>
                 </div>
               </div>
             )}
