@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 
 // PostHog Project ID - get from PostHog dashboard > Project Settings
 const PROJECT_ID = process.env.POSTHOG_PROJECT_ID || '341992'
-const POSTHOG_URL = process.env.POSTHOG_API_URL || 'https://us.posthog.com'
+// Note: API endpoint is us.posthog.com (not us.i.posthog.com which is for client tracking)
+const POSTHOG_API_URL = 'https://us.posthog.com'
 
 // Fetch active users in the last 5 minutes (more real-time)
 async function getActiveUsers() {
@@ -10,21 +11,32 @@ async function getActiveUsers() {
   if (!apiKey) return 0
   
   try {
-    const res = await fetch(`${POSTHOG_URL}/api/projects/${PROJECT_ID}/query/`, {
+  const url = `${POSTHOG_API_URL}/api/projects/${PROJECT_ID}/query/`
+  
+  try {
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        query: {
-          kind: 'HogQLQuery',
-          query: `
-            SELECT count(distinct distinct_id) as active
-            FROM events
-            WHERE timestamp >= now() - interval 5 minute
-          `
-        }
+      body: JSON.stringify({ query: { kind: 'HogQLQuery', query } }),
+      cache: 'no-store',
+    })
+    
+    if (!res.ok) {
+      const text = await res.text()
+      console.error('[v0] PostHog query failed:', res.status, text)
+      return []
+    }
+    
+    const json = await res.json()
+    return json.results ?? []
+  } catch (err) {
+    console.error('[v0] PostHog fetch error:', err)
+    return []
+  }
+}
       }),
       cache: 'no-store',
     })
@@ -44,7 +56,7 @@ async function runQuery(query: string) {
     return []
   }
   
-  console.log('[v0] PostHog query - Project:', PROJECT_ID, 'URL:', POSTHOG_URL)
+  console.log('[v0] PostHog query - Project:', PROJECT_ID, 'URL:', POSTHOG_API_URL)
   
   const res = await fetch(`${POSTHOG_URL}/api/projects/${PROJECT_ID}/query/`, {
     method: 'POST',
