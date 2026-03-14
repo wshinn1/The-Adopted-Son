@@ -186,7 +186,48 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
         {/* Featured Image Preview - Main Area */}
         {coverImageUrl && coverImageUrl.trim().length > 0 && (
           <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
-            <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">Featured Image Preview</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Featured Image Preview</h3>
+              <div className="flex items-center gap-2">
+                <label className="cursor-pointer text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+                  Replace
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      setUploading(true)
+                      try {
+                        const formData = new FormData()
+                        formData.append('file', file)
+                        const res = await fetch('/api/media/upload', { method: 'POST', body: formData })
+                        if (!res.ok) throw new Error('Upload failed')
+                        const result = await res.json()
+                        setCoverImageUrl(result.url)
+                      } catch (err) {
+                        console.error('Upload error:', err)
+                        setError('Failed to upload image')
+                      } finally {
+                        setUploading(false)
+                        e.target.value = ''
+                      }
+                    }}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCoverImageUrl('')
+                    setCoverImageCaption('')
+                  }}
+                  className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
             <div className="relative w-full" style={{ maxWidth: '600px' }}>
               <div className="aspect-video relative rounded-lg overflow-hidden bg-neutral-200 dark:bg-neutral-700">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -195,7 +236,6 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
                   alt="Featured image preview"
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    console.log('[v0] Featured image failed to load:', coverImageUrl)
                     const target = e.currentTarget
                     target.style.display = 'none'
                     const parent = target.parentElement
