@@ -92,36 +92,31 @@ export async function GET() {
     await new Promise(r => setTimeout(r, 100))
     
     // Batch 3: Geo data (run in parallel, max 2)
+    // PostHog stores geo data with $geoip_ prefix on event properties
     const [countriesRows, citiesRows] = await Promise.all([
       runQuery(`
         SELECT 
-          coalesce(
-            properties['$geoip_country_name'],
-            properties['$geoip_country_code'],
-            'Unknown'
-          ) as country, 
+          properties.$geoip_country_name as country, 
           count() as views
         FROM events
         WHERE event = '$pageview'
           AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
+          AND properties.$geoip_country_name IS NOT NULL
+          AND properties.$geoip_country_name != ''
         GROUP BY country
-        HAVING country != 'Unknown' AND country != ''
         ORDER BY views DESC
         LIMIT 10
       `),
       runQuery(`
         SELECT 
-          coalesce(
-            properties['$geoip_city_name'],
-            properties['$geoip_city'],
-            'Unknown'
-          ) as city, 
+          properties.$geoip_city_name as city, 
           count() as views
         FROM events
         WHERE event = '$pageview'
           AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
+          AND properties.$geoip_city_name IS NOT NULL
+          AND properties.$geoip_city_name != ''
         GROUP BY city
-        HAVING city != 'Unknown' AND city != ''
         ORDER BY views DESC
         LIMIT 10
       `),
