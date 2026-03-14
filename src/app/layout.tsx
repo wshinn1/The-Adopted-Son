@@ -61,7 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const faviconUrl = typeof row?.value === 'string' ? row.value.replace(/^"|"$/g, '') : null
 
   return (
-    <html lang="en" className={beVietnamPro.className}>
+    <html lang="en" className={beVietnamPro.className} data-scroll-behavior="smooth">
       <head>
         {faviconUrl && <link rel="icon" href={faviconUrl} />}
       </head>
