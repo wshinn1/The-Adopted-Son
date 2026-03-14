@@ -1,6 +1,14 @@
 import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 
+export interface NewsletterSettings {
+  heading: string
+  subheading: string
+  button_text: string
+  background_color: string
+  text_color: string
+}
+
 export interface SiteSettings {
   site_name: string
   site_tagline: string
@@ -14,6 +22,7 @@ export interface SiteSettings {
     body_font: string
   }
   show_newsletter_on_posts: boolean
+  newsletter_settings: NewsletterSettings
   share_buttons: {
     enabled: boolean
     facebook: boolean
@@ -41,6 +50,13 @@ const defaults: SiteSettings = {
     body_font: 'font-serif',
   },
   show_newsletter_on_posts: true,
+  newsletter_settings: {
+    heading: 'Stay Connected',
+    subheading: 'Get the latest devotionals and updates delivered to your inbox.',
+    button_text: 'Subscribe',
+    background_color: '#F5F2ED',
+    text_color: '#1a1a1a',
+  },
   share_buttons: {
     enabled: true,
     facebook: true,
@@ -82,6 +98,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     social_links: settings.social_links || defaults.social_links,
     typography: settings.typography || defaults.typography,
     show_newsletter_on_posts: settings.show_newsletter_on_posts !== false,
+    newsletter_settings: settings.newsletter_settings || defaults.newsletter_settings,
     share_buttons: settings.share_buttons || defaults.share_buttons,
   }
 }

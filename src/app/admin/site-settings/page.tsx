@@ -149,6 +149,9 @@ export default function SiteSettingsPage() {
       setHeadingFont(settings.typography?.heading_font || 'font-sans')
       setBodyFont(settings.typography?.body_font || 'font-serif')
       setShowNewsletterOnPosts(settings.show_newsletter_on_posts !== false)
+      if (settings.newsletter_settings) {
+        setNewsletterSettings(settings.newsletter_settings)
+      }
       if (settings.share_buttons) {
         setShareButtons(settings.share_buttons)
       }
@@ -180,6 +183,7 @@ export default function SiteSettingsPage() {
       await saveSetting('social_links', socialLinks)
       await saveSetting('typography', { heading_font: headingFont, body_font: bodyFont })
       await saveSetting('show_newsletter_on_posts', showNewsletterOnPosts)
+      await saveSetting('newsletter_settings', newsletterSettings)
       await saveSetting('share_buttons', shareButtons)
       alert('Settings saved!')
     } catch (err) {
@@ -616,6 +620,80 @@ export default function SiteSettingsPage() {
                 />
               </button>
             </div>
+
+            {/* Newsletter Styling */}
+            {showNewsletterOnPosts && (
+              <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700 space-y-4">
+                <h4 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Newsletter Appearance</h4>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-neutral-500 mb-1">Background Color</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={newsletterSettings.background_color}
+                        onChange={(e) => setNewsletterSettings({ ...newsletterSettings, background_color: e.target.value })}
+                        className="w-8 h-8 rounded cursor-pointer border border-neutral-300"
+                      />
+                      <input
+                        type="text"
+                        value={newsletterSettings.background_color}
+                        onChange={(e) => setNewsletterSettings({ ...newsletterSettings, background_color: e.target.value })}
+                        className="flex-1 px-2 py-1 text-xs border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-neutral-500 mb-1">Text Color</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={newsletterSettings.text_color}
+                        onChange={(e) => setNewsletterSettings({ ...newsletterSettings, text_color: e.target.value })}
+                        className="w-8 h-8 rounded cursor-pointer border border-neutral-300"
+                      />
+                      <input
+                        type="text"
+                        value={newsletterSettings.text_color}
+                        onChange={(e) => setNewsletterSettings({ ...newsletterSettings, text_color: e.target.value })}
+                        className="flex-1 px-2 py-1 text-xs border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-neutral-500 mb-1">Heading</label>
+                  <input
+                    type="text"
+                    value={newsletterSettings.heading}
+                    onChange={(e) => setNewsletterSettings({ ...newsletterSettings, heading: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-neutral-500 mb-1">Subheading</label>
+                  <input
+                    type="text"
+                    value={newsletterSettings.subheading}
+                    onChange={(e) => setNewsletterSettings({ ...newsletterSettings, subheading: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-neutral-500 mb-1">Button Text</label>
+                  <input
+                    type="text"
+                    value={newsletterSettings.button_text}
+                    onChange={(e) => setNewsletterSettings({ ...newsletterSettings, button_text: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Share buttons section */}
             <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
