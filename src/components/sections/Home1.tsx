@@ -69,7 +69,7 @@ export default function Home1({ data }: Home1Props) {
           {/* Title */}
           <h2 className="mt-4 text-2xl font-medium leading-snug text-neutral-900 md:text-3xl lg:text-4xl font-heading">
             {data.card_title_before}{' '}
-            <em className="font-body italic">{data.card_title_highlight}</em>{' '}
+            <em className="italic" style={{ fontFamily: 'var(--font-body)' }}>{data.card_title_highlight}</em>{' '}
             {data.card_title_after}
           </h2>
 

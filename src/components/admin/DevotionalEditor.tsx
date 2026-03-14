@@ -272,8 +272,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 300px"
-                  unoptimized={coverImageUrl.includes('blob.vercel-storage.com') || coverImageUrl.includes('supabase')}
-                  priority
+                  unoptimized
                 />
               </div>
               <button
