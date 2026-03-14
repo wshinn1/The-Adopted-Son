@@ -265,12 +265,19 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
           </h3>
           {coverImageUrl && coverImageUrl.trim().length > 0 ? (
             <div className="aspect-video relative rounded-lg overflow-hidden bg-neutral-200 dark:bg-neutral-700">
-              <Image
+              {/* Using img tag directly like MediaCard's modal preview */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={coverImageUrl}
                 alt="Cover preview"
-                fill
-                className="object-cover"
-                unoptimized
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => {
+                  console.log('[v0] Image failed to load:', coverImageUrl)
+                  e.currentTarget.style.display = 'none'
+                }}
+                onLoad={() => {
+                  console.log('[v0] Image loaded successfully:', coverImageUrl)
+                }}
               />
               <button
                 type="button"
