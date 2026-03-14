@@ -131,12 +131,7 @@ export default async function PricingPage() {
           )}
         </div>
 
-        <div className="mt-8 rounded-xl bg-muted/50 p-6 text-center">
-          <h3 className="font-semibold text-foreground">30-Day Money Back Guarantee</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Not satisfied? Contact us within 30 days for a full refund, no questions asked.
-          </p>
-        </div>
+        
       </div>
     </div>
   )
