@@ -5,43 +5,12 @@ const PROJECT_ID = process.env.POSTHOG_PROJECT_ID || '341992'
 // Note: API endpoint is us.posthog.com (not us.i.posthog.com which is for client tracking)
 const POSTHOG_API_URL = 'https://us.posthog.com'
 
-// Fetch active users in the last 5 minutes (more real-time)
-async function getActiveUsers() {
-  const apiKey = process.env.POSTHOG_PERSONAL_API_KEY
-  if (!apiKey) return 0
-  
-  try {
-    const res = await fetch(`${POSTHOG_API_URL}/api/projects/${PROJECT_ID}/query/`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: {
-          kind: 'HogQLQuery',
-          query: `
-            SELECT count(DISTINCT distinct_id) as active
-            FROM events
-            WHERE timestamp >= now() - INTERVAL 5 MINUTE
-          `
-        }
-      }),
-      cache: 'no-store',
-    })
-    
-    if (!res.ok) return 0
-    const json = await res.json()
-    return json.results?.[0]?.[0] ?? 0
-  } catch {
-    return 0
-  }
-}
+// Use 7 days instead of 30 to reduce query load and avoid timeouts
+const LOOKBACK_DAYS = 7
 
 async function runQuery(query: string) {
   const apiKey = process.env.POSTHOG_PERSONAL_API_KEY
   if (!apiKey) {
-    console.error('[v0] POSTHOG_PERSONAL_API_KEY is not set')
     return []
   }
   
@@ -57,107 +26,120 @@ async function runQuery(query: string) {
     })
     
     if (!res.ok) {
-      const text = await res.text()
-      console.error('[v0] PostHog query failed:', res.status, text)
       return []
     }
     
     const json = await res.json()
     return json.results ?? []
-  } catch (err) {
-    console.error('[v0] PostHog fetch error:', err)
+  } catch {
     return []
   }
 }
 
+// Helper to run queries sequentially to avoid concurrency limits
+async function runQueriesSequentially<T>(queries: (() => Promise<T>)[]): Promise<T[]> {
+  const results: T[] = []
+  for (const query of queries) {
+    results.push(await query())
+  }
+  return results
+}
+
 export async function GET() {
   try {
-    const [activeUsers, pageviewRows, uniqueRows, topPagesRows, last30Rows, countriesRows, citiesRows] = await Promise.all([
-      getActiveUsers(),
-      // Total pageviews last 30 days - use lowercase comparison for event name
+    // Run queries in batches of 2 to stay under PostHog's concurrency limit of 3
+    // Batch 1: Core metrics
+    const [coreResults] = await Promise.all([
       runQuery(`
-        SELECT count() as total
+        SELECT 
+          count() as pageviews,
+          count(DISTINCT distinct_id) as uniques,
+          countIf(timestamp >= now() - INTERVAL 5 MINUTE) as active_recent
         FROM events
-        WHERE lower(event) = '$pageview'
-          AND timestamp >= now() - INTERVAL 30 DAY
+        WHERE event = '$pageview'
+          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
       `),
-      // Unique visitors last 30 days
-      runQuery(`
-        SELECT count(DISTINCT distinct_id) as uniques
-        FROM events
-        WHERE lower(event) = '$pageview'
-          AND timestamp >= now() - INTERVAL 30 DAY
-      `),
-      // Top 10 pages last 30 days
+    ])
+    
+    // Small delay to avoid rate limiting
+    await new Promise(r => setTimeout(r, 100))
+    
+    // Batch 2: Top pages and daily views (run in parallel, max 2)
+    const [topPagesRows, last7Rows] = await Promise.all([
       runQuery(`
         SELECT 
           properties['$current_url'] as page, 
           count() as views
         FROM events
-        WHERE lower(event) = '$pageview'
-          AND timestamp >= now() - INTERVAL 30 DAY
+        WHERE event = '$pageview'
+          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
         GROUP BY page
         ORDER BY views DESC
         LIMIT 10
       `),
-      // Daily views last 30 days
       runQuery(`
         SELECT 
           toDate(timestamp) as day, 
           count() as views
         FROM events
-        WHERE lower(event) = '$pageview'
-          AND timestamp >= now() - INTERVAL 30 DAY
+        WHERE event = '$pageview'
+          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
         GROUP BY day
         ORDER BY day ASC
       `),
-      // Top countries - use country code as fallback
+    ])
+    
+    await new Promise(r => setTimeout(r, 100))
+    
+    // Batch 3: Geo data (run in parallel, max 2)
+    const [countriesRows, citiesRows] = await Promise.all([
       runQuery(`
         SELECT 
           coalesce(
             properties['$geoip_country_name'],
             properties['$geoip_country_code'],
-            properties['$country_code'],
-            properties['$country']
+            'Unknown'
           ) as country, 
           count() as views
         FROM events
-        WHERE lower(event) = '$pageview'
-          AND timestamp >= now() - INTERVAL 30 DAY
-          AND country IS NOT NULL
-          AND country != ''
+        WHERE event = '$pageview'
+          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
         GROUP BY country
+        HAVING country != 'Unknown' AND country != ''
         ORDER BY views DESC
         LIMIT 10
       `),
-      // Top cities
       runQuery(`
         SELECT 
           coalesce(
             properties['$geoip_city_name'],
             properties['$geoip_city'],
-            properties['$city']
+            'Unknown'
           ) as city, 
           count() as views
         FROM events
-        WHERE lower(event) = '$pageview'
-          AND timestamp >= now() - INTERVAL 30 DAY
-          AND city IS NOT NULL
-          AND city != ''
+        WHERE event = '$pageview'
+          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
         GROUP BY city
+        HAVING city != 'Unknown' AND city != ''
         ORDER BY views DESC
         LIMIT 10
       `),
     ])
 
+    const pageviews = coreResults?.[0]?.[0] ?? 0
+    const uniqueVisitors = coreResults?.[0]?.[1] ?? 0
+    const activeUsers = coreResults?.[0]?.[2] ?? 0
+
     return NextResponse.json({
       activeUsers,
-      pageviews: pageviewRows?.[0]?.[0] ?? 0,
-      uniqueVisitors: uniqueRows?.[0]?.[0] ?? 0,
+      pageviews,
+      uniqueVisitors,
       topPages: (topPagesRows ?? []).map((r: [string, number]) => ({ page: r[0], views: r[1] })),
-      dailyViews: (last30Rows ?? []).map((r: [string, number]) => ({ day: r[0], views: r[1] })),
+      dailyViews: (last7Rows ?? []).map((r: [string, number]) => ({ day: r[0], views: r[1] })),
       countries: (countriesRows ?? []).map((r: [string, number]) => ({ country: r[0], views: r[1] })),
       cities: (citiesRows ?? []).map((r: [string, number]) => ({ city: r[0], views: r[1] })),
+      lookbackDays: LOOKBACK_DAYS,
     })
   } catch (err) {
     console.error('[v0] Analytics API error:', err)
