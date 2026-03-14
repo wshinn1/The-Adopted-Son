@@ -51,18 +51,31 @@ const FONT_OPTIONS = [
 ]
 
 const FONT_SIZE_OPTIONS = [
-  { value: 'xs', label: 'Extra Small', description: '12px' },
-  { value: 'sm', label: 'Small', description: '14px' },
-  { value: 'base', label: 'Medium (Default)', description: '16px' },
-  { value: 'lg', label: 'Large', description: '18px' },
-  { value: 'xl', label: 'Extra Large', description: '20px' },
+  { value: '8', label: '8 pt' },
+  { value: '9', label: '9 pt' },
+  { value: '10', label: '10 pt' },
+  { value: '11', label: '11 pt' },
+  { value: '12', label: '12 pt (Default)' },
+  { value: '13', label: '13 pt' },
+  { value: '14', label: '14 pt' },
+  { value: '16', label: '16 pt' },
+  { value: '18', label: '18 pt' },
+  { value: '20', label: '20 pt' },
+  { value: '22', label: '22 pt' },
+  { value: '24', label: '24 pt' },
 ]
 
 const HEADING_SIZE_OPTIONS = [
-  { value: 'sm', label: 'Small', description: 'Smaller headings' },
-  { value: 'base', label: 'Medium (Default)', description: 'Standard size' },
-  { value: 'lg', label: 'Large', description: 'Larger headings' },
-  { value: 'xl', label: 'Extra Large', description: 'Maximum impact' },
+  { value: '18', label: '18 pt' },
+  { value: '20', label: '20 pt' },
+  { value: '24', label: '24 pt' },
+  { value: '28', label: '28 pt' },
+  { value: '32', label: '32 pt (Default)' },
+  { value: '36', label: '36 pt' },
+  { value: '40', label: '40 pt' },
+  { value: '48', label: '48 pt' },
+  { value: '56', label: '56 pt' },
+  { value: '64', label: '64 pt' },
 ]
 
 const groupedFonts = FONT_OPTIONS.reduce((acc, font) => {
@@ -83,9 +96,9 @@ export default function SiteSettingsPage() {
   const [headingFont, setHeadingFont] = useState('font-sans')
   const [bodyFont, setBodyFont] = useState('font-serif')
   const [accentFont, setAccentFont] = useState('Space_Mono')
-  const [headingSize, setHeadingSize] = useState('base')
-  const [bodySize, setBodySize] = useState('base')
-  const [accentSize, setAccentSize] = useState('sm')
+  const [headingSize, setHeadingSize] = useState('32')
+  const [bodySize, setBodySize] = useState('12')
+  const [accentSize, setAccentSize] = useState('10')
   const [showNewsletterOnPosts, setShowNewsletterOnPosts] = useState(true)
   const [newsletterSettings, setNewsletterSettings] = useState({
     heading: 'Stay Connected',
@@ -196,9 +209,9 @@ export default function SiteSettingsPage() {
       setHeadingFont(settings.typography?.heading_font || 'font-sans')
       setBodyFont(settings.typography?.body_font || 'font-serif')
       setAccentFont(settings.typography?.accent_font || 'Space_Mono')
-      setHeadingSize(settings.typography?.heading_size || 'base')
-      setBodySize(settings.typography?.body_size || 'base')
-      setAccentSize(settings.typography?.accent_size || 'sm')
+      setHeadingSize(settings.typography?.heading_size || '32')
+      setBodySize(settings.typography?.body_size || '12')
+      setAccentSize(settings.typography?.accent_size || '10')
       setShowNewsletterOnPosts(settings.show_newsletter_on_posts !== false)
       if (settings.newsletter_settings) {
         setNewsletterSettings(settings.newsletter_settings)
@@ -456,7 +469,7 @@ export default function SiteSettingsPage() {
                 >
                   {HEADING_SIZE_OPTIONS.map((size) => (
                     <option key={size.value} value={size.value}>
-                      {size.label} - {size.description}
+                      {size.label}
                     </option>
                   ))}
                 </select>
@@ -497,7 +510,7 @@ export default function SiteSettingsPage() {
                 >
                   {FONT_SIZE_OPTIONS.map((size) => (
                     <option key={size.value} value={size.value}>
-                      {size.label} ({size.description})
+                      {size.label}
                     </option>
                   ))}
                 </select>
@@ -538,7 +551,7 @@ export default function SiteSettingsPage() {
                 >
                   {FONT_SIZE_OPTIONS.map((size) => (
                     <option key={size.value} value={size.value}>
-                      {size.label} ({size.description})
+                      {size.label}
                     </option>
                   ))}
                 </select>

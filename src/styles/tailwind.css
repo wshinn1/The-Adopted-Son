@@ -10,9 +10,9 @@
   --font-heading: 'Be Vietnam Pro', sans-serif;
   --font-body: 'Merriweather', serif;
   --font-accent: 'Space Mono', monospace;
-  --font-size-body: 1rem;
-  --font-size-accent: 0.875rem;
-  --heading-scale: 1;
+  --font-size-body: 12pt;
+  --font-size-accent: 10pt;
+  --font-size-heading: 32pt;
 }
 
 /* Font utility classes for blog posts */

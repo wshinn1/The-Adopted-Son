@@ -78,20 +78,8 @@ interface FontProviderProps {
   initialAccentFont?: string
 }
 
-const FONT_SIZE_MAP: Record<string, string> = {
-  xs: '0.75rem',
-  sm: '0.875rem',
-  base: '1rem',
-  lg: '1.125rem',
-  xl: '1.25rem',
-}
-
-const HEADING_SIZE_SCALE: Record<string, string> = {
-  sm: '0.9',
-  base: '1',
-  lg: '1.1',
-  xl: '1.2',
-}
+// Font sizes are now stored as pt values directly (e.g., '12', '14', '16')
+// and converted to pt units when applied
 
 export default function FontProvider({ 
   children, 
@@ -102,9 +90,9 @@ export default function FontProvider({
   const [headingFont, setHeadingFont] = useState(initialHeadingFont)
   const [bodyFont, setBodyFont] = useState(initialBodyFont)
   const [accentFont, setAccentFont] = useState(initialAccentFont)
-  const [headingSize, setHeadingSize] = useState('base')
-  const [bodySize, setBodySize] = useState('base')
-  const [accentSize, setAccentSize] = useState('sm')
+  const [headingSize, setHeadingSize] = useState('32')
+  const [bodySize, setBodySize] = useState('12')
+  const [accentSize, setAccentSize] = useState('10')
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -181,18 +169,18 @@ export default function FontProvider({
       '--font-accent',
       FONT_FAMILY_MAP[accentFont] || FONT_FAMILY_MAP['Space_Mono']
     )
-    // Set font sizes
+    // Set font sizes (values are stored as pt numbers like '12', '14', etc.)
     document.documentElement.style.setProperty(
       '--font-size-body',
-      FONT_SIZE_MAP[bodySize] || FONT_SIZE_MAP['base']
+      `${bodySize || '12'}pt`
     )
     document.documentElement.style.setProperty(
       '--font-size-accent',
-      FONT_SIZE_MAP[accentSize] || FONT_SIZE_MAP['sm']
+      `${accentSize || '10'}pt`
     )
     document.documentElement.style.setProperty(
-      '--heading-scale',
-      HEADING_SIZE_SCALE[headingSize] || HEADING_SIZE_SCALE['base']
+      '--font-size-heading',
+      `${headingSize || '32'}pt`
     )
   }, [headingFont, bodyFont, accentFont, headingSize, bodySize, accentSize])
 
