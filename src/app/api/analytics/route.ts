@@ -111,28 +111,40 @@ export async function GET() {
         GROUP BY day
         ORDER BY day ASC
       `),
-      // Top countries
+      // Top countries - try multiple property name variations
       runQuery(`
         SELECT 
-          properties['$geoip_country_name'] as country, 
+          coalesce(
+            properties['$geoip_country_name'],
+            properties['$geo_country_name'],
+            properties['$country'],
+            person.properties['$geoip_country_name']
+          ) as country, 
           count() as views
         FROM events
         WHERE lower(event) = '$pageview'
           AND timestamp >= now() - INTERVAL 30 DAY
-          AND properties['$geoip_country_name'] IS NOT NULL
+          AND country IS NOT NULL
+          AND country != ''
         GROUP BY country
         ORDER BY views DESC
         LIMIT 10
       `),
-      // Top cities
+      // Top cities - try multiple property name variations
       runQuery(`
         SELECT 
-          properties['$geoip_city_name'] as city, 
+          coalesce(
+            properties['$geoip_city_name'],
+            properties['$geo_city_name'],
+            properties['$city'],
+            person.properties['$geoip_city_name']
+          ) as city, 
           count() as views
         FROM events
         WHERE lower(event) = '$pageview'
           AND timestamp >= now() - INTERVAL 30 DAY
-          AND properties['$geoip_city_name'] IS NOT NULL
+          AND city IS NOT NULL
+          AND city != ''
         GROUP BY city
         ORDER BY views DESC
         LIMIT 10
