@@ -21,8 +21,12 @@ export default function AnalyticsStats() {
   useEffect(() => {
     if (data && !isLoading) {
       setLastUpdated(new Date())
+      console.log('[v0] Analytics data received:', data)
     }
-  }, [data, isLoading])
+    if (error) {
+      console.error('[v0] Analytics error:', error)
+    }
+  }, [data, isLoading, error])
 
   return (
     <div className="space-y-8">

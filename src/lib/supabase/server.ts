@@ -23,6 +23,12 @@ export async function createClient() {
           }
         },
       },
+      auth: {
+        // Disable PKCE flow - use implicit flow with token_hash instead
+        // PKCE requires cookies to persist between signup and email click,
+        // which fails when users open email links in different browsers/apps
+        flowType: 'implicit',
+      },
     },
   )
 }
