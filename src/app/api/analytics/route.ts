@@ -11,10 +11,42 @@ async function getActiveUsers() {
   if (!apiKey) return 0
   
   try {
-  const url = `${POSTHOG_API_URL}/api/projects/${PROJECT_ID}/query/`
+    const res = await fetch(`${POSTHOG_API_URL}/api/projects/${PROJECT_ID}/query/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: `
+            SELECT count(distinct distinct_id) as active
+            FROM events
+            WHERE timestamp >= now() - interval 5 minute
+          `
+        }
+      }),
+      cache: 'no-store',
+    })
+    
+    if (!res.ok) return 0
+    const json = await res.json()
+    return json.results?.[0]?.[0] ?? 0
+  } catch {
+    return 0
+  }
+}
+
+async function runQuery(query: string) {
+  const apiKey = process.env.POSTHOG_PERSONAL_API_KEY
+  if (!apiKey) {
+    console.error('[v0] POSTHOG_PERSONAL_API_KEY is not set')
+    return []
+  }
   
   try {
-    const res = await fetch(url, {
+    const res = await fetch(`${POSTHOG_API_URL}/api/projects/${PROJECT_ID}/query/`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -37,47 +69,6 @@ async function getActiveUsers() {
     return []
   }
 }
-      }),
-      cache: 'no-store',
-    })
-    
-    if (!res.ok) return 0
-    const json = await res.json()
-    return json.results?.[0]?.[0] ?? 0
-  } catch {
-    return 0
-  }
-}
-
-async function runQuery(query: string) {
-  const apiKey = process.env.POSTHOG_PERSONAL_API_KEY
-  if (!apiKey) {
-    console.error('[v0] POSTHOG_PERSONAL_API_KEY is not set')
-    return []
-  }
-  
-  console.log('[v0] PostHog query - Project:', PROJECT_ID, 'URL:', POSTHOG_API_URL)
-  
-  const res = await fetch(`${POSTHOG_URL}/api/projects/${PROJECT_ID}/query/`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query: { kind: 'HogQLQuery', query } }),
-    cache: 'no-store', // always fetch fresh for real-time data
-  })
-  
-  if (!res.ok) {
-    const text = await res.text()
-    console.error('[v0] PostHog query failed:', res.status, text)
-    // Return empty instead of throwing to prevent entire dashboard from failing
-    return []
-  }
-  
-  const json = await res.json()
-  return json.results ?? []
-}
 
 export async function GET() {
   try {
@@ -99,7 +90,7 @@ export async function GET() {
       `),
       // Top 10 pages last 30 days
       runQuery(`
-        SELECT properties.$pathname as page, count() as views
+        SELECT properties.$current_url as page, count() as views
         FROM events
         WHERE event = '$pageview'
           AND timestamp >= now() - interval 30 day
@@ -107,16 +98,16 @@ export async function GET() {
         ORDER BY views DESC
         LIMIT 10
       `),
-      // Pageviews per day last 7 days
+      // Daily views last 30 days
       runQuery(`
         SELECT toDate(timestamp) as day, count() as views
         FROM events
         WHERE event = '$pageview'
-          AND timestamp >= now() - interval 7 day
+          AND timestamp >= now() - interval 30 day
         GROUP BY day
         ORDER BY day ASC
       `),
-      // Top countries last 30 days
+      // Top countries
       runQuery(`
         SELECT properties.$geoip_country_name as country, count() as views
         FROM events
@@ -127,18 +118,14 @@ export async function GET() {
         ORDER BY views DESC
         LIMIT 10
       `),
-      // Top cities (with state/country) last 30 days
+      // Top cities
       runQuery(`
-        SELECT 
-          properties.$geoip_city_name as city,
-          properties.$geoip_subdivision_1_name as state,
-          properties.$geoip_country_code as country_code,
-          count() as views
+        SELECT properties.$geoip_city_name as city, count() as views
         FROM events
         WHERE event = '$pageview'
           AND timestamp >= now() - interval 30 day
           AND properties.$geoip_city_name IS NOT NULL
-        GROUP BY city, state, country_code
+        GROUP BY city
         ORDER BY views DESC
         LIMIT 10
       `),
@@ -148,18 +135,13 @@ export async function GET() {
       activeUsers,
       pageviews: pageviewRows?.[0]?.[0] ?? 0,
       uniqueVisitors: uniqueRows?.[0]?.[0] ?? 0,
-      topPages: topPagesRows?.map((r: [string, number]) => ({ page: r[0], views: r[1] })) ?? [],
-      dailyViews: last30Rows?.map((r: [string, number]) => ({ day: r[0], views: r[1] })) ?? [],
-      topCountries: countriesRows?.map((r: [string, number]) => ({ country: r[0], views: r[1] })) ?? [],
-      topCities: citiesRows?.map((r: [string, string, string, number]) => ({ 
-        city: r[0], 
-        state: r[1], 
-        countryCode: r[2], 
-        views: r[3] 
-      })) ?? [],
+      topPages: (topPagesRows ?? []).map((r: [string, number]) => ({ page: r[0], views: r[1] })),
+      dailyViews: (last30Rows ?? []).map((r: [string, number]) => ({ day: r[0], views: r[1] })),
+      countries: (countriesRows ?? []).map((r: [string, number]) => ({ country: r[0], views: r[1] })),
+      cities: (citiesRows ?? []).map((r: [string, number]) => ({ city: r[0], views: r[1] })),
     })
-  } catch (e) {
-    console.error('[v0] PostHog API error:', e)
+  } catch (err) {
+    console.error('[v0] Analytics API error:', err)
     return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 })
   }
 }
