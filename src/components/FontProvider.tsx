@@ -25,6 +25,15 @@ const GOOGLE_FONT_MAP: Record<string, string> = {
   Cormorant_Garamond: 'Cormorant+Garamond:wght@300;400;500;600;700',
   Bitter: 'Bitter:wght@300;400;500;600;700',
   Spectral: 'Spectral:wght@300;400;500;600;700',
+  // Monospace fonts
+  JetBrains_Mono: 'JetBrains+Mono:wght@400;500;700',
+  Fira_Code: 'Fira+Code:wght@400;500;700',
+  Source_Code_Pro: 'Source+Code+Pro:wght@400;500;700',
+  IBM_Plex_Mono: 'IBM+Plex+Mono:wght@400;500;700',
+  Space_Mono: 'Space+Mono:wght@400;700',
+  Roboto_Mono: 'Roboto+Mono:wght@400;500;700',
+  Courier_Prime: 'Courier+Prime:wght@400;700',
+  Anonymous_Pro: 'Anonymous+Pro:wght@400;700',
 }
 
 // Map font values to CSS font-family
@@ -51,21 +60,51 @@ const FONT_FAMILY_MAP: Record<string, string> = {
   Cormorant_Garamond: "'Cormorant Garamond', serif",
   Bitter: "'Bitter', serif",
   Spectral: "'Spectral', serif",
+  // Monospace fonts
+  JetBrains_Mono: "'JetBrains Mono', monospace",
+  Fira_Code: "'Fira Code', monospace",
+  Source_Code_Pro: "'Source Code Pro', monospace",
+  IBM_Plex_Mono: "'IBM Plex Mono', monospace",
+  Space_Mono: "'Space Mono', monospace",
+  Roboto_Mono: "'Roboto Mono', monospace",
+  Courier_Prime: "'Courier Prime', monospace",
+  Anonymous_Pro: "'Anonymous Pro', monospace",
 }
 
 interface FontProviderProps {
   children: React.ReactNode
   initialHeadingFont?: string
   initialBodyFont?: string
+  initialAccentFont?: string
+}
+
+const FONT_SIZE_MAP: Record<string, string> = {
+  xs: '0.75rem',
+  sm: '0.875rem',
+  base: '1rem',
+  lg: '1.125rem',
+  xl: '1.25rem',
+}
+
+const HEADING_SIZE_SCALE: Record<string, string> = {
+  sm: '0.9',
+  base: '1',
+  lg: '1.1',
+  xl: '1.2',
 }
 
 export default function FontProvider({ 
   children, 
   initialHeadingFont = 'Be_Vietnam_Pro',
-  initialBodyFont = 'Merriweather' 
+  initialBodyFont = 'Merriweather',
+  initialAccentFont = 'Space_Mono'
 }: FontProviderProps) {
   const [headingFont, setHeadingFont] = useState(initialHeadingFont)
   const [bodyFont, setBodyFont] = useState(initialBodyFont)
+  const [accentFont, setAccentFont] = useState(initialAccentFont)
+  const [headingSize, setHeadingSize] = useState('base')
+  const [bodySize, setBodySize] = useState('base')
+  const [accentSize, setAccentSize] = useState('sm')
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -86,6 +125,10 @@ export default function FontProvider({
           const typography = typeof data.value === 'string' ? JSON.parse(data.value) : data.value
           if (typography.heading_font) setHeadingFont(typography.heading_font)
           if (typography.body_font) setBodyFont(typography.body_font)
+          if (typography.accent_font) setAccentFont(typography.accent_font)
+          if (typography.heading_size) setHeadingSize(typography.heading_size)
+          if (typography.body_size) setBodySize(typography.body_size)
+          if (typography.accent_size) setAccentSize(typography.accent_size)
         }
       } catch (err) {
         console.error('Error loading typography settings:', err)
@@ -106,6 +149,9 @@ export default function FontProvider({
     }
     if (GOOGLE_FONT_MAP[bodyFont] && bodyFont !== headingFont) {
       fontsToLoad.push(GOOGLE_FONT_MAP[bodyFont])
+    }
+    if (GOOGLE_FONT_MAP[accentFont] && accentFont !== headingFont && accentFont !== bodyFont) {
+      fontsToLoad.push(GOOGLE_FONT_MAP[accentFont])
     }
 
     if (fontsToLoad.length > 0) {
@@ -131,7 +177,24 @@ export default function FontProvider({
       '--font-body',
       FONT_FAMILY_MAP[bodyFont] || FONT_FAMILY_MAP['Merriweather']
     )
-  }, [headingFont, bodyFont])
+    document.documentElement.style.setProperty(
+      '--font-accent',
+      FONT_FAMILY_MAP[accentFont] || FONT_FAMILY_MAP['Space_Mono']
+    )
+    // Set font sizes
+    document.documentElement.style.setProperty(
+      '--font-size-body',
+      FONT_SIZE_MAP[bodySize] || FONT_SIZE_MAP['base']
+    )
+    document.documentElement.style.setProperty(
+      '--font-size-accent',
+      FONT_SIZE_MAP[accentSize] || FONT_SIZE_MAP['sm']
+    )
+    document.documentElement.style.setProperty(
+      '--heading-scale',
+      HEADING_SIZE_SCALE[headingSize] || HEADING_SIZE_SCALE['base']
+    )
+  }, [headingFont, bodyFont, accentFont, headingSize, bodySize, accentSize])
 
   return <>{children}</>
 }
