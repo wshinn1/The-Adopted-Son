@@ -97,6 +97,7 @@ export default async function DevotionalPage({ params }: Props) {
     excerpt: devotional.excerpt,
     content: canRead ? (devotional.content as Record<string, unknown> | null) : getTeaserContent(devotional.content),
     cover_image_url: devotional.cover_image_url,
+    cover_image_caption: devotional.cover_image_caption,
     scripture_reference: devotional.scripture_reference,
     scripture_text: devotional.scripture_text,
     category: devotional.category,

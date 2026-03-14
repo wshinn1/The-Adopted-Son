@@ -119,6 +119,10 @@ export default function SiteSettingsPage() {
   const [headingStyle, setHeadingStyle] = useState('normal')
   const [bodyStyle, setBodyStyle] = useState('normal')
   const [accentStyle, setAccentStyle] = useState('normal')
+  const [captionFont, setCaptionFont] = useState('Lora')
+  const [captionSize, setCaptionSize] = useState('10')
+  const [captionWeight, setCaptionWeight] = useState('400')
+  const [captionStyle, setCaptionStyle] = useState('italic')
   const [showNewsletterOnPosts, setShowNewsletterOnPosts] = useState(true)
   const [newsletterSettings, setNewsletterSettings] = useState({
     heading: 'Stay Connected',
@@ -187,6 +191,7 @@ export default function SiteSettingsPage() {
     if (GOOGLE_FONT_MAP[headingFont]) fontsToLoad.push(GOOGLE_FONT_MAP[headingFont])
     if (GOOGLE_FONT_MAP[bodyFont] && bodyFont !== headingFont) fontsToLoad.push(GOOGLE_FONT_MAP[bodyFont])
     if (GOOGLE_FONT_MAP[accentFont] && accentFont !== headingFont && accentFont !== bodyFont) fontsToLoad.push(GOOGLE_FONT_MAP[accentFont])
+    if (GOOGLE_FONT_MAP[captionFont] && captionFont !== headingFont && captionFont !== bodyFont && captionFont !== accentFont) fontsToLoad.push(GOOGLE_FONT_MAP[captionFont])
 
     if (fontsToLoad.length > 0) {
       const linkId = 'admin-preview-fonts'
@@ -199,7 +204,7 @@ export default function SiteSettingsPage() {
       }
       link.href = `https://fonts.googleapis.com/css2?${fontsToLoad.map(f => `family=${f}`).join('&')}&display=swap`
     }
-  }, [headingFont, bodyFont, accentFont])
+  }, [headingFont, bodyFont, accentFont, captionFont])
 
   const loadSettings = async () => {
     try {
@@ -238,6 +243,10 @@ export default function SiteSettingsPage() {
       setHeadingStyle(settings.typography?.heading_style || 'normal')
       setBodyStyle(settings.typography?.body_style || 'normal')
       setAccentStyle(settings.typography?.accent_style || 'normal')
+      setCaptionFont(settings.typography?.caption_font || 'Lora')
+      setCaptionSize(settings.typography?.caption_size || '10')
+      setCaptionWeight(settings.typography?.caption_weight || '400')
+      setCaptionStyle(settings.typography?.caption_style || 'italic')
       setShowNewsletterOnPosts(settings.show_newsletter_on_posts !== false)
       if (settings.newsletter_settings) {
         setNewsletterSettings(settings.newsletter_settings)
@@ -284,6 +293,10 @@ export default function SiteSettingsPage() {
         heading_style: headingStyle,
         body_style: bodyStyle,
         accent_style: accentStyle,
+        caption_font: captionFont,
+        caption_size: captionSize,
+        caption_weight: captionWeight,
+        caption_style: captionStyle,
       })
       await saveSetting('show_newsletter_on_posts', showNewsletterOnPosts)
       await saveSetting('newsletter_settings', newsletterSettings)
@@ -692,6 +705,81 @@ export default function SiteSettingsPage() {
               </div>
             </div>
 
+            {/* Caption Font */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Caption Font
+                </label>
+                <select
+                  value={captionFont}
+                  onChange={(e) => setCaptionFont(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {Object.entries(groupedFonts).map(([category, fonts]) => (
+                    <optgroup key={category} label={category}>
+                      {fonts.map((font) => (
+                        <option key={font.value} value={font.value}>
+                          {font.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                <p className="text-xs text-neutral-500 mt-1">Used for image captions and credits</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Size
+                </label>
+                <select
+                  value={captionSize}
+                  onChange={(e) => setCaptionSize(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {FONT_SIZE_OPTIONS.map((size) => (
+                    <option key={size.value} value={size.value}>
+                      {size.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                    Weight
+                  </label>
+                  <select
+                    value={captionWeight}
+                    onChange={(e) => setCaptionWeight(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                  >
+                    {FONT_WEIGHT_OPTIONS.map((w) => (
+                      <option key={w.value} value={w.value}>
+                        {w.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                    Style
+                  </label>
+                  <select
+                    value={captionStyle}
+                    onChange={(e) => setCaptionStyle(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                  >
+                    {FONT_STYLE_OPTIONS.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
             {/* Font Preview */}
             <div className="mt-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
               <p className="text-xs text-neutral-500 mb-3">Preview (save to see changes on your site):</p>
@@ -727,6 +815,17 @@ export default function SiteSettingsPage() {
                 }}
               >
                 This is how your body text will appear in blog posts. The quick brown fox jumps over the lazy dog.
+              </p>
+              <p 
+                className="text-neutral-500 mt-3"
+                style={{ 
+                  fontFamily: `'${captionFont.replace(/_/g, ' ')}', serif`,
+                  fontSize: `${captionSize}pt`,
+                  fontWeight: captionWeight,
+                  fontStyle: captionStyle,
+                }}
+              >
+                Photo caption example - Image credit or description
               </p>
             </div>
           </div>

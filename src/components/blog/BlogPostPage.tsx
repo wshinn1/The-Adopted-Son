@@ -20,6 +20,7 @@ interface BlogPost {
   excerpt?: string | null
   content?: Record<string, unknown> | null
   cover_image_url?: string | null
+  cover_image_caption?: string | null
   scripture_reference?: string | null
   scripture_text?: string | null
   category?: string | null
@@ -190,17 +191,24 @@ export default function BlogPostPage({ post, shareSettings }: Props) {
 
         {/* Featured Image */}
         {post.cover_image_url && (
-          <div className="mt-10 aspect-[16/10] relative rounded-lg overflow-hidden">
-            <Image
-              src={post.cover_image_url}
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-              loading="eager"
-              unoptimized={post.cover_image_url.includes('blob.vercel-storage.com')}
-            />
-          </div>
+          <figure className="mt-10">
+            <div className="aspect-[16/10] relative rounded-lg overflow-hidden">
+              <Image
+                src={post.cover_image_url}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+                loading="eager"
+                unoptimized={post.cover_image_url.includes('blob.vercel-storage.com')}
+              />
+            </div>
+            {post.cover_image_caption && (
+              <figcaption className="mt-3 text-sm text-neutral-500 text-center italic font-caption">
+                {post.cover_image_caption}
+              </figcaption>
+            )}
+          </figure>
         )}
 
         {/* Scripture Block (if applicable) */}

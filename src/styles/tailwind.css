@@ -19,6 +19,10 @@
   --font-style-heading: normal;
   --font-style-body: normal;
   --font-style-accent: normal;
+  --font-caption: 'Lora', serif;
+  --font-size-caption: 10pt;
+  --font-weight-caption: 400;
+  --font-style-caption: italic;
 }
 
 /* Font utility classes for blog posts */
@@ -32,6 +36,13 @@
 
 @utility font-accent {
   font-family: var(--font-accent);
+}
+
+@utility font-caption {
+  font-family: var(--font-caption);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-caption);
+  font-style: var(--font-style-caption);
 }
 
 @theme {
