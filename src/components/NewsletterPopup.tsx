@@ -19,13 +19,18 @@ interface NewsletterPopupProps {
 }
 
 export default function NewsletterPopup({ settings, onClose, onSubscribe }: NewsletterPopupProps) {
+  const [firstName, setFirstName] = useState('')
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!email) return
+    if (!email || !firstName.trim()) {
+      setErrorMessage('Please fill in all fields')
+      setStatus('error')
+      return
+    }
 
     setStatus('loading')
     setErrorMessage('')
@@ -34,7 +39,7 @@ export default function NewsletterPopup({ settings, onClose, onSubscribe }: News
       const res = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ firstName: firstName.trim(), email }),
       })
 
       const data = await res.json()
@@ -121,15 +126,21 @@ export default function NewsletterPopup({ settings, onClose, onSubscribe }: News
 
               <form onSubmit={handleSubmit} className="space-y-3">
                 <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="First name"
+                  required
+                  className="w-full px-4 py-3 rounded-lg border border-neutral-300 text-base bg-white focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  disabled={status === 'loading'}
+                />
+                <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="Email address"
                   required
                   className="w-full px-4 py-3 rounded-lg border border-neutral-300 text-base bg-white focus:outline-none focus:ring-2 focus:ring-offset-2"
-                  style={{ 
-                    focusRing: settings.accent_color,
-                  } as React.CSSProperties}
                   disabled={status === 'loading'}
                 />
                 
