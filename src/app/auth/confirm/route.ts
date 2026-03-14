@@ -8,6 +8,15 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') as EmailOtpType | null
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/account'
+  
+  // Log all params for debugging
+  console.log('[v0] Auth confirm request:', { 
+    url: request.url,
+    token_hash: token_hash ? 'present' : 'missing', 
+    type, 
+    code: code ? 'present' : 'missing',
+    next,
+  })
 
   const supabase = await createClient()
 
@@ -18,6 +27,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}${next}`)
     }
     console.error('[v0] Email verification error:', error.message)
+    return NextResponse.redirect(`${origin}/auth/error?reason=${encodeURIComponent(error.message)}`)
   }
 
   // Handle PKCE flow via code (OAuth, magic link)
@@ -27,7 +37,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}${next}`)
     }
     console.error('[v0] Code exchange error:', error.message)
+    return NextResponse.redirect(`${origin}/auth/error?reason=${encodeURIComponent(error.message)}`)
   }
 
-  return NextResponse.redirect(`${origin}/auth/error`)
+  // No valid parameters found - this means Supabase redirected without token/code
+  console.log('[v0] No valid auth params found in URL')
+  return NextResponse.redirect(`${origin}/auth/error?reason=${encodeURIComponent('No authentication token received. The confirmation link may have expired or already been used.')}`)
 }

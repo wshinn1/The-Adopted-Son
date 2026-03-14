@@ -21,9 +21,9 @@ async function getActiveUsers() {
         query: {
           kind: 'HogQLQuery',
           query: `
-            SELECT count(distinct distinct_id) as active
+            SELECT count(DISTINCT distinct_id) as active
             FROM events
-            WHERE timestamp >= now() - interval 5 minute
+            WHERE timestamp >= now() - INTERVAL 5 MINUTE
           `
         }
       }),
@@ -74,57 +74,65 @@ export async function GET() {
   try {
     const [activeUsers, pageviewRows, uniqueRows, topPagesRows, last30Rows, countriesRows, citiesRows] = await Promise.all([
       getActiveUsers(),
-      // Total pageviews last 30 days
+      // Total pageviews last 30 days - use lowercase comparison for event name
       runQuery(`
         SELECT count() as total
         FROM events
-        WHERE event = '$pageview'
-          AND timestamp >= now() - interval 30 day
+        WHERE lower(event) = '$pageview'
+          AND timestamp >= now() - INTERVAL 30 DAY
       `),
       // Unique visitors last 30 days
       runQuery(`
-        SELECT count(distinct distinct_id) as uniques
+        SELECT count(DISTINCT distinct_id) as uniques
         FROM events
-        WHERE event = '$pageview'
-          AND timestamp >= now() - interval 30 day
+        WHERE lower(event) = '$pageview'
+          AND timestamp >= now() - INTERVAL 30 DAY
       `),
       // Top 10 pages last 30 days
       runQuery(`
-        SELECT properties.$current_url as page, count() as views
+        SELECT 
+          properties['$current_url'] as page, 
+          count() as views
         FROM events
-        WHERE event = '$pageview'
-          AND timestamp >= now() - interval 30 day
+        WHERE lower(event) = '$pageview'
+          AND timestamp >= now() - INTERVAL 30 DAY
         GROUP BY page
         ORDER BY views DESC
         LIMIT 10
       `),
       // Daily views last 30 days
       runQuery(`
-        SELECT toDate(timestamp) as day, count() as views
+        SELECT 
+          toDate(timestamp) as day, 
+          count() as views
         FROM events
-        WHERE event = '$pageview'
-          AND timestamp >= now() - interval 30 day
+        WHERE lower(event) = '$pageview'
+          AND timestamp >= now() - INTERVAL 30 DAY
         GROUP BY day
         ORDER BY day ASC
       `),
       // Top countries
       runQuery(`
-        SELECT properties.$geoip_country_name as country, count() as views
+        SELECT 
+          properties['$geoip_country_name'] as country, 
+          count() as views
         FROM events
-        WHERE event = '$pageview'
-          AND timestamp >= now() - interval 30 day
-          AND properties.$geoip_country_name IS NOT NULL
+        WHERE lower(event) = '$pageview'
+          AND timestamp >= now() - INTERVAL 30 DAY
+          AND properties['$geoip_country_name'] IS NOT NULL
         GROUP BY country
         ORDER BY views DESC
         LIMIT 10
       `),
       // Top cities
       runQuery(`
-        SELECT properties.$geoip_city_name as city, count() as views
+        SELECT 
+          properties['$geoip_city_name'] as city, 
+          count() as views
         FROM events
-        WHERE event = '$pageview'
-          AND timestamp >= now() - interval 30 day
-          AND properties.$geoip_city_name IS NOT NULL
+        WHERE lower(event) = '$pageview'
+          AND timestamp >= now() - INTERVAL 30 DAY
+          AND properties['$geoip_city_name'] IS NOT NULL
         GROUP BY city
         ORDER BY views DESC
         LIMIT 10

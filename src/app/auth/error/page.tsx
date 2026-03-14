@@ -1,6 +1,12 @@
 import Link from 'next/link'
 
-export default function AuthErrorPage() {
+export default async function AuthErrorPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reason?: string }>
+}) {
+  const { reason } = await searchParams
+  
   return (
     <div className="w-full max-w-md text-center">
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-8 shadow-sm">
@@ -13,6 +19,11 @@ export default function AuthErrorPage() {
         <p className="text-neutral-500 dark:text-neutral-400 text-sm">
           Something went wrong during sign in. Please try again.
         </p>
+        {reason && (
+          <p className="mt-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/50 rounded-lg p-3">
+            {reason}
+          </p>
+        )}
         <Link
           href="/auth/login"
           className="mt-6 inline-block px-6 py-2.5 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors text-sm"
