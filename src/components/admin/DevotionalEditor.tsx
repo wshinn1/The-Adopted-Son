@@ -265,6 +265,10 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
           </h3>
           {coverImageUrl && coverImageUrl.trim().length > 0 ? (
             <div className="relative">
+              {/* Debug: show the URL being used */}
+              <div className="text-xs text-red-500 break-all mb-2 p-2 bg-red-50 rounded">
+                DEBUG URL: {coverImageUrl}
+              </div>
               <div className="aspect-video relative rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
