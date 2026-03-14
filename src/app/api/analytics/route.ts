@@ -111,14 +111,14 @@ export async function GET() {
         GROUP BY day
         ORDER BY day ASC
       `),
-      // Top countries - try multiple property name variations
+      // Top countries - use country code as fallback
       runQuery(`
         SELECT 
           coalesce(
             properties['$geoip_country_name'],
-            properties['$geo_country_name'],
-            properties['$country'],
-            person.properties['$geoip_country_name']
+            properties['$geoip_country_code'],
+            properties['$country_code'],
+            properties['$country']
           ) as country, 
           count() as views
         FROM events
@@ -130,14 +130,13 @@ export async function GET() {
         ORDER BY views DESC
         LIMIT 10
       `),
-      // Top cities - try multiple property name variations
+      // Top cities
       runQuery(`
         SELECT 
           coalesce(
             properties['$geoip_city_name'],
-            properties['$geo_city_name'],
-            properties['$city'],
-            person.properties['$geoip_city_name']
+            properties['$geoip_city'],
+            properties['$city']
           ) as city, 
           count() as views
         FROM events
