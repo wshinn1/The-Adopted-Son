@@ -96,29 +96,33 @@ export async function GET() {
     const [countriesRows, citiesRows] = await Promise.all([
       runQuery(`
         SELECT 
-          properties['$geoip_country_name'] as country, 
+          properties['$geoip_country_name'] as country,
+          properties['$geoip_country_code'] as countryCode,
           count() as views
         FROM events
         WHERE event = '$pageview'
           AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
           AND properties['$geoip_country_name'] IS NOT NULL
           AND properties['$geoip_country_name'] != ''
-        GROUP BY country
+        GROUP BY country, countryCode
         ORDER BY views DESC
-        LIMIT 10
+        LIMIT 50
       `),
       runQuery(`
         SELECT 
-          properties['$geoip_city_name'] as city, 
+          properties['$geoip_city_name'] as city,
+          properties['$geoip_subdivision_1_name'] as state,
+          properties['$geoip_country_code'] as countryCode,
+          properties['$geoip_country_name'] as country,
           count() as views
         FROM events
         WHERE event = '$pageview'
           AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
           AND properties['$geoip_city_name'] IS NOT NULL
           AND properties['$geoip_city_name'] != ''
-        GROUP BY city
+        GROUP BY city, state, countryCode, country
         ORDER BY views DESC
-        LIMIT 10
+        LIMIT 100
       `),
     ])
 
@@ -132,8 +136,18 @@ export async function GET() {
       uniqueVisitors,
       topPages: (topPagesRows ?? []).map((r: [string, number]) => ({ page: r[0], views: r[1] })),
       dailyViews: (last7Rows ?? []).map((r: [string, number]) => ({ day: r[0], views: r[1] })),
-      countries: (countriesRows ?? []).map((r: [string, number]) => ({ country: r[0], views: r[1] })),
-      cities: (citiesRows ?? []).map((r: [string, number]) => ({ city: r[0], views: r[1] })),
+      topCountries: (countriesRows ?? []).map((r: [string, string, number]) => ({ 
+        country: r[0], 
+        countryCode: r[1], 
+        views: r[2] 
+      })),
+      topCities: (citiesRows ?? []).map((r: [string, string, string, string, number]) => ({ 
+        city: r[0], 
+        state: r[1],
+        countryCode: r[2],
+        country: r[3],
+        views: r[4] 
+      })),
       lookbackDays: LOOKBACK_DAYS,
     })
   } catch (err) {
