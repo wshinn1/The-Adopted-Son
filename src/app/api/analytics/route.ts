@@ -96,26 +96,26 @@ export async function GET() {
     const [countriesRows, citiesRows] = await Promise.all([
       runQuery(`
         SELECT 
-          properties.$geoip_country_name as country, 
+          properties['$geoip_country_name'] as country, 
           count() as views
         FROM events
         WHERE event = '$pageview'
           AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
-          AND properties.$geoip_country_name IS NOT NULL
-          AND properties.$geoip_country_name != ''
+          AND properties['$geoip_country_name'] IS NOT NULL
+          AND properties['$geoip_country_name'] != ''
         GROUP BY country
         ORDER BY views DESC
         LIMIT 10
       `),
       runQuery(`
         SELECT 
-          properties.$geoip_city_name as city, 
+          properties['$geoip_city_name'] as city, 
           count() as views
         FROM events
         WHERE event = '$pageview'
           AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
-          AND properties.$geoip_city_name IS NOT NULL
-          AND properties.$geoip_city_name != ''
+          AND properties['$geoip_city_name'] IS NOT NULL
+          AND properties['$geoip_city_name'] != ''
         GROUP BY city
         ORDER BY views DESC
         LIMIT 10
