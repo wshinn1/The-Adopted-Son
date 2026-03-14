@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import TrialBanner from '@/components/devotional/TrialBanner'
 import HamburgerHeader from '@/components/HamburgerHeader'
+import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
 
 export const metadata: Metadata = {
   title: 'Devotionals',
@@ -215,6 +216,21 @@ export default async function DevotionalsPage({ searchParams }: Props) {
       <div className="h-20" />
       
       <TrialBanner />
+      
+      {/* Newsletter Signup */}
+      {settings.show_newsletter_on_posts && (
+        <NewsletterSignUp
+          data={{
+            heading: 'Stay Connected',
+            subheading: 'Get the latest devotionals and updates delivered to your inbox.',
+            button_text: 'Subscribe',
+            success_message: 'Thank you for subscribing! Check your inbox for confirmation.',
+            background_color: '#F5F2ED',
+            background_image_url: '',
+            text_color: '#1a1a1a',
+          }}
+        />
+      )}
       
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         
