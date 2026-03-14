@@ -13,6 +13,12 @@
   --font-size-body: 12pt;
   --font-size-accent: 10pt;
   --font-size-heading: 32pt;
+  --font-weight-heading: 700;
+  --font-weight-body: 400;
+  --font-weight-accent: 400;
+  --font-style-heading: normal;
+  --font-style-body: normal;
+  --font-style-accent: normal;
 }
 
 /* Font utility classes for blog posts */

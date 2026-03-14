@@ -93,6 +93,12 @@ export default function FontProvider({
   const [headingSize, setHeadingSize] = useState('32')
   const [bodySize, setBodySize] = useState('12')
   const [accentSize, setAccentSize] = useState('10')
+  const [headingWeight, setHeadingWeight] = useState('700')
+  const [bodyWeight, setBodyWeight] = useState('400')
+  const [accentWeight, setAccentWeight] = useState('400')
+  const [headingStyle, setHeadingStyle] = useState('normal')
+  const [bodyStyle, setBodyStyle] = useState('normal')
+  const [accentStyle, setAccentStyle] = useState('normal')
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -117,6 +123,12 @@ export default function FontProvider({
           if (typography.heading_size) setHeadingSize(typography.heading_size)
           if (typography.body_size) setBodySize(typography.body_size)
           if (typography.accent_size) setAccentSize(typography.accent_size)
+          if (typography.heading_weight) setHeadingWeight(typography.heading_weight)
+          if (typography.body_weight) setBodyWeight(typography.body_weight)
+          if (typography.accent_weight) setAccentWeight(typography.accent_weight)
+          if (typography.heading_style) setHeadingStyle(typography.heading_style)
+          if (typography.body_style) setBodyStyle(typography.body_style)
+          if (typography.accent_style) setAccentStyle(typography.accent_style)
         }
       } catch (err) {
         console.error('Error loading typography settings:', err)
@@ -182,7 +194,33 @@ export default function FontProvider({
       '--font-size-heading',
       `${headingSize || '32'}pt`
     )
-  }, [headingFont, bodyFont, accentFont, headingSize, bodySize, accentSize])
+    // Set font weights
+    document.documentElement.style.setProperty(
+      '--font-weight-heading',
+      headingWeight || '700'
+    )
+    document.documentElement.style.setProperty(
+      '--font-weight-body',
+      bodyWeight || '400'
+    )
+    document.documentElement.style.setProperty(
+      '--font-weight-accent',
+      accentWeight || '400'
+    )
+    // Set font styles
+    document.documentElement.style.setProperty(
+      '--font-style-heading',
+      headingStyle || 'normal'
+    )
+    document.documentElement.style.setProperty(
+      '--font-style-body',
+      bodyStyle || 'normal'
+    )
+    document.documentElement.style.setProperty(
+      '--font-style-accent',
+      accentStyle || 'normal'
+    )
+  }, [headingFont, bodyFont, accentFont, headingSize, bodySize, accentSize, headingWeight, bodyWeight, accentWeight, headingStyle, bodyStyle, accentStyle])
 
   return <>{children}</>
 }
