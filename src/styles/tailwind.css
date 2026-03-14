@@ -28,14 +28,22 @@
 /* Font utility classes for blog posts */
 @utility font-heading {
   font-family: var(--font-heading);
+  font-weight: var(--font-weight-heading);
+  font-style: var(--font-style-heading);
 }
 
 @utility font-body {
   font-family: var(--font-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-body);
+  font-style: var(--font-style-body);
 }
 
 @utility font-accent {
   font-family: var(--font-accent);
+  font-size: var(--font-size-accent);
+  font-weight: var(--font-weight-accent);
+  font-style: var(--font-style-accent);
 }
 
 @utility font-caption {
