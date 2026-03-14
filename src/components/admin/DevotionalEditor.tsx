@@ -183,6 +183,35 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
           </div>
         )}
 
+        {/* Featured Image Preview - Main Area */}
+        {coverImageUrl && coverImageUrl.trim().length > 0 && (
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
+            <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">Featured Image Preview</h3>
+            <div className="relative w-full" style={{ maxWidth: '600px' }}>
+              <div className="aspect-video relative rounded-lg overflow-hidden bg-neutral-200 dark:bg-neutral-700">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={coverImageUrl}
+                  alt="Featured image preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.log('[v0] Featured image failed to load:', coverImageUrl)
+                    const target = e.currentTarget
+                    target.style.display = 'none'
+                    const parent = target.parentElement
+                    if (parent) {
+                      parent.innerHTML = '<div class="flex items-center justify-center h-full text-neutral-400 text-sm">Image failed to load</div>'
+                    }
+                  }}
+                />
+              </div>
+              {coverImageCaption && (
+                <p className="mt-2 text-xs text-neutral-500 italic">{coverImageCaption}</p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Title */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5">
           <input
