@@ -5,6 +5,7 @@ import ThemeProvider from './theme-provider'
 import FontProvider from '@/components/FontProvider'
 import PostHogProvider from '@/components/PostHogProvider'
 import CookieConsent from '@/components/CookieConsent'
+import NewsletterPopupController from '@/components/NewsletterPopupController'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { createClient } from '@/lib/supabase/server'
 
@@ -71,6 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <FontProvider>
               <div>{children}</div>
               <CookieConsent />
+              <NewsletterPopupController />
             </FontProvider>
           </ThemeProvider>
         </PostHogProvider>

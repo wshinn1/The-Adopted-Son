@@ -168,13 +168,13 @@ export default async function DevotionalPage({ params }: Props) {
       {settings.show_newsletter_on_posts && canRead && (
         <NewsletterSignUp
           data={{
-            heading: 'Stay Connected',
-            subheading: 'Get daily devotionals and spiritual encouragement delivered to your inbox.',
-            button_text: 'Subscribe',
+            heading: settings.newsletter_settings?.heading || 'Stay Connected',
+            subheading: settings.newsletter_settings?.subheading || 'Get daily devotionals and spiritual encouragement delivered to your inbox.',
+            button_text: settings.newsletter_settings?.button_text || 'Subscribe',
             success_message: 'Thank you for subscribing! Check your inbox for confirmation.',
-            background_color: '#F5F2ED',
-            background_image_url: '',
-            text_color: '#1a1a1a',
+            background_color: settings.newsletter_settings?.background_color || '#F5F2ED',
+            background_image_url: settings.newsletter_settings?.background_image_url || '',
+            text_color: settings.newsletter_settings?.text_color || '#1a1a1a',
           }}
         />
       )}
