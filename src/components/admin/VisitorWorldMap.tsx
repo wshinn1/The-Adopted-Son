@@ -116,16 +116,16 @@ export default function VisitorWorldMap({ countries, cities }: VisitorWorldMapPr
               <Geographies geography={geoUrl}>
                 {({ geographies }) =>
                   geographies.map((geo) => {
-                    const countryCode = geo.properties?.['Alpha-3'] || geo.id
-                    const countryName = geo.properties?.name || 'Unknown'
-                    const data = countryLookup[countryCode]
+                    const countryCode: string = geo.properties?.['Alpha-3'] || geo.id || ''
+                    const countryName: string = geo.properties?.name || 'Unknown'
+                    const data = countryCode ? countryLookup[countryCode] : undefined
                     const hasData = !!data
                     
                     return (
                       <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={getCountryColor(countryCode)}
+                        fill={countryCode ? getCountryColor(countryCode) : '#E5E5E5'}
                         stroke="#FFFFFF"
                         strokeWidth={0.5}
                         style={{
