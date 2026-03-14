@@ -14,32 +14,39 @@ declare module 'react-simple-maps' {
     children?: ReactNode
   }
 
-  export interface GeographiesProps {
-    geography: string | object
-    children: (props: { geographies: GeographyProps[] }) => ReactNode
-  }
-
-  export interface GeographyProps {
-    id?: string
+  export interface GeoData {
+    id?: string | number | object
     rsmKey?: string
     properties?: {
       name?: string
       NAME?: string
       ISO_A2?: string
+      'Alpha-3'?: string
       [key: string]: unknown
     }
     geometry?: object
+  }
+
+  export interface GeographiesProps {
+    geography: string | object
+    children: (props: { geographies: GeoData[] }) => ReactNode
+  }
+
+  export interface GeographyProps {
+    geography: GeoData
     style?: {
-      default?: React.CSSProperties
-      hover?: React.CSSProperties
-      pressed?: React.CSSProperties
+      default?: React.CSSProperties & { outline?: string; cursor?: string }
+      hover?: React.CSSProperties & { outline?: string; cursor?: string }
+      pressed?: React.CSSProperties & { outline?: string; cursor?: string }
     }
     onMouseEnter?: (event: React.MouseEvent) => void
+    onMouseMove?: (event: React.MouseEvent) => void
     onMouseLeave?: (event: React.MouseEvent) => void
     onClick?: (event: React.MouseEvent) => void
     fill?: string
     stroke?: string
     strokeWidth?: number
+    [key: string]: unknown
   }
 
   export interface ZoomableGroupProps {
