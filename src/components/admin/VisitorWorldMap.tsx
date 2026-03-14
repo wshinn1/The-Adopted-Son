@@ -116,8 +116,10 @@ export default function VisitorWorldMap({ countries, cities }: VisitorWorldMapPr
               <Geographies geography={geoUrl}>
                 {({ geographies }) =>
                   geographies.map((geo) => {
-                    const countryCode: string = geo.properties?.['Alpha-3'] || geo.id || ''
-                    const countryName: string = geo.properties?.name || 'Unknown'
+                    const rawCode = geo.properties?.['Alpha-3'] || geo.id
+                    const countryCode = typeof rawCode === 'string' ? rawCode : ''
+                    const rawName = geo.properties?.name
+                    const countryName = typeof rawName === 'string' ? rawName : 'Unknown'
                     const data = countryCode ? countryLookup[countryCode] : undefined
                     const hasData = !!data
                     
