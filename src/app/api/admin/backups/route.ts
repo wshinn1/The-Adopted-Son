@@ -1,4 +1,4 @@
-import { list, get } from '@vercel/blob'
+import { list } from '@vercel/blob'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
@@ -25,7 +25,7 @@ export async function GET() {
     const { blobs } = await list({ prefix: 'backups/' })
     
     // Extract unique dates and their manifests
-    const dateMap = new Map<string, any>()
+    const dateMap = new Map<string, { date: string; manifestUrl: string | null }>()
     
     for (const blob of blobs) {
       const match = blob.pathname.match(/^backups\/(\d{4}-\d{2}-\d{2})\//)
@@ -35,25 +35,25 @@ export async function GET() {
           dateMap.set(date, { date, manifestUrl: null })
         }
         if (blob.pathname.endsWith('manifest.json')) {
-          dateMap.get(date).manifestUrl = blob.url
+          dateMap.get(date)!.manifestUrl = blob.url
         }
       }
     }
 
-    // Load manifests
+    // Load manifests by fetching the URL directly
     const backups = []
     for (const [date, info] of dateMap) {
-      const backupInfo: any = { date }
+      const backupInfo: { date: string; manifest?: unknown } = { date }
       
       if (info.manifestUrl) {
         try {
-          const result = await get(`backups/${date}/manifest.json`, { access: 'private' })
-          if (result) {
-            const text = await new Response(result.stream).text()
+          const response = await fetch(info.manifestUrl)
+          if (response.ok) {
+            const text = await response.text()
             backupInfo.manifest = JSON.parse(text)
           }
         } catch (e) {
-          // Manifest not readable
+          console.error(`Error reading manifest for ${date}:`, e)
         }
       }
       
