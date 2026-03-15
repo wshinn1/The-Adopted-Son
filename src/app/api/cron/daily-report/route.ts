@@ -159,9 +159,9 @@ export async function GET(request: NextRequest) {
     </div>
     
     <!-- Countries -->
-    ${countries.length > 0 ? `
     <div style="margin-bottom: 28px;">
       <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: #374151; text-transform: uppercase; letter-spacing: 0.5px;">Top Countries</h2>
+      ${countries.length > 0 ? `
       <table style="width: 100%; border-collapse: collapse;">
         ${countries.map((c: { country: string; views: number }, i: number) => `
           <tr style="border-bottom: 1px solid #e5e7eb;">
@@ -170,13 +170,13 @@ export async function GET(request: NextRequest) {
           </tr>
         `).join('')}
       </table>
+      ` : `<p style="font-size: 13px; color: #9ca3af; margin: 0;">No geographic data for yesterday</p>`}
     </div>
-    ` : ''}
     
     <!-- Cities -->
-    ${cities.length > 0 ? `
     <div style="margin-bottom: 28px;">
       <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: #374151; text-transform: uppercase; letter-spacing: 0.5px;">Top Cities</h2>
+      ${cities.length > 0 ? `
       <table style="width: 100%; border-collapse: collapse;">
         ${cities.map((c: { city: string; views: number }, i: number) => `
           <tr style="border-bottom: 1px solid #e5e7eb;">
@@ -185,13 +185,13 @@ export async function GET(request: NextRequest) {
           </tr>
         `).join('')}
       </table>
+      ` : `<p style="font-size: 13px; color: #9ca3af; margin: 0;">No city data for yesterday</p>`}
     </div>
-    ` : ''}
     
     <!-- Top Pages -->
-    ${topPages.length > 0 ? `
     <div style="margin-bottom: 28px;">
       <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: #374151; text-transform: uppercase; letter-spacing: 0.5px;">Top Pages</h2>
+      ${topPages.length > 0 ? `
       <table style="width: 100%; border-collapse: collapse;">
         ${topPages.slice(0, 10).map((p: { page: string; views: number }, i: number) => {
           const shortUrl = p.page?.replace('https://www.theadoptedson.com', '').replace('https://theadoptedson.com', '') || '/'
@@ -202,13 +202,13 @@ export async function GET(request: NextRequest) {
           </tr>
         `}).join('')}
       </table>
+      ` : `<p style="font-size: 13px; color: #9ca3af; margin: 0;">No page views yesterday</p>`}
     </div>
-    ` : ''}
     
     <!-- Top Devotionals -->
-    ${devotionals.length > 0 ? `
     <div style="margin-bottom: 16px;">
       <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: #374151; text-transform: uppercase; letter-spacing: 0.5px;">Top Devotionals</h2>
+      ${devotionals.length > 0 ? `
       <table style="width: 100%; border-collapse: collapse;">
         ${devotionals.slice(0, 10).map((d: { page: string; views: number }, i: number) => {
           const slug = d.page?.split('/devotionals/')[1]?.split('?')[0] || d.page
@@ -219,8 +219,8 @@ export async function GET(request: NextRequest) {
           </tr>
         `}).join('')}
       </table>
+      ` : `<p style="font-size: 13px; color: #9ca3af; margin: 0;">No devotional views yesterday</p>`}
     </div>
-    ` : ''}
     
     <p style="font-size: 12px; color: #999; margin: 32px 0 0 0; padding-top: 16px; border-top: 1px solid #e5e7eb;">
       <a href="https://www.theadoptedson.com/admin/analytics" style="color: #2563eb;">View full analytics dashboard</a>
