@@ -17,6 +17,8 @@ const navItems = [
   { label: 'Analytics', href: '/admin/analytics', icon: '↗' },
   { label: 'Backups', href: '/admin/backups', icon: '↺' },
   { label: 'Menu', href: '/admin/menu', icon: '☰' },
+  { label: 'Typography', href: '/admin/typography', icon: 'Aa' },
+  { label: 'Blog Settings', href: '/admin/blog-settings', icon: '✉' },
   { label: 'Site Settings', href: '/admin/site-settings', icon: '⚙' },
 ]
 
