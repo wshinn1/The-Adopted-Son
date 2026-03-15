@@ -70,7 +70,7 @@ export async function POST() {
         }
 
         await put(`${backupFolder}/database/${table}.json`, JSON.stringify(data, null, 2), {
-          access: 'private',
+          access: 'public',
           contentType: 'application/json',
         })
 
@@ -96,7 +96,7 @@ export async function POST() {
               await put(
                 `${backupFolder}/media/${media.pathname || media.filename}`,
                 blob,
-                { access: 'private' }
+                { access: 'public' }
               )
               mediaBackedUp++
             }
@@ -115,7 +115,7 @@ export async function POST() {
     }
 
     await put(`${backupFolder}/manifest.json`, JSON.stringify(manifest, null, 2), {
-      access: 'private',
+      access: 'public',
       contentType: 'application/json',
     })
 

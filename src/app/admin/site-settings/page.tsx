@@ -139,6 +139,8 @@ export default function SiteSettingsPage() {
     linkedin: false,
     email: true,
   })
+  const [notifyNewSubscribers, setNotifyNewSubscribers] = useState(true)
+  const [adminNotificationEmail, setAdminNotificationEmail] = useState('weshinn@gmail.com')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [seedingTemplates, setSeedingTemplates] = useState(false)
@@ -254,6 +256,8 @@ export default function SiteSettingsPage() {
       if (settings.share_buttons) {
         setShareButtons(settings.share_buttons)
       }
+      setNotifyNewSubscribers(settings.notify_new_subscribers !== false)
+      setAdminNotificationEmail(settings.admin_notification_email || 'weshinn@gmail.com')
     } catch (err) {
       console.error('Error loading settings:', err)
     } finally {
@@ -301,6 +305,8 @@ export default function SiteSettingsPage() {
       await saveSetting('show_newsletter_on_posts', showNewsletterOnPosts)
       await saveSetting('newsletter_settings', newsletterSettings)
       await saveSetting('share_buttons', shareButtons)
+      await saveSetting('notify_new_subscribers', notifyNewSubscribers)
+      await saveSetting('admin_notification_email', adminNotificationEmail)
       alert('Settings saved!')
     } catch (err) {
       console.error('Error saving settings:', err)
@@ -1156,6 +1162,51 @@ export default function SiteSettingsPage() {
                 </div>
               </div>
             )}
+
+            {/* Email Notifications section */}
+            <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    New Subscriber Notifications
+                  </label>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Receive an email when someone subscribes to your newsletter
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setNotifyNewSubscribers(!notifyNewSubscribers)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    notifyNewSubscribers ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      notifyNewSubscribers ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {notifyNewSubscribers && (
+                <div className="ml-4">
+                  <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">
+                    Notification Email
+                  </label>
+                  <input
+                    type="email"
+                    value={adminNotificationEmail}
+                    onChange={(e) => setAdminNotificationEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                  <p className="text-xs text-neutral-400 mt-1">
+                    Email address where new subscriber notifications will be sent
+                  </p>
+                </div>
+              )}
+            </div>
 
             {/* Share buttons section */}
             <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
