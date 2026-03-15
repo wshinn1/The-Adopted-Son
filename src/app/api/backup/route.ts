@@ -62,7 +62,7 @@ export async function GET(request: Request) {
         const jsonData = JSON.stringify(data, null, 2)
         
         await put(`${backupFolder}/database/${table}.json`, jsonData, {
-          access: 'private',
+          access: 'public',
           contentType: 'application/json',
         })
 
@@ -91,7 +91,7 @@ export async function GET(request: Request) {
               await put(
                 `${backupFolder}/media/${media.pathname || media.filename}`,
                 blob,
-                { access: 'private' }
+                { access: 'public' }
               )
               mediaBackedUp++
             }
@@ -111,7 +111,7 @@ export async function GET(request: Request) {
     }
 
     await put(`${backupFolder}/manifest.json`, JSON.stringify(manifest, null, 2), {
-      access: 'private',
+      access: 'public',
       contentType: 'application/json',
     })
 
