@@ -62,7 +62,7 @@ export default function Home1({ data }: Home1Props) {
         {/* Overlapping Card - vertically centered, overlapping right side of image */}
         <div className="relative -mt-16 ml-auto w-11/12 bg-white p-8 shadow-sm md:absolute md:right-0 md:top-1/2 md:mt-0 md:-translate-y-1/2 md:w-1/2 md:p-10 lg:w-5/12 lg:p-12">
           {/* Label */}
-          <span className="text-xs font-medium tracking-[0.2em] text-neutral-500 font-accent uppercase">
+          <span className="text-xs tracking-[0.2em] text-neutral-500 font-accent uppercase">
             {data.card_label}
           </span>
 
