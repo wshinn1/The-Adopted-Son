@@ -12,14 +12,21 @@ export async function GET(request: Request) {
   // Verify cron secret to prevent unauthorized access
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    console.error('Backup cron: Unauthorized - invalid or missing CRON_SECRET')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Check required environment variables
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Backup cron: Missing Supabase environment variables')
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
   }
 
   try {
     // Initialize Supabase with service role for full access
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     )
 
     const timestamp = new Date().toISOString().split('T')[0] // YYYY-MM-DD

@@ -1,4 +1,4 @@
-import { put, list, del } from '@vercel/blob'
+import { put } from '@vercel/blob'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
@@ -24,11 +24,22 @@ export async function POST() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  // Check for required environment variables
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Missing required environment variables for backup')
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+  }
+
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.error('Missing BLOB_READ_WRITE_TOKEN for backup storage')
+    return NextResponse.json({ error: 'Blob storage not configured' }, { status: 500 })
+  }
+
   try {
     // Use service role for full access
     const serviceSupabase = createServiceClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     )
 
     const timestamp = new Date().toISOString().split('T')[0]
@@ -111,6 +122,10 @@ export async function POST() {
     return NextResponse.json({ success: true, backup: manifest })
   } catch (error) {
     console.error('Backup failed:', error)
-    return NextResponse.json({ error: 'Backup failed' }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ 
+      error: 'Backup failed', 
+      details: errorMessage 
+    }, { status: 500 })
   }
 }

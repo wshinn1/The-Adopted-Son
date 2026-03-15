@@ -48,10 +48,12 @@ export default function BackupsPage() {
         setMessage('Backup completed successfully!')
         loadBackups()
       } else {
-        setMessage(`Backup failed: ${data.error}`)
+        const errorDetail = data.details ? ` - ${data.details}` : ''
+        setMessage(`Backup failed: ${data.error}${errorDetail}`)
       }
     } catch (error) {
-      setMessage('Backup failed: Network error')
+      console.error('Backup error:', error)
+      setMessage('Backup failed: Network error - please check your connection')
     } finally {
       setRunningBackup(false)
     }

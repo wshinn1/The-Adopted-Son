@@ -3,6 +3,7 @@ import PaywallGate from '@/components/devotional/PaywallGate'
 import TrialBanner from '@/components/devotional/TrialBanner'
 import HamburgerHeader from '@/components/HamburgerHeader'
 import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
+import ReadingProgress from '@/components/ReadingProgress'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
 import { getSiteSettings } from '@/lib/site-settings'
 import { checkAccess } from '@/lib/trial'
@@ -29,8 +30,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `${devotional?.seo_title || devotional?.title} — The Adopted Son` 
     : 'Devotional'
   const description = devotional?.seo_description || devotional?.excerpt || 'A daily devotional from The Adopted Son'
-  const imageUrl = devotional?.cover_image_url ?? 'https://www.theadoptedson.com/og-image.jpg'
   const keywords = devotional?.seo_keywords?.split(',').map(k => k.trim()).filter(Boolean) || []
+
+  // Generate dynamic OG image URL
+  const ogParams = new URLSearchParams({
+    title: devotional?.title || 'Devotional',
+    description: devotional?.excerpt || '',
+    author: devotional?.author_name || '',
+    ...(devotional?.cover_image_url ? { image: devotional.cover_image_url } : {}),
+  })
+  const ogImageUrl = `https://www.theadoptedson.com/api/og?${ogParams.toString()}`
 
   return {
     title,
@@ -47,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: devotional?.author_name ? [devotional.author_name] : ['The Adopted Son'],
       images: [
         {
-          url: imageUrl,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: devotional?.title ?? 'The Adopted Son Devotional',
@@ -59,7 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: [ogImageUrl],
       creator: '@theadoptedson',
     },
     alternates: {
@@ -137,6 +146,7 @@ export default async function DevotionalPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
+      <ReadingProgress />
       <HamburgerHeader
         siteName={settings.site_name}
         logoType={settings.logo_type}
