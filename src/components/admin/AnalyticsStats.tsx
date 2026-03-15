@@ -1,9 +1,10 @@
 'use client'
 
 import useSWR from 'swr'
-import { BarChart2, Users, Eye, TrendingUp, ExternalLink, Globe, MapPin, RefreshCw, Activity } from 'lucide-react'
+import { BarChart2, Users, Eye, TrendingUp, ExternalLink, Globe, MapPin, RefreshCw, Activity, UserPlus, CreditCard, BookOpen } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 
 const VisitorWorldMap = dynamic(() => import('./VisitorWorldMap'), { 
   ssr: false,
@@ -25,6 +26,11 @@ export default function AnalyticsStats() {
     refreshInterval: 10000, // refresh every 10s for near-realtime updates
     revalidateOnFocus: true,
     dedupingInterval: 5000,
+  })
+  
+  const { data: subscriberData, isLoading: subscriberLoading, error: subscriberError } = useSWR('/api/analytics/subscribers', fetcher, {
+    refreshInterval: 30000, // refresh every 30s
+    revalidateOnFocus: true,
   })
   
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
@@ -80,20 +86,20 @@ export default function AnalyticsStats() {
         </div>
       </div>
 
-      {/* Stat cards */}
+      {/* Traffic Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
-          label="Pageviews (30d)"
+          label="Pageviews (7d)"
           value={isLoading ? null : error ? '—' : data?.pageviews?.toLocaleString()}
           icon={Eye}
         />
         <StatCard
-          label="Unique Visitors (30d)"
+          label="Unique Visitors (7d)"
           value={isLoading ? null : error ? '—' : data?.uniqueVisitors?.toLocaleString()}
           icon={Users}
         />
         <StatCard
-          label="Avg Daily Views (7d)"
+          label="Avg Daily Views"
           value={
             isLoading
               ? null
@@ -108,6 +114,69 @@ export default function AnalyticsStats() {
           }
           icon={TrendingUp}
         />
+      </div>
+
+      {/* Subscriber & Content Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatCard
+          label="Total Subscribers"
+          value={subscriberLoading ? null : subscriberError ? '—' : subscriberData?.totalSubscribers?.toLocaleString()}
+          icon={Users}
+          highlight
+        />
+        <StatCard
+          label="New This Week"
+          value={subscriberLoading ? null : subscriberError ? '—' : `+${subscriberData?.newSubscribers7d?.toLocaleString() ?? 0}`}
+          icon={UserPlus}
+          positive
+        />
+        <StatCard
+          label="Paid Subscribers"
+          value={subscriberLoading ? null : subscriberError ? '—' : subscriberData?.paidSubscribers?.toLocaleString()}
+          icon={CreditCard}
+        />
+        <StatCard
+          label="Published Posts"
+          value={subscriberLoading ? null : subscriberError ? '—' : subscriberData?.totalDevotionals?.toLocaleString()}
+          icon={BookOpen}
+        />
+      </div>
+
+      {/* Subscriber Growth Chart */}
+      <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5">
+        <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 flex items-center gap-2">
+          <UserPlus className="w-4 h-4 text-green-500" />
+          Subscriber Growth (Last 14 Days)
+        </h2>
+        {subscriberLoading ? (
+          <SkeletonList rows={4} />
+        ) : subscriberError ? (
+          <ErrorMsg />
+        ) : subscriberData?.dailySignups?.length ? (
+          <div className="space-y-2">
+            {subscriberData.dailySignups.map((d: { date: string; count: number }, i: number) => {
+              const max = Math.max(...subscriberData.dailySignups.map((x: { count: number }) => x.count), 1)
+              const pct = Math.round((d.count / max) * 100)
+              const dateLabel = new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+              return (
+                <div key={i} className="flex items-center gap-3 text-sm">
+                  <span className="w-16 flex-shrink-0 text-xs text-neutral-500 dark:text-neutral-400">{dateLabel}</span>
+                  <div className="flex-1 bg-neutral-100 dark:bg-neutral-800 rounded-full h-2">
+                    <div
+                      className="bg-green-500 h-2 rounded-full transition-all"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="w-6 text-right text-xs font-semibold text-neutral-900 dark:text-neutral-100">
+                    {d.count}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-neutral-400">No subscriber data yet.</p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -156,9 +225,13 @@ export default function AnalyticsStats() {
                 const slug = p.page?.split('/devotionals/').pop()?.split('?')[0] || p.page
                 return (
                   <li key={i} className="flex items-center justify-between gap-2 text-sm">
-                    <span className="truncate text-neutral-700 dark:text-neutral-300 text-xs" title={p.page}>
+                    <Link 
+                      href={`/devotionals/${slug}`}
+                      className="truncate text-neutral-700 dark:text-neutral-300 text-xs hover:text-primary-600 dark:hover:text-primary-400 transition-colors" 
+                      title={p.page}
+                    >
                       {slug}
-                    </span>
+                    </Link>
                     <span className="flex-shrink-0 font-semibold text-neutral-900 dark:text-neutral-100">
                       {p.views.toLocaleString()}
                     </span>
@@ -302,17 +375,37 @@ export default function AnalyticsStats() {
   )
 }
 
-function StatCard({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon: React.ComponentType<{ className?: string }> }) {
+function StatCard({ 
+  label, 
+  value, 
+  icon: Icon,
+  highlight = false,
+  positive = false,
+}: { 
+  label: string
+  value: string | null | undefined
+  icon: React.ComponentType<{ className?: string }>
+  highlight?: boolean
+  positive?: boolean
+}) {
   return (
-    <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5">
+    <div className={`rounded-xl border p-5 ${
+      highlight 
+        ? 'border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-950/20' 
+        : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900'
+    }`}>
       <div className="flex items-center gap-2 mb-2">
-        <Icon className="w-4 h-4 text-primary-500" />
+        <Icon className={`w-4 h-4 ${
+          highlight ? 'text-primary-600' : positive ? 'text-green-500' : 'text-primary-500'
+        }`} />
         <span className="text-xs text-neutral-500 dark:text-neutral-400">{label}</span>
       </div>
       {value === null ? (
         <div className="h-8 w-24 bg-neutral-100 dark:bg-neutral-800 rounded animate-pulse" />
       ) : (
-        <p className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{value}</p>
+        <p className={`text-2xl font-bold ${
+          positive ? 'text-green-600 dark:text-green-400' : 'text-neutral-900 dark:text-neutral-100'
+        }`}>{value}</p>
       )}
     </div>
   )
