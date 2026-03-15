@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {
+    root: process.cwd(),
+  },
   experimental: {
     // Force Turbopack cache invalidation
     turbotrace: { logLevel: 'error' },
