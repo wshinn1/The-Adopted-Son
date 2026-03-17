@@ -198,7 +198,7 @@ export default function FinancialsPage() {
                         tickFormatter={(value) => `$${value}`}
                       />
                       <Tooltip 
-                        formatter={(value: number) => formatCurrency(value)}
+                        formatter={(value) => formatCurrency(Number(value))}
                         labelStyle={{ color: '#333' }}
                         contentStyle={{ 
                           backgroundColor: '#fff', 
