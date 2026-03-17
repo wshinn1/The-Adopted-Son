@@ -7,6 +7,65 @@ import dynamic from 'next/dynamic'
 // Dynamically import RichTextEditor to avoid SSR issues
 const RichTextEditor = dynamic(() => import('./RichTextEditor'), { ssr: false })
 
+// Color palette swatches matching the site colors admin page
+const colorSwatches = [
+  '#FFB84D', // Honey Gold
+  '#4A3828', // Espresso
+  '#2B4A6F', // Twilight Blue
+  '#8B4513', // Saddle Brown
+  '#4A5D23', // Olive
+  '#E8A547', // Amber
+  '#7C6D9C', // Dusty Purple
+  '#E8DFD5', // Warm Cream
+  '#1a1a1a', // Near Black
+]
+
+// ColorField component matching the site colors admin styling
+function ColorField({ 
+  label, 
+  value, 
+  onChange 
+}: { 
+  label: string
+  value: string
+  onChange: (value: string) => void 
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+        {label}
+      </label>
+      <div className="flex items-center gap-3 mb-2">
+        <div
+          className="w-12 h-10 rounded-lg border border-neutral-200 dark:border-neutral-700 flex-shrink-0"
+          style={{ backgroundColor: value || '#000000' }}
+        />
+        <input
+          type="text"
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="#000000"
+          className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+        />
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {colorSwatches.map((color) => (
+          <button
+            key={color}
+            type="button"
+            onClick={() => onChange(color)}
+            className={`w-6 h-6 rounded transition-transform hover:scale-110 ${
+              value?.toLowerCase() === color.toLowerCase() ? 'ring-2 ring-offset-1 ring-primary-500' : ''
+            }`}
+            style={{ backgroundColor: color }}
+            title={color}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 interface SchemaProperty {
   type: string
   title: string
@@ -119,10 +178,17 @@ export default function SectionEditor({
 
   // Use enhanced schema for Home1 sections to include stroke fields
   const properties = enhancedSchema?.properties || {}
+  
+  // Separate newsletter button color fields from other properties for special rendering
+  const newsletterButtonColorKeys = ['button_bg_color', 'button_text_color', 'button_hover_bg_color', 'button_hover_text_color']
+  const isNewsletterSection = templateName === 'NewsletterSignUp'
+  const regularProperties = isNewsletterSection 
+    ? Object.entries(properties).filter(([key]) => !newsletterButtonColorKeys.includes(key))
+    : Object.entries(properties)
 
   return (
     <div className="space-y-4">
-      {Object.entries(properties).map(([key, prop]) => (
+      {regularProperties.map(([key, prop]) => (
         <div key={key}>
           <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             {prop.title || key}
@@ -249,6 +315,62 @@ export default function SectionEditor({
           )}
         </div>
       ))}
+
+      {/* Newsletter Button Colors Section */}
+      {isNewsletterSection && (
+        <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+          <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+            Button Colors
+          </h3>
+          <p className="text-sm text-neutral-500 mb-4">
+            Customize the subscribe button appearance.
+          </p>
+          <div className="grid gap-6 md:grid-cols-2">
+            <ColorField
+              label="Button Background"
+              value={formData.button_bg_color || '#2B4A6F'}
+              onChange={(val) => handleChange('button_bg_color', val)}
+            />
+            <ColorField
+              label="Button Text"
+              value={formData.button_text_color || '#ffffff'}
+              onChange={(val) => handleChange('button_text_color', val)}
+            />
+            <ColorField
+              label="Button Hover Background"
+              value={formData.button_hover_bg_color || '#1e3a5f'}
+              onChange={(val) => handleChange('button_hover_bg_color', val)}
+            />
+            <ColorField
+              label="Button Hover Text"
+              value={formData.button_hover_text_color || '#ffffff'}
+              onChange={(val) => handleChange('button_hover_text_color', val)}
+            />
+          </div>
+          {/* Preview */}
+          <div className="mt-6 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <p className="text-xs text-neutral-500 mb-3">Preview (hover to see effect):</p>
+            <button
+              type="button"
+              className="px-6 py-2.5 rounded-lg font-medium text-sm transition-colors"
+              style={{
+                backgroundColor: formData.button_bg_color || '#2B4A6F',
+                color: formData.button_text_color || '#ffffff',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = formData.button_hover_bg_color || '#1e3a5f'
+                e.currentTarget.style.color = formData.button_hover_text_color || '#ffffff'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = formData.button_bg_color || '#2B4A6F'
+                e.currentTarget.style.color = formData.button_text_color || '#ffffff'
+              }}
+            >
+              Subscribe
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
         <button
