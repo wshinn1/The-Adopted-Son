@@ -43,10 +43,20 @@ const defaultColors: SiteColors = {
   date_badge_text: '#ffffff',
 }
 
-export default function ColorProvider({ children }: { children: React.ReactNode }) {
-  const [colors, setColors] = useState<SiteColors>(defaultColors)
+interface ColorProviderProps {
+  children: React.ReactNode
+  initialColors?: Partial<SiteColors>
+}
+
+export default function ColorProvider({ children, initialColors }: ColorProviderProps) {
+  // Use initial colors from server if provided, otherwise use defaults
+  const [colors, setColors] = useState<SiteColors>({ ...defaultColors, ...initialColors })
+  const [hasFetched, setHasFetched] = useState(!!initialColors)
 
   useEffect(() => {
+    // Skip fetch if we already have initial colors from server
+    if (hasFetched) return
+
     const loadColors = async () => {
       try {
         const supabase = createBrowserClient(
@@ -66,11 +76,13 @@ export default function ColorProvider({ children }: { children: React.ReactNode 
         }
       } catch (err) {
         console.error('Error loading site colors:', err)
+      } finally {
+        setHasFetched(true)
       }
     }
 
     loadColors()
-  }, [])
+  }, [hasFetched])
 
   // Apply colors as CSS custom properties
   useEffect(() => {
