@@ -15,6 +15,7 @@ const navItems = [
   { label: 'Subscribers', href: '/admin/subscribers', icon: '◎' },
   { label: 'Popup', href: '/admin/popup', icon: '◫' },
   { label: 'Analytics', href: '/admin/analytics', icon: '↗' },
+  { label: 'Financials', href: '/admin/financials', icon: '$' },
   { label: 'Backups', href: '/admin/backups', icon: '↺' },
   { label: 'Menu', href: '/admin/menu', icon: '☰' },
   { label: 'Typography', href: '/admin/typography', icon: 'Aa' },
