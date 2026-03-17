@@ -229,6 +229,10 @@ export default async function DevotionalsPage({ searchParams }: Props) {
             background_color: settings.newsletter_settings?.background_color || '#F5F2ED',
             background_image_url: settings.newsletter_settings?.background_image_url || '',
             text_color: settings.newsletter_settings?.text_color || '#1a1a1a',
+            button_bg_color: settings.newsletter_settings?.button_bg_color,
+            button_text_color: settings.newsletter_settings?.button_text_color,
+            button_hover_bg_color: settings.newsletter_settings?.button_hover_bg_color,
+            button_hover_text_color: settings.newsletter_settings?.button_hover_text_color,
           }}
         />
       )}
@@ -278,7 +282,13 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                               priority={index < 2}
                               unoptimized
                             />
-                            <div className="absolute top-4 left-4 bg-gray-800/80 text-white px-4 py-2 rounded-lg text-center">
+                            <div 
+                              className="absolute top-4 left-4 px-4 py-2 rounded-lg text-center"
+                              style={{
+                                backgroundColor: 'var(--color-date-badge-bg)',
+                                color: 'var(--color-date-badge-text)',
+                              }}
+                            >
                               <div className="text-2xl font-bold leading-none">{day}</div>
                               <div className="text-xs uppercase">{month}</div>
                             </div>
@@ -369,8 +379,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                         <span 
                           className="inline-block w-fit px-4 py-1.5 text-sm font-medium rounded-full mb-4"
                           style={{ 
-                            backgroundColor: 'color-mix(in srgb, var(--color-button-primary) 10%, white)', 
-                            color: 'var(--color-button-primary)' 
+                            backgroundColor: 'var(--color-category-badge-bg)', 
+                            color: 'var(--color-category-badge-text)' 
                           }}
                         >
                           {featuredPost.categories[0].name}
@@ -433,7 +443,13 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                           unoptimized
                         />
                         {/* Date Badge */}
-                        <div className="absolute top-3 left-3 bg-gray-800/80 text-white px-3 py-2 rounded-lg text-center">
+                        <div 
+                          className="absolute top-3 left-3 px-3 py-2 rounded-lg text-center"
+                          style={{
+                            backgroundColor: 'var(--color-date-badge-bg)',
+                            color: 'var(--color-date-badge-text)',
+                          }}
+                        >
                           <div className="text-xl font-bold leading-none">{day}</div>
                           <div className="text-xs uppercase">{month}</div>
                         </div>

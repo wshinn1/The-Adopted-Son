@@ -8,6 +8,10 @@ export interface NewsletterSettings {
   background_color: string
   background_image_url: string
   text_color: string
+  button_bg_color?: string
+  button_text_color?: string
+  button_hover_bg_color?: string
+  button_hover_text_color?: string
 }
 
 export interface PopupSettings {
@@ -124,7 +128,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     social_links: settings.social_links || defaults.social_links,
     typography: settings.typography || defaults.typography,
     show_newsletter_on_posts: settings.show_newsletter_on_posts !== false,
-    newsletter_settings: settings.newsletter_settings || defaults.newsletter_settings,
+    newsletter_settings: { ...defaults.newsletter_settings, ...settings.newsletter_settings },
     share_buttons: settings.share_buttons || defaults.share_buttons,
     popup_settings: settings.popup_settings || defaults.popup_settings,
   }
