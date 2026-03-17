@@ -91,7 +91,7 @@ export default function SiteColorsPage() {
     try {
       const { error } = await supabase
         .from('site_settings')
-        .upsert({ key: 'site_colors', value: JSON.stringify(colors) }, { onConflict: 'key' })
+        .upsert({ key: 'site_colors', value: colors }, { onConflict: 'key' })
 
       if (error) throw error
       alert('Colors saved! Refresh the site to see changes.')
