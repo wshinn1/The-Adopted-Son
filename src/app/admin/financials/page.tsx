@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import AdminSidebar from '@/components/admin/AdminSidebar'
 import {
   BarChart,
   Bar,
@@ -104,10 +103,7 @@ export default function FinancialsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-900">
-      <AdminSidebar user={{ name: 'Admin', email: 'admin@theadoptedson.com' }} />
-      
-      <main className="flex-1 p-4 lg:p-8 pt-16 lg:pt-8">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-4 lg:p-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-6">
             Financial Reports
@@ -349,7 +345,6 @@ export default function FinancialsPage() {
             </>
           ) : null}
         </div>
-      </main>
     </div>
   )
 }
