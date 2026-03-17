@@ -32,14 +32,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = devotional?.seo_description || devotional?.excerpt || 'A daily devotional from The Adopted Son'
   const keywords = devotional?.seo_keywords?.split(',').map(k => k.trim()).filter(Boolean) || []
 
-  // Generate dynamic OG image URL
-  const ogParams = new URLSearchParams({
-    title: devotional?.title || 'Devotional',
-    description: devotional?.excerpt || '',
-    author: devotional?.author_name || '',
-    ...(devotional?.cover_image_url ? { image: devotional.cover_image_url } : {}),
-  })
-  const ogImageUrl = `https://www.theadoptedson.com/api/og?${ogParams.toString()}`
+  // Use the devotional's featured image directly for social sharing
+  const ogImageUrl = devotional?.cover_image_url || 'https://www.theadoptedson.com/og-image.jpg'
 
   return {
     title,
