@@ -15,7 +15,7 @@ interface BannerSettings {
   expired_message: string
   success_message: string
   button_text: string
-  expired_button_text: string
+  expired_button_label: string
   placeholder_text: string
   active_bg_color: string
   active_text_color: string
@@ -32,7 +32,7 @@ const defaultSettings: BannerSettings = {
   expired_message: 'Your free trial has ended. Subscribe to continue reading premium content.',
   success_message: "You're in! Enjoy your free trial of all devotionals.",
   button_text: 'Notify me',
-  expired_button_text: 'View Plans',
+  expired_button_label: 'View Plans',
   placeholder_text: 'your@email.com',
   active_bg_color: '#2B4A6F',
   active_text_color: '#ffffff',
@@ -151,7 +151,7 @@ export default function TrialBanner() {
             className="text-sm px-4 py-1.5 font-medium rounded-lg hover:opacity-90 transition-opacity"
             style={{ backgroundColor: settings.expired_button_bg, color: settings.expired_button_text }}
           >
-            {settings.expired_button_text}
+            {settings.expired_button_label}
           </a>
           <button
             onClick={() => setDismissed(true)}

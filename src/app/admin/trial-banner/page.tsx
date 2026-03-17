@@ -9,7 +9,7 @@ interface TrialBannerSettings {
   expired_message: string
   success_message: string
   button_text: string
-  expired_button_text: string
+  expired_button_label: string
   placeholder_text: string
   
   // Colors - active state
@@ -30,7 +30,7 @@ const defaultSettings: TrialBannerSettings = {
   expired_message: 'Your free trial has ended. Subscribe to continue reading premium content.',
   success_message: "You're in! Enjoy your free trial of all devotionals.",
   button_text: 'Notify me',
-  expired_button_text: 'View Plans',
+  expired_button_label: 'View Plans',
   placeholder_text: 'your@email.com',
   
   active_bg_color: '#2B4A6F', // Twilight Blue
@@ -241,8 +241,8 @@ export default function TrialBannerPage() {
                 </label>
                 <input
                   type="text"
-                  value={settings.expired_button_text}
-                  onChange={(e) => setSettings({ ...settings, expired_button_text: e.target.value })}
+                  value={settings.expired_button_label}
+                  onChange={(e) => setSettings({ ...settings, expired_button_label: e.target.value })}
                   className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 />
               </div>
@@ -379,7 +379,7 @@ export default function TrialBannerPage() {
                   color: settings.expired_button_text,
                 }}
               >
-                {settings.expired_button_text}
+                {settings.expired_button_label}
               </button>
             </div>
           </div>
