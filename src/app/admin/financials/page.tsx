@@ -242,7 +242,7 @@ export default function FinancialsPage() {
                         tickFormatter={(value) => `$${value}`}
                       />
                       <Tooltip 
-                        formatter={(value: number) => formatCurrency(value)}
+                        formatter={(value) => formatCurrency(Number(value))}
                         labelStyle={{ color: '#333' }}
                         contentStyle={{ 
                           backgroundColor: '#fff', 
@@ -280,8 +280,8 @@ export default function FinancialsPage() {
                         tick={{ fill: '#666', fontSize: 12 }}
                         tickFormatter={(value) => `$${value}`}
                       />
-                      <Tooltip 
-                        formatter={(value: number | null) => value ? formatCurrency(value) : 'N/A'}
+<Tooltip 
+                        formatter={(value) => formatCurrency(Number(value))}
                         labelStyle={{ color: '#333' }}
                         contentStyle={{ 
                           backgroundColor: '#fff', 
