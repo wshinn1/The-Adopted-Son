@@ -7,6 +7,7 @@ interface SiteColors {
   button_primary: string
   button_primary_hover: string
   button_primary_text: string
+  button_primary_hover_text: string
   category_badge_bg: string
   category_badge_text: string
   title_hover_color: string
@@ -20,6 +21,7 @@ const defaultColors: SiteColors = {
   button_primary: '#2B4A6F',
   button_primary_hover: '#1e3a5f',
   button_primary_text: '#ffffff',
+  button_primary_hover_text: '#ffffff',
   category_badge_bg: '#4A3828',
   category_badge_text: '#ffffff',
   title_hover_color: '#E8A547',
@@ -64,6 +66,7 @@ export default function ColorProvider({ children }: { children: React.ReactNode 
     root.style.setProperty('--color-button-primary', colors.button_primary)
     root.style.setProperty('--color-button-primary-hover', colors.button_primary_hover)
     root.style.setProperty('--color-button-primary-text', colors.button_primary_text)
+    root.style.setProperty('--color-button-primary-hover-text', colors.button_primary_hover_text)
     root.style.setProperty('--color-category-badge-bg', colors.category_badge_bg)
     root.style.setProperty('--color-category-badge-text', colors.category_badge_text)
     root.style.setProperty('--color-title-hover', colors.title_hover_color)
