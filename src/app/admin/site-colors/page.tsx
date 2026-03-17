@@ -30,6 +30,10 @@ interface SiteColors {
   icon_button_icon: string
   icon_button_hover_bg: string
   icon_button_hover_icon: string
+  
+  // Date badge colors (on blog cards)
+  date_badge_bg: string
+  date_badge_text: string
 }
 
 const defaultColors: SiteColors = {
@@ -48,6 +52,8 @@ const defaultColors: SiteColors = {
   icon_button_icon: '#ffffff',
   icon_button_hover_bg: '#1e3a5f',
   icon_button_hover_icon: '#ffffff',
+  date_badge_bg: '#374151', // Gray-700
+  date_badge_text: '#ffffff',
 }
 
 // Brand color presets
@@ -408,6 +414,42 @@ export default function SiteColorsPage() {
               value={colors.newsletter_button_text}
               onChange={(val) => setColors({ ...colors, newsletter_button_text: val })}
             />
+          </div>
+        </div>
+
+        {/* Date Badge */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+            Date Badge
+          </h2>
+          <p className="text-sm text-neutral-500 mb-6">
+            The date badge shown on blog/devotional cards (displays day and month)
+          </p>
+          <div className="grid gap-6 md:grid-cols-2">
+            <ColorField
+              label="Badge Background"
+              value={colors.date_badge_bg}
+              onChange={(val) => setColors({ ...colors, date_badge_bg: val })}
+            />
+            <ColorField
+              label="Badge Text"
+              value={colors.date_badge_text}
+              onChange={(val) => setColors({ ...colors, date_badge_text: val })}
+            />
+          </div>
+          {/* Preview */}
+          <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+            <p className="text-xs text-neutral-500 mb-3">Preview:</p>
+            <div
+              className="inline-flex flex-col items-center justify-center w-14 h-14 rounded-lg text-center"
+              style={{
+                backgroundColor: colors.date_badge_bg,
+                color: colors.date_badge_text,
+              }}
+            >
+              <span className="text-lg font-bold leading-none">12</span>
+              <span className="text-xs uppercase tracking-wide">MAR</span>
+            </div>
           </div>
         </div>
 
