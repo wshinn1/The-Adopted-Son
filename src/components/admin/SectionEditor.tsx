@@ -98,7 +98,8 @@ export default function SectionEditor({
     onSave(formData)
   }
 
-  const properties = schema?.properties || {}
+  // Use enhanced schema for Home1 sections to include stroke fields
+  const properties = enhancedSchema?.properties || {}
 
   return (
     <div className="space-y-4">
