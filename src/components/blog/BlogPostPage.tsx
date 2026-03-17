@@ -225,13 +225,6 @@ export default function BlogPostPage({ post, shareSettings }: Props) {
           </div>
         )}
 
-        {/* Excerpt - Large italic intro text */}
-        {post.excerpt && (
-          <p className="mt-10 text-xl md:text-2xl text-neutral-700 leading-relaxed font-body">
-            {post.excerpt}
-          </p>
-        )}
-
         {/* Body Content */}
         <div className="mt-8 font-body">
           <BlogContent content={post.content} />
