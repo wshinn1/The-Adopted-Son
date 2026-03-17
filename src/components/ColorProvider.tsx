@@ -48,12 +48,17 @@ export default function ColorProvider({ children }: { children: React.ReactNode 
           .eq('key', 'site_colors')
           .single()
 
+        console.log('[v0] ColorProvider raw data:', data)
+        console.log('[v0] ColorProvider error:', error)
         if (!error && data?.value) {
+          console.log('[v0] ColorProvider data.value type:', typeof data.value)
+          console.log('[v0] ColorProvider data.value:', data.value)
           const parsed = typeof data.value === 'string' ? JSON.parse(data.value) : data.value
+          console.log('[v0] ColorProvider parsed colors:', parsed)
           setColors({ ...defaultColors, ...parsed })
         }
       } catch (err) {
-        console.error('Error loading site colors:', err)
+        console.error('[v0] Error loading site colors:', err)
       }
     }
 
