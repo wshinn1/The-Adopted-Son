@@ -78,7 +78,13 @@ export default function DevotionalsGrid({
                         unoptimized
                       />
                       {/* Date Badge */}
-                      <div className="absolute top-4 left-4 bg-gray-800/80 text-white px-4 py-2 rounded-lg text-center">
+                      <div 
+                        className="absolute top-4 left-4 px-4 py-2 rounded-lg text-center"
+                        style={{
+                          backgroundColor: 'var(--color-date-badge-bg)',
+                          color: 'var(--color-date-badge-text)',
+                        }}
+                      >
                         <div className="text-2xl font-bold leading-none">{day}</div>
                         <div className="text-xs uppercase">{month}</div>
                       </div>

@@ -19,6 +19,8 @@ interface SiteColors {
   icon_button_icon: string
   icon_button_hover_bg: string
   icon_button_hover_icon: string
+  date_badge_bg: string
+  date_badge_text: string
 }
 
 const defaultColors: SiteColors = {
@@ -37,6 +39,8 @@ const defaultColors: SiteColors = {
   icon_button_icon: '#ffffff',
   icon_button_hover_bg: '#1e3a5f',
   icon_button_hover_icon: '#ffffff',
+  date_badge_bg: '#374151',
+  date_badge_text: '#ffffff',
 }
 
 export default function ColorProvider({ children }: { children: React.ReactNode }) {
@@ -86,6 +90,8 @@ export default function ColorProvider({ children }: { children: React.ReactNode 
     root.style.setProperty('--color-icon-button-icon', colors.icon_button_icon)
     root.style.setProperty('--color-icon-button-hover-bg', colors.icon_button_hover_bg)
     root.style.setProperty('--color-icon-button-hover-icon', colors.icon_button_hover_icon)
+    root.style.setProperty('--color-date-badge-bg', colors.date_badge_bg)
+    root.style.setProperty('--color-date-badge-text', colors.date_badge_text)
   }, [colors])
 
   return <>{children}</>

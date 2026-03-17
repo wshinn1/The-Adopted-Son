@@ -40,6 +40,8 @@
   --color-icon-button-icon: #ffffff;
   --color-icon-button-hover-bg: #1e3a5f;
   --color-icon-button-hover-icon: #ffffff;
+  --color-date-badge-bg: #374151;
+  --color-date-badge-text: #ffffff;
 }
 
 /* Font utility classes for blog posts */
