@@ -15,6 +15,10 @@ interface SiteColors {
   pagination_active_text: string
   newsletter_button_bg: string
   newsletter_button_text: string
+  icon_button_bg: string
+  icon_button_icon: string
+  icon_button_hover_bg: string
+  icon_button_hover_icon: string
 }
 
 const defaultColors: SiteColors = {
@@ -29,6 +33,10 @@ const defaultColors: SiteColors = {
   pagination_active_text: '#ffffff',
   newsletter_button_bg: '#2B4A6F',
   newsletter_button_text: '#ffffff',
+  icon_button_bg: '#2B4A6F',
+  icon_button_icon: '#ffffff',
+  icon_button_hover_bg: '#1e3a5f',
+  icon_button_hover_icon: '#ffffff',
 }
 
 export default function ColorProvider({ children }: { children: React.ReactNode }) {
@@ -74,6 +82,10 @@ export default function ColorProvider({ children }: { children: React.ReactNode 
     root.style.setProperty('--color-pagination-active-text', colors.pagination_active_text)
     root.style.setProperty('--color-newsletter-button-bg', colors.newsletter_button_bg)
     root.style.setProperty('--color-newsletter-button-text', colors.newsletter_button_text)
+    root.style.setProperty('--color-icon-button-bg', colors.icon_button_bg)
+    root.style.setProperty('--color-icon-button-icon', colors.icon_button_icon)
+    root.style.setProperty('--color-icon-button-hover-bg', colors.icon_button_hover_bg)
+    root.style.setProperty('--color-icon-button-hover-icon', colors.icon_button_hover_icon)
   }, [colors])
 
   return <>{children}</>

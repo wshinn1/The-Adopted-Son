@@ -91,7 +91,19 @@ export default function Home1({ data }: Home1Props) {
           {/* Button */}
           <Link
             href={data.button_url}
-            className="mt-6 inline-flex size-14 items-center justify-center bg-neutral-900 text-white transition-colors hover:bg-neutral-800 md:mt-8"
+            className="group mt-6 inline-flex size-14 items-center justify-center transition-colors md:mt-8"
+            style={{
+              backgroundColor: 'var(--color-icon-button-bg)',
+              color: 'var(--color-icon-button-icon)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-icon-button-hover-bg)'
+              e.currentTarget.style.color = 'var(--color-icon-button-hover-icon)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-icon-button-bg)'
+              e.currentTarget.style.color = 'var(--color-icon-button-icon)'
+            }}
           >
             <ArrowRight className="size-5" />
           </Link>
