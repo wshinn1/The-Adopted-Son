@@ -12,6 +12,9 @@ interface SchemaProperty {
   title: string
   enum?: string[] // For select dropdowns
   format?: string // 'richtext' for rich text editor
+  minimum?: number
+  maximum?: number
+  step?: number
 }
 
 interface Schema {
@@ -146,6 +149,35 @@ export default function SectionEditor({
               rows={3}
               className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
             />
+          ) : prop.type === 'boolean' || key.toLowerCase().includes('enabled') ? (
+            /* Boolean toggle */
+            <button
+              type="button"
+              onClick={() => handleChange(key, !formData[key])}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                formData[key] ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  formData[key] ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          ) : key.toLowerCase().includes('width') && prop.type === 'number' ? (
+            /* Number input with step for stroke width */
+            <div className="flex items-center gap-3">
+              <input
+                type="number"
+                value={formData[key] || 0}
+                onChange={(e) => handleChange(key, parseFloat(e.target.value))}
+                min={prop.minimum ?? 0}
+                max={prop.maximum ?? 10}
+                step={prop.step ?? 0.1}
+                className="w-24 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+              />
+              <span className="text-sm text-neutral-500">px</span>
+            </div>
           ) : key.toLowerCase().includes('color') ? (
             /* Color picker */
             <div className="flex items-center gap-3">

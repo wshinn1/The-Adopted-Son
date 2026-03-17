@@ -66,7 +66,7 @@ export default function DevotionalsPagination({
             disabled={isPending || pageNum === currentPage}
             className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors font-body disabled:cursor-not-allowed ${
               pageNum === currentPage
-                ? 'bg-blue-500 text-white'
+                ? 'bg-pagination-active text-pagination-active'
                 : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
             }`}
           >

@@ -18,6 +18,8 @@ const navItems = [
   { label: 'Backups', href: '/admin/backups', icon: '↺' },
   { label: 'Menu', href: '/admin/menu', icon: '☰' },
   { label: 'Typography', href: '/admin/typography', icon: 'Aa' },
+  { label: 'Site Colors', href: '/admin/site-colors', icon: '◉' },
+  { label: 'Trial Banner', href: '/admin/trial-banner', icon: '▤' },
   { label: 'Blog Settings', href: '/admin/blog-settings', icon: '✉' },
   { label: 'Site Settings', href: '/admin/site-settings', icon: '⚙' },
 ]

@@ -17,6 +17,9 @@ export interface Home1Data {
   card_description: string
   button_url: string
   background_color: string
+  card_stroke_enabled: boolean
+  card_stroke_width: string
+  card_stroke_color: string
 }
 
 interface Home1Props {
@@ -60,7 +63,14 @@ export default function Home1({ data }: Home1Props) {
         </div>
 
         {/* Overlapping Card - vertically centered, overlapping right side of image */}
-        <div className="relative -mt-16 ml-auto w-11/12 bg-white p-8 shadow-sm md:absolute md:right-0 md:top-1/2 md:mt-0 md:-translate-y-1/2 md:w-1/2 md:p-10 lg:w-5/12 lg:p-12">
+        <div 
+          className="relative -mt-16 ml-auto w-11/12 bg-white p-8 shadow-sm md:absolute md:right-0 md:top-1/2 md:mt-0 md:-translate-y-1/2 md:w-1/2 md:p-10 lg:w-5/12 lg:p-12"
+          style={{
+            border: data.card_stroke_enabled 
+              ? `${data.card_stroke_width || '1'}px solid ${data.card_stroke_color || '#E5E5E5'}` 
+              : 'none'
+          }}
+        >
           {/* Label */}
           <span className="text-xs tracking-[0.2em] text-neutral-500 font-accent uppercase">
             {data.card_label}

@@ -47,7 +47,7 @@ export default function DevotionalsGrid({
   return (
     <section id="more-devotionals">
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-1 h-8 bg-blue-500 rounded-full" />
+        <div className="w-1 h-8 bg-button-primary rounded-full" />
         <h2 className="text-2xl font-bold text-gray-900 font-heading">More Devotionals</h2>
       </div>
 
@@ -96,7 +96,7 @@ export default function DevotionalsGrid({
                     )}
                     
                     {/* Title */}
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors font-heading">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-title-hover transition-colors font-heading">
                       {post.title}
                     </h3>
                     
@@ -131,7 +131,7 @@ export default function DevotionalsGrid({
             {search ? 'Try a different search term.' : 'Check back soon for inspiring daily readings.'}
           </p>
           {search && (
-            <Link href="/devotionals" className="mt-6 inline-block px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors">
+            <Link href="/devotionals" className="mt-6 inline-block px-6 py-3 rounded-full bg-button-primary text-button-primary font-medium hover:opacity-90 transition-opacity">
               View all devotionals
             </Link>
           )}
