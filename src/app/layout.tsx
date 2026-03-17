@@ -54,12 +54,22 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
-  const { data: row } = await supabase
+  
+  // Batch fetch site settings to avoid waterfall
+  const { data: settings } = await supabase
     .from('site_settings')
-    .select('value')
-    .eq('key', 'favicon_url')
-    .single()
-  const faviconUrl = typeof row?.value === 'string' ? row.value.replace(/^"|"$/g, '') : null
+    .select('key, value')
+    .in('key', ['favicon_url', 'typography'])
+  
+  const settingsMap = new Map(settings?.map(s => [s.key, s.value]) || [])
+  const faviconValue = settingsMap.get('favicon_url')
+  const faviconUrl = typeof faviconValue === 'string' ? faviconValue.replace(/^"|"$/g, '') : null
+  
+  // Parse typography settings for FontProvider
+  const typographyValue = settingsMap.get('typography')
+  const initialTypography = typographyValue 
+    ? (typeof typographyValue === 'string' ? JSON.parse(typographyValue) : typographyValue)
+    : undefined
 
   return (
     <html lang="en" className={beVietnamPro.className} data-scroll-behavior="smooth">
@@ -69,7 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="bg-white text-base text-neutral-900 dark:bg-neutral-900 dark:text-neutral-200">
         <PostHogProvider>
           <ThemeProvider>
-            <FontProvider>
+            <FontProvider initialTypography={initialTypography}>
               <div>{children}</div>
               <CookieConsent />
               <NewsletterPopupController />

@@ -71,11 +71,28 @@ const FONT_FAMILY_MAP: Record<string, string> = {
   Anonymous_Pro: "'Anonymous Pro', monospace",
 }
 
+interface TypographySettings {
+  heading_font?: string
+  body_font?: string
+  accent_font?: string
+  heading_size?: string
+  body_size?: string
+  accent_size?: string
+  heading_weight?: string
+  body_weight?: string
+  accent_weight?: string
+  heading_style?: string
+  body_style?: string
+  accent_style?: string
+  caption_font?: string
+  caption_size?: string
+  caption_weight?: string
+  caption_style?: string
+}
+
 interface FontProviderProps {
   children: React.ReactNode
-  initialHeadingFont?: string
-  initialBodyFont?: string
-  initialAccentFont?: string
+  initialTypography?: TypographySettings
 }
 
 // Font sizes are now stored as pt values directly (e.g., '12', '14', '16')
@@ -83,29 +100,30 @@ interface FontProviderProps {
 
 export default function FontProvider({ 
   children, 
-  initialHeadingFont = 'Be_Vietnam_Pro',
-  initialBodyFont = 'Merriweather',
-  initialAccentFont = 'Space_Mono'
+  initialTypography
 }: FontProviderProps) {
-  const [headingFont, setHeadingFont] = useState(initialHeadingFont)
-  const [bodyFont, setBodyFont] = useState(initialBodyFont)
-  const [accentFont, setAccentFont] = useState(initialAccentFont)
-  const [headingSize, setHeadingSize] = useState('32')
-  const [bodySize, setBodySize] = useState('12')
-  const [accentSize, setAccentSize] = useState('10')
-  const [headingWeight, setHeadingWeight] = useState('700')
-  const [bodyWeight, setBodyWeight] = useState('400')
-  const [accentWeight, setAccentWeight] = useState('400')
-  const [headingStyle, setHeadingStyle] = useState('normal')
-  const [bodyStyle, setBodyStyle] = useState('normal')
-  const [accentStyle, setAccentStyle] = useState('normal')
-  const [captionFont, setCaptionFont] = useState('Lora')
-  const [captionSize, setCaptionSize] = useState('10')
-  const [captionWeight, setCaptionWeight] = useState('400')
-  const [captionStyle, setCaptionStyle] = useState('italic')
-  const [loaded, setLoaded] = useState(false)
+  const [headingFont, setHeadingFont] = useState(initialTypography?.heading_font || 'Be_Vietnam_Pro')
+  const [bodyFont, setBodyFont] = useState(initialTypography?.body_font || 'Merriweather')
+  const [accentFont, setAccentFont] = useState(initialTypography?.accent_font || 'Space_Mono')
+  const [headingSize, setHeadingSize] = useState(initialTypography?.heading_size || '32')
+  const [bodySize, setBodySize] = useState(initialTypography?.body_size || '12')
+  const [accentSize, setAccentSize] = useState(initialTypography?.accent_size || '10')
+  const [headingWeight, setHeadingWeight] = useState(initialTypography?.heading_weight || '700')
+  const [bodyWeight, setBodyWeight] = useState(initialTypography?.body_weight || '400')
+  const [accentWeight, setAccentWeight] = useState(initialTypography?.accent_weight || '400')
+  const [headingStyle, setHeadingStyle] = useState(initialTypography?.heading_style || 'normal')
+  const [bodyStyle, setBodyStyle] = useState(initialTypography?.body_style || 'normal')
+  const [accentStyle, setAccentStyle] = useState(initialTypography?.accent_style || 'normal')
+  const [captionFont, setCaptionFont] = useState(initialTypography?.caption_font || 'Lora')
+  const [captionSize, setCaptionSize] = useState(initialTypography?.caption_size || '10')
+  const [captionWeight, setCaptionWeight] = useState(initialTypography?.caption_weight || '400')
+  const [captionStyle, setCaptionStyle] = useState(initialTypography?.caption_style || 'italic')
+  const [hasFetched, setHasFetched] = useState(!!initialTypography)
 
   useEffect(() => {
+    // Skip fetch if we have initial typography from server
+    if (hasFetched) return
+
     const loadSettings = async () => {
       try {
         const supabase = createBrowserClient(
@@ -141,12 +159,12 @@ export default function FontProvider({
       } catch (err) {
         console.error('Error loading typography settings:', err)
       } finally {
-        setLoaded(true)
+        setHasFetched(true)
       }
     }
 
     loadSettings()
-  }, [])
+  }, [hasFetched])
 
   useEffect(() => {
     // Load Google Fonts dynamically
