@@ -8,6 +8,10 @@ export interface NewsletterSettings {
   background_color: string
   background_image_url: string
   text_color: string
+  button_bg_color?: string
+  button_text_color?: string
+  button_hover_bg_color?: string
+  button_hover_text_color?: string
 }
 
 export interface PopupSettings {

@@ -186,6 +186,10 @@ export default async function DevotionalPage({ params }: Props) {
             background_color: settings.newsletter_settings?.background_color || '#F5F2ED',
             background_image_url: settings.newsletter_settings?.background_image_url || '',
             text_color: settings.newsletter_settings?.text_color || '#1a1a1a',
+            button_bg_color: settings.newsletter_settings?.button_bg_color,
+            button_text_color: settings.newsletter_settings?.button_text_color,
+            button_hover_bg_color: settings.newsletter_settings?.button_hover_bg_color,
+            button_hover_text_color: settings.newsletter_settings?.button_hover_text_color,
           }}
         />
       )}
