@@ -44,6 +44,21 @@ const HOME1_STROKE_DEFAULTS = {
   card_stroke_color: '#E5E5E5',
 }
 
+// Additional fields for NewsletterSignUp button colors
+const NEWSLETTER_BUTTON_FIELDS: Record<string, SchemaProperty> = {
+  button_bg_color: { type: 'string', title: 'Button Background Color' },
+  button_text_color: { type: 'string', title: 'Button Text Color' },
+  button_hover_bg_color: { type: 'string', title: 'Button Hover Background' },
+  button_hover_text_color: { type: 'string', title: 'Button Hover Text Color' },
+}
+
+const NEWSLETTER_BUTTON_DEFAULTS = {
+  button_bg_color: '#2B4A6F',
+  button_text_color: '#ffffff',
+  button_hover_bg_color: '#1e3a5f',
+  button_hover_text_color: '#ffffff',
+}
+
 export default function SectionEditor({ 
   data, 
   schema, 
@@ -52,13 +67,17 @@ export default function SectionEditor({
   saving,
   templateName 
 }: SectionEditorProps) {
-  // Merge stroke fields for Home1 sections
-  const enhancedSchema = templateName === 'Home1' 
-    ? { ...schema, properties: { ...schema?.properties, ...HOME1_STROKE_FIELDS } }
-    : schema
-  const enhancedDefaults = templateName === 'Home1'
-    ? { ...defaultData, ...HOME1_STROKE_DEFAULTS }
-    : defaultData
+  // Merge additional fields for specific sections
+  let enhancedSchema = schema
+  let enhancedDefaults = defaultData
+  
+  if (templateName === 'Home1') {
+    enhancedSchema = { ...schema, properties: { ...schema?.properties, ...HOME1_STROKE_FIELDS } }
+    enhancedDefaults = { ...defaultData, ...HOME1_STROKE_DEFAULTS }
+  } else if (templateName === 'NewsletterSignUp') {
+    enhancedSchema = { ...schema, properties: { ...schema?.properties, ...NEWSLETTER_BUTTON_FIELDS } }
+    enhancedDefaults = { ...defaultData, ...NEWSLETTER_BUTTON_DEFAULTS }
+  }
 
   const [formData, setFormData] = useState<Record<string, any>>({ ...enhancedDefaults, ...data })
   const [uploading, setUploading] = useState(false)

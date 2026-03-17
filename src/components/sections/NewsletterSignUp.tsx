@@ -10,6 +10,10 @@ export interface NewsletterSignUpData {
   background_color: string
   background_image_url: string
   text_color: string
+  button_bg_color?: string
+  button_text_color?: string
+  button_hover_bg_color?: string
+  button_hover_text_color?: string
 }
 
 interface NewsletterSignUpProps {
@@ -107,10 +111,22 @@ export default function NewsletterSignUp({ data }: NewsletterSignUpProps) {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="px-7 py-3.5 font-medium text-sm rounded-xl hover:opacity-90 transition-opacity disabled:opacity-60 whitespace-nowrap font-body"
+              className="px-7 py-3.5 font-medium text-sm rounded-xl transition-colors disabled:opacity-60 whitespace-nowrap font-body"
               style={{ 
-                backgroundColor: 'var(--color-newsletter-button-bg)', 
-                color: 'var(--color-newsletter-button-text)' 
+                backgroundColor: data.button_bg_color || 'var(--color-newsletter-button-bg)', 
+                color: data.button_text_color || 'var(--color-newsletter-button-text)' 
+              }}
+              onMouseEnter={(e) => {
+                if (data.button_hover_bg_color) {
+                  e.currentTarget.style.backgroundColor = data.button_hover_bg_color
+                }
+                if (data.button_hover_text_color) {
+                  e.currentTarget.style.color = data.button_hover_text_color
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = data.button_bg_color || 'var(--color-newsletter-button-bg)'
+                e.currentTarget.style.color = data.button_text_color || 'var(--color-newsletter-button-text)'
               }}
             >
               {status === 'loading' ? 'Subscribing...' : (data.button_text || 'Subscribe')}
