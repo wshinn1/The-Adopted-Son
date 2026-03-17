@@ -32,14 +32,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = devotional?.seo_description || devotional?.excerpt || 'A daily devotional from The Adopted Son'
   const keywords = devotional?.seo_keywords?.split(',').map(k => k.trim()).filter(Boolean) || []
 
-  // Generate dynamic OG image URL
-  const ogParams = new URLSearchParams({
-    title: devotional?.title || 'Devotional',
-    description: devotional?.excerpt || '',
-    author: devotional?.author_name || '',
-    ...(devotional?.cover_image_url ? { image: devotional.cover_image_url } : {}),
-  })
-  const ogImageUrl = `https://www.theadoptedson.com/api/og?${ogParams.toString()}`
+  // Use the devotional's featured image directly for social sharing
+  // Ensure the URL is absolute for social media platforms
+  let ogImageUrl = 'https://www.theadoptedson.com/og-image.jpg'
+  if (devotional?.cover_image_url) {
+    // If it's already an absolute URL, use it directly
+    if (devotional.cover_image_url.startsWith('http')) {
+      ogImageUrl = devotional.cover_image_url
+    } else {
+      // If it's a relative path, prepend the domain
+      ogImageUrl = `https://www.theadoptedson.com${devotional.cover_image_url.startsWith('/') ? '' : '/'}${devotional.cover_image_url}`
+    }
+  }
 
   return {
     title,
