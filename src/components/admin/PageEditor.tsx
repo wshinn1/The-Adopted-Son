@@ -674,7 +674,7 @@ export default function PageEditor({ page, sections: initialSections, templates 
                       defaultData={getTemplate(section).default_data}
                       onSave={(newData) => updateSectionData(section.id, newData)}
                       saving={saving}
-                      templateName={getTemplate(section).name}
+                      templateName={getTemplate(section).component_name}
                     />
                   </div>
                 )}
