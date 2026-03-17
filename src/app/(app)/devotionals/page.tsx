@@ -244,7 +244,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
               name="search"
               defaultValue={search || ''}
               placeholder="Search devotionals..."
-              className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-body"
+              className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-button-primary)] focus:border-transparent font-body"
             />
           </form>
         </div>
@@ -253,7 +253,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
         {search && search.trim().length > 0 ? (
           <section className="mb-16">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-1 h-8 bg-blue-500 rounded-full" />
+              <div className="w-1 h-8 bg-button-primary rounded-full" />
               <h2 className="text-2xl font-bold text-gray-900 font-heading">
                 {gridPosts.length > 0 ? `Results for "${search}"` : `No results for "${search}"`}
               </h2>
@@ -292,7 +292,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                               ))}
                             </div>
                           )}
-                          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors font-heading">
+                          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-title-hover transition-colors font-heading">
                             {post.title}
                           </h3>
                           {post.excerpt && (
@@ -313,7 +313,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                     )}
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                       <Link key={pageNum} href={`/devotionals?page=${pageNum}&search=${search}`}
-                        className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors font-body ${pageNum === currentPage ? 'bg-blue-500 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
+                        className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors font-body ${pageNum === currentPage ? 'bg-pagination-active text-pagination-active' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
                         {pageNum}
                       </Link>
                     ))}
@@ -328,7 +328,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
             ) : (
               <div className="py-20 text-center bg-white rounded-2xl">
                 <p className="text-gray-600 font-body">Try a different search term.</p>
-                <Link href="/devotionals" className="mt-6 inline-block px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors">
+                <Link href="/devotionals" className="mt-6 inline-block px-6 py-3 rounded-full bg-button-primary text-button-primary font-medium hover:opacity-90 transition-opacity">
                   View all devotionals
                 </Link>
               </div>
@@ -340,7 +340,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
         {/* Devotionals Section */}
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-1 h-8 bg-blue-500 rounded-full" />
+            <div className="w-1 h-8 bg-button-primary rounded-full" />
             <h2 className="text-2xl font-bold text-gray-900 font-heading">Devotionals</h2>
           </div>
 
@@ -365,13 +365,19 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                     
                     {/* Content */}
                     <div className="flex flex-col justify-center p-6 md:p-8 flex-1">
-                      {featuredPost.categories?.[0] && (
-                        <span className="inline-block w-fit px-4 py-1.5 text-sm font-medium rounded-full bg-blue-50 text-blue-600 mb-4">
+{featuredPost.categories?.[0] && (
+                        <span 
+                          className="inline-block w-fit px-4 py-1.5 text-sm font-medium rounded-full mb-4"
+                          style={{ 
+                            backgroundColor: 'color-mix(in srgb, var(--color-button-primary) 10%, white)', 
+                            color: 'var(--color-button-primary)' 
+                          }}
+                        >
                           {featuredPost.categories[0].name}
                         </span>
                       )}
                       
-                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors font-heading leading-tight">
+                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 group-hover:text-title-hover transition-colors font-heading leading-tight">
                         {featuredPost.title}
                       </h3>
                       
@@ -434,7 +440,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                       </div>
                       {/* Content */}
                       <div className="p-4 flex flex-col flex-1">
-                        <h4 className="font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors font-heading mb-2">
+                        <h4 className="font-bold text-gray-900 line-clamp-2 group-hover:text-title-hover transition-colors font-heading mb-2">
                           {post.title}
                         </h4>
                         {post.excerpt && (
