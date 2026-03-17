@@ -36,6 +36,10 @@
   --color-pagination-active-text: #ffffff;
   --color-newsletter-button-bg: #2B4A6F;
   --color-newsletter-button-text: #ffffff;
+  --color-icon-button-bg: #2B4A6F;
+  --color-icon-button-icon: #ffffff;
+  --color-icon-button-hover-bg: #1e3a5f;
+  --color-icon-button-hover-icon: #ffffff;
 }
 
 /* Font utility classes for blog posts */

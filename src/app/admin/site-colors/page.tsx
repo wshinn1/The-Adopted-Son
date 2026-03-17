@@ -24,6 +24,12 @@ interface SiteColors {
   // Newsletter section colors
   newsletter_button_bg: string
   newsletter_button_text: string
+  
+  // Icon button colors (circular arrow buttons)
+  icon_button_bg: string
+  icon_button_icon: string
+  icon_button_hover_bg: string
+  icon_button_hover_icon: string
 }
 
 const defaultColors: SiteColors = {
@@ -38,6 +44,10 @@ const defaultColors: SiteColors = {
   pagination_active_text: '#ffffff',
   newsletter_button_bg: '#2B4A6F', // Twilight Blue
   newsletter_button_text: '#ffffff',
+  icon_button_bg: '#2B4A6F', // Twilight Blue
+  icon_button_icon: '#ffffff',
+  icon_button_hover_bg: '#1e3a5f',
+  icon_button_hover_icon: '#ffffff',
 }
 
 // Brand color presets
@@ -398,6 +408,61 @@ export default function SiteColorsPage() {
               value={colors.newsletter_button_text}
               onChange={(val) => setColors({ ...colors, newsletter_button_text: val })}
             />
+          </div>
+        </div>
+
+        {/* Icon Buttons */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+            Icon Buttons
+          </h2>
+          <p className="text-sm text-neutral-500 mb-6">
+            Colors for circular icon buttons (like the arrow button on hero sections)
+          </p>
+          <div className="grid gap-6 md:grid-cols-2">
+            <ColorField
+              label="Button Background"
+              value={colors.icon_button_bg}
+              onChange={(val) => setColors({ ...colors, icon_button_bg: val })}
+            />
+            <ColorField
+              label="Icon Color"
+              value={colors.icon_button_icon}
+              onChange={(val) => setColors({ ...colors, icon_button_icon: val })}
+            />
+            <ColorField
+              label="Hover Background"
+              value={colors.icon_button_hover_bg}
+              onChange={(val) => setColors({ ...colors, icon_button_hover_bg: val })}
+            />
+            <ColorField
+              label="Hover Icon Color"
+              value={colors.icon_button_hover_icon}
+              onChange={(val) => setColors({ ...colors, icon_button_hover_icon: val })}
+            />
+          </div>
+          {/* Preview */}
+          <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+            <p className="text-xs text-neutral-500 mb-3">Preview (hover to see):</p>
+            <button
+              className="w-12 h-12 rounded-full flex items-center justify-center transition-colors"
+              style={{
+                backgroundColor: colors.icon_button_bg,
+                color: colors.icon_button_icon,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = colors.icon_button_hover_bg
+                e.currentTarget.style.color = colors.icon_button_hover_icon
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = colors.icon_button_bg
+                e.currentTarget.style.color = colors.icon_button_icon
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
