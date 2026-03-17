@@ -28,6 +28,20 @@ interface SectionEditorProps {
   defaultData: Record<string, any>
   onSave: (data: Record<string, any>) => void
   saving: boolean
+  templateName?: string
+}
+
+// Additional fields for Home1 that may not be in the database schema yet
+const HOME1_STROKE_FIELDS: Record<string, SchemaProperty> = {
+  card_stroke_enabled: { type: 'boolean', title: 'Card Border Enabled' },
+  card_stroke_width: { type: 'number', title: 'Card Border Width', minimum: 0, maximum: 10, step: 0.1 },
+  card_stroke_color: { type: 'string', title: 'Card Border Color' },
+}
+
+const HOME1_STROKE_DEFAULTS = {
+  card_stroke_enabled: false,
+  card_stroke_width: 1,
+  card_stroke_color: '#E5E5E5',
 }
 
 export default function SectionEditor({ 
@@ -35,14 +49,23 @@ export default function SectionEditor({
   schema, 
   defaultData, 
   onSave,
-  saving 
+  saving,
+  templateName 
 }: SectionEditorProps) {
-  const [formData, setFormData] = useState<Record<string, any>>({ ...defaultData, ...data })
+  // Merge stroke fields for Home1 sections
+  const enhancedSchema = templateName === 'Home1' 
+    ? { ...schema, properties: { ...schema?.properties, ...HOME1_STROKE_FIELDS } }
+    : schema
+  const enhancedDefaults = templateName === 'Home1'
+    ? { ...defaultData, ...HOME1_STROKE_DEFAULTS }
+    : defaultData
+
+  const [formData, setFormData] = useState<Record<string, any>>({ ...enhancedDefaults, ...data })
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
-    setFormData({ ...defaultData, ...data })
-  }, [data, defaultData])
+    setFormData({ ...enhancedDefaults, ...data })
+  }, [data, defaultData, templateName])
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }))
