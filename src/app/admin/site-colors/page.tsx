@@ -8,6 +8,7 @@ interface SiteColors {
   button_primary: string
   button_primary_hover: string
   button_primary_text: string
+  button_primary_hover_text: string
   
   // Category badge colors
   category_badge_bg: string
@@ -29,6 +30,7 @@ const defaultColors: SiteColors = {
   button_primary: '#2B4A6F', // Twilight Blue
   button_primary_hover: '#1e3a5f',
   button_primary_text: '#ffffff',
+  button_primary_hover_text: '#ffffff',
   category_badge_bg: '#4A3828', // Deep Earth
   category_badge_text: '#ffffff',
   title_hover_color: '#E8A547', // Golden Dawn
@@ -223,18 +225,29 @@ export default function SiteColorsPage() {
               value={colors.button_primary_text}
               onChange={(val) => setColors({ ...colors, button_primary_text: val })}
             />
+            <ColorField
+              label="Button Hover Text"
+              value={colors.button_primary_hover_text}
+              onChange={(val) => setColors({ ...colors, button_primary_hover_text: val })}
+            />
           </div>
           {/* Preview */}
           <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
-            <p className="text-xs text-neutral-500 mb-3">Preview:</p>
+            <p className="text-xs text-neutral-500 mb-3">Preview (hover to see text color change):</p>
             <button
               className="px-6 py-2.5 rounded-lg font-medium text-sm transition-colors"
               style={{
                 backgroundColor: colors.button_primary,
                 color: colors.button_primary_text,
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = colors.button_primary_hover)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = colors.button_primary)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = colors.button_primary_hover
+                e.currentTarget.style.color = colors.button_primary_hover_text
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = colors.button_primary
+                e.currentTarget.style.color = colors.button_primary_text
+              }}
             >
               Subscribe
             </button>
