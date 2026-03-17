@@ -23,6 +23,18 @@
   --font-size-caption: 10pt;
   --font-weight-caption: 400;
   --font-style-caption: italic;
+  
+  /* Dynamic site colors - set by ColorProvider */
+  --color-button-primary: #2B4A6F;
+  --color-button-primary-hover: #1e3a5f;
+  --color-button-primary-text: #ffffff;
+  --color-category-badge-bg: #4A3828;
+  --color-category-badge-text: #ffffff;
+  --color-title-hover: #E8A547;
+  --color-pagination-active-bg: #2B4A6F;
+  --color-pagination-active-text: #ffffff;
+  --color-newsletter-button-bg: #2B4A6F;
+  --color-newsletter-button-text: #ffffff;
 }
 
 /* Font utility classes for blog posts */
@@ -51,6 +63,35 @@
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-caption);
   font-style: var(--font-style-caption);
+}
+
+/* Site color utilities - controlled by ColorProvider */
+@utility text-title-hover {
+  color: var(--color-title-hover);
+}
+
+@utility bg-button-primary {
+  background-color: var(--color-button-primary);
+}
+
+@utility text-button-primary {
+  color: var(--color-button-primary-text);
+}
+
+@utility bg-category-badge {
+  background-color: var(--color-category-badge-bg);
+}
+
+@utility text-category-badge {
+  color: var(--color-category-badge-text);
+}
+
+@utility bg-pagination-active {
+  background-color: var(--color-pagination-active-bg);
+}
+
+@utility text-pagination-active {
+  color: var(--color-pagination-active-text);
 }
 
 @theme {

@@ -10,6 +10,40 @@ interface TrialInfo {
   trialExpired: boolean
 }
 
+interface BannerSettings {
+  active_message: string
+  expired_message: string
+  success_message: string
+  button_text: string
+  expired_button_text: string
+  placeholder_text: string
+  active_bg_color: string
+  active_text_color: string
+  active_button_bg: string
+  active_button_text: string
+  expired_bg_color: string
+  expired_text_color: string
+  expired_button_bg: string
+  expired_button_text: string
+}
+
+const defaultSettings: BannerSettings = {
+  active_message: 'You have free access for {days} — enter your email to stay updated.',
+  expired_message: 'Your free trial has ended. Subscribe to continue reading premium content.',
+  success_message: "You're in! Enjoy your free trial of all devotionals.",
+  button_text: 'Notify me',
+  expired_button_text: 'View Plans',
+  placeholder_text: 'your@email.com',
+  active_bg_color: '#2B4A6F',
+  active_text_color: '#ffffff',
+  active_button_bg: '#ffffff',
+  active_button_text: '#2B4A6F',
+  expired_bg_color: '#B8704D',
+  expired_text_color: '#ffffff',
+  expired_button_bg: '#ffffff',
+  expired_button_text: '#B8704D',
+}
+
 export default function TrialBanner() {
   const [dismissed, setDismissed] = useState(false)
   const [email, setEmail] = useState('')
@@ -17,6 +51,7 @@ export default function TrialBanner() {
   const [submitting, setSubmitting] = useState(false)
   const [trialInfo, setTrialInfo] = useState<TrialInfo | null>(null)
   const [loading, setLoading] = useState(true)
+  const [settings, setSettings] = useState<BannerSettings>(defaultSettings)
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,6 +61,20 @@ export default function TrialBanner() {
   useEffect(() => {
     async function checkTrialStatus() {
       try {
+        // Load banner settings
+        const { data: settingsData } = await supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'trial_banner_settings')
+          .single()
+        
+        if (settingsData?.value) {
+          const parsed = typeof settingsData.value === 'string' 
+            ? JSON.parse(settingsData.value) 
+            : settingsData.value
+          setSettings({ ...defaultSettings, ...parsed })
+        }
+
         // Check if user is logged in
         const { data: { user } } = await supabase.auth.getUser()
 
@@ -89,20 +138,25 @@ export default function TrialBanner() {
   // Show expired message
   if (trialInfo?.trialExpired) {
     return (
-      <div className="bg-amber-600 text-white px-4 py-3 relative">
+      <div 
+        className="px-4 py-3 relative"
+        style={{ backgroundColor: settings.expired_bg_color, color: settings.expired_text_color }}
+      >
         <div className="container flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sm font-medium text-center sm:text-left">
-            Your free trial has ended. Subscribe to continue reading premium content.
+            {settings.expired_message}
           </p>
           <a
             href="/pricing"
-            className="text-sm px-4 py-1.5 bg-white text-amber-600 font-medium rounded-lg hover:bg-neutral-100 transition-colors"
+            className="text-sm px-4 py-1.5 font-medium rounded-lg hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: settings.expired_button_bg, color: settings.expired_button_text }}
           >
-            View Plans
+            {settings.expired_button_text}
           </a>
           <button
             onClick={() => setDismissed(true)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white text-lg leading-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-100 text-lg leading-none"
+            style={{ color: `${settings.expired_text_color}cc` }}
             aria-label="Dismiss banner"
           >
             ×
@@ -113,39 +167,44 @@ export default function TrialBanner() {
   }
 
   return (
-    <div className="bg-primary-600 text-white px-4 py-3 relative">
+    <div 
+      className="px-4 py-3 relative"
+      style={{ backgroundColor: settings.active_bg_color, color: settings.active_text_color }}
+    >
       <div className="container flex flex-col sm:flex-row items-center justify-between gap-3">
         {submitted ? (
           <p className="text-sm font-medium text-center sm:text-left">
-            You're in! Enjoy your free trial of all devotionals.
+            {settings.success_message}
           </p>
         ) : (
           <>
             <p className="text-sm font-medium text-center sm:text-left">
-              You have free access for {daysText} — enter your email to stay updated.
+              {settings.active_message.replace('{days}', daysText)}
             </p>
             <form onSubmit={handleSubmit} className="flex items-center gap-2 shrink-0">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
+                placeholder={settings.placeholder_text}
                 className="text-sm px-3 py-1.5 rounded-lg text-neutral-900 focus:outline-none w-52"
                 required
               />
               <button
                 type="submit"
                 disabled={submitting}
-                className="text-sm px-3 py-1.5 bg-white text-primary-600 font-medium rounded-lg hover:bg-neutral-100 transition-colors disabled:opacity-50"
+                className="text-sm px-3 py-1.5 font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                style={{ backgroundColor: settings.active_button_bg, color: settings.active_button_text }}
               >
-                {submitting ? 'Saving...' : 'Notify me'}
+                {submitting ? 'Saving...' : settings.button_text}
               </button>
             </form>
           </>
         )}
         <button
           onClick={() => setDismissed(true)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white text-lg leading-none"
+          className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-100 text-lg leading-none"
+          style={{ color: `${settings.active_text_color}cc` }}
           aria-label="Dismiss banner"
         >
           ×

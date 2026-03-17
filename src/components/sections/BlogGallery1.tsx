@@ -99,14 +99,20 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
           </div>
           <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-12 max-w-2xl">
             {featured.category && (
-              <span className="inline-block bg-primary-600 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded mb-3 w-fit">
+              <span 
+                className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded mb-3 w-fit"
+                style={{ backgroundColor: 'var(--color-category-badge-bg)', color: 'var(--color-category-badge-text)' }}
+              >
                 {featured.category}
               </span>
             )}
             <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold font-heading leading-snug mb-4">
               {featured.title}
             </h3>
-            <span className="inline-block bg-primary-600 text-white text-xs font-bold uppercase tracking-widest px-4 py-2 w-fit group-hover:bg-primary-700 transition-colors">
+            <span 
+              className="inline-block text-xs font-bold uppercase tracking-widest px-4 py-2 w-fit hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: 'var(--color-button-primary)', color: 'var(--color-button-primary-text)' }}
+            >
               Read More
             </span>
           </div>
@@ -143,14 +149,17 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                   </div>
                   {post.category && (
                     <div className="absolute bottom-0 left-0 right-0 flex justify-center translate-y-1/2 z-10">
-                      <span className="bg-primary-600 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5">
+                      <span 
+                        className="text-xs font-bold uppercase tracking-widest px-4 py-1.5"
+                        style={{ backgroundColor: 'var(--color-category-badge-bg)', color: 'var(--color-category-badge-text)' }}
+                      >
                         {post.category}
                       </span>
                     </div>
                   )}
                 </div>
                 <div className="pt-8 pb-2 text-center">
-                  <h3 className="text-xl font-bold text-neutral-900 font-heading leading-snug group-hover:text-primary-600 transition-colors text-balance">
+                  <h3 className="text-xl font-bold text-neutral-900 font-heading leading-snug transition-colors text-balance group-hover:text-title-hover">
                     {post.title}
                   </h3>
                   {date && <p className="text-sm text-neutral-400 font-body mt-2">{date}</p>}
