@@ -1,7 +1,16 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
+// Allow GET for easy browser trigger
+export async function GET() {
+  return updateHome1Schema()
+}
+
 export async function POST() {
+  return updateHome1Schema()
+}
+
+async function updateHome1Schema() {
   try {
     // First, get the current Home1 template
     const { data: template, error: fetchError } = await supabaseAdmin
@@ -58,7 +67,34 @@ export async function POST() {
       return NextResponse.json({ error: 'Failed to update template', details: updateError }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, message: 'Home1 template updated with stroke settings' })
+    // Also update existing page_sections that use Home1 to include stroke fields
+    const { data: existingSections } = await supabaseAdmin
+      .from('page_sections')
+      .select('id, data')
+      .eq('template_name', 'Home1')
+
+    if (existingSections && existingSections.length > 0) {
+      for (const section of existingSections) {
+        const sectionData = typeof section.data === 'string' ? JSON.parse(section.data) : section.data
+        // Only add if not already present
+        if (sectionData.card_stroke_enabled === undefined) {
+          sectionData.card_stroke_enabled = false
+          sectionData.card_stroke_width = 1
+          sectionData.card_stroke_color = '#E5E5E5'
+          
+          await supabaseAdmin
+            .from('page_sections')
+            .update({ data: sectionData })
+            .eq('id', section.id)
+        }
+      }
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Home1 template updated with stroke settings',
+      sectionsUpdated: existingSections?.length || 0
+    })
   } catch (error) {
     console.error('Error updating Home1 schema:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
