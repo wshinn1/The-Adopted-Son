@@ -8,10 +8,6 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
-  experimental: {
-    // Force Turbopack cache invalidation
-    turbotrace: { logLevel: 'error' },
-  },
   images: {
     minimumCacheTTL: 2678400 * 6,
     remotePatterns: [
