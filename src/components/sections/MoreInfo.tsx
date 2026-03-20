@@ -64,13 +64,10 @@ export default function MoreInfo({ data }: MoreInfoProps) {
 
             {content && (
               <div 
-                className="text-base md:text-lg leading-relaxed font-body space-y-4"
+                className="text-base md:text-lg leading-relaxed font-body prose prose-neutral max-w-none"
                 style={{ color: text_color }}
-              >
-                {content.split('\n\n').map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-              </div>
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
             )}
           </div>
         </div>
