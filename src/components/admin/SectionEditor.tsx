@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Upload } from 'lucide-react'
+import { Upload, Plus, Trash2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
 // Dynamically import RichTextEditor to avoid SSR issues
@@ -118,6 +118,9 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
   button_hover_text_color: '#ffffff',
 }
 
+// HeroSlider1 specific fields - these are handled separately with custom UI
+const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds']
+
 export default function SectionEditor({ 
   data, 
   schema, 
@@ -182,9 +185,15 @@ export default function SectionEditor({
   // Separate newsletter button color fields from other properties for special rendering
   const newsletterButtonColorKeys = ['button_bg_color', 'button_text_color', 'button_hover_bg_color', 'button_hover_text_color']
   const isNewsletterSection = templateName === 'NewsletterSignUp'
-  const regularProperties = isNewsletterSection 
-    ? Object.entries(properties).filter(([key]) => !newsletterButtonColorKeys.includes(key))
-    : Object.entries(properties)
+  const isHeroSlider1Section = templateName === 'HeroSlider1'
+  
+  let regularProperties = Object.entries(properties)
+  if (isNewsletterSection) {
+    regularProperties = regularProperties.filter(([key]) => !newsletterButtonColorKeys.includes(key))
+  }
+  if (isHeroSlider1Section) {
+    regularProperties = regularProperties.filter(([key]) => !HEROSLIDER1_CUSTOM_KEYS.includes(key))
+  }
 
   return (
     <div className="space-y-4">
@@ -315,6 +324,203 @@ export default function SectionEditor({
           )}
         </div>
       ))}
+
+      {/* HeroSlider1 Custom Fields */}
+      {isHeroSlider1Section && (
+        <div className="space-y-6">
+          {/* Headlines - Multiple Fields */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+              Headlines (rotates daily at 12:30 AM EST)
+            </label>
+            <p className="text-xs text-neutral-500 mb-3">
+              Add multiple headlines. One headline displays per day, rotating through the list.
+            </p>
+            <div className="space-y-2">
+              {(formData.headlines || ['']).map((headline: string, index: number) => (
+                <div key={index} className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-400 w-6">{index + 1}.</span>
+                  <input
+                    type="text"
+                    value={headline}
+                    onChange={(e) => {
+                      const newHeadlines = [...(formData.headlines || [''])]
+                      newHeadlines[index] = e.target.value
+                      handleChange('headlines', newHeadlines)
+                    }}
+                    placeholder={`Headline ${index + 1}`}
+                    className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                  {(formData.headlines || []).length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newHeadlines = (formData.headlines || []).filter((_: string, i: number) => i !== index)
+                        handleChange('headlines', newHeadlines)
+                      }}
+                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {(formData.headlines || []).length < 20 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const newHeadlines = [...(formData.headlines || ['']), '']
+                  handleChange('headlines', newHeadlines)
+                }}
+                className="mt-2 flex items-center gap-2 px-3 py-2 text-sm text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+              >
+                <Plus className="size-4" />
+                Add Headline ({(formData.headlines || []).length}/20)
+              </button>
+            )}
+          </div>
+
+          {/* Text Color with ColorField */}
+          <ColorField
+            label="Text Color"
+            value={formData.text_color || '#ffffff'}
+            onChange={(val) => handleChange('text_color', val)}
+          />
+
+          {/* Height with Unit Selector */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+              Minimum Height
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={parseInt(formData.min_height) || 100}
+                onChange={(e) => {
+                  const unit = formData.min_height?.includes('px') ? 'px' : formData.min_height?.includes('%') ? '%' : 'vh'
+                  handleChange('min_height', `${e.target.value}${unit}`)
+                }}
+                min={0}
+                className="w-24 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+              />
+              <select
+                value={formData.min_height?.includes('px') ? 'px' : formData.min_height?.includes('%') ? '%' : 'vh'}
+                onChange={(e) => {
+                  const value = parseInt(formData.min_height) || 100
+                  handleChange('min_height', `${value}${e.target.value}`)
+                }}
+                className="px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+              >
+                <option value="px">Pixels (px)</option>
+                <option value="%">Percent (%)</option>
+                <option value="vh">Viewport Height (vh)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Background Images */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+              Background Images (up to 5 - will crossfade)
+            </label>
+            <div className="space-y-3">
+              {(formData.background_images || []).map((imgUrl: string, index: number) => (
+                <div key={index} className="flex items-start gap-3">
+                  {imgUrl && (
+                    <img src={imgUrl} alt={`Background ${index + 1}`} className="w-20 h-14 object-cover rounded-lg" />
+                  )}
+                  <div className="flex-1 flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={imgUrl}
+                      onChange={(e) => {
+                        const newImages = [...(formData.background_images || [])]
+                        newImages[index] = e.target.value
+                        handleChange('background_images', newImages)
+                      }}
+                      placeholder="Image URL"
+                      className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    />
+                    <label className="flex items-center gap-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-700 rounded-lg cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors">
+                      <Upload className="size-4" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            setUploading(true)
+                            try {
+                              const formDataObj = new FormData()
+                              formDataObj.append('file', file)
+                              const response = await fetch('/api/media/upload', { method: 'POST', body: formDataObj })
+                              if (!response.ok) throw new Error('Upload failed')
+                              const result = await response.json()
+                              const newImages = [...(formData.background_images || [])]
+                              newImages[index] = result.url
+                              handleChange('background_images', newImages)
+                            } catch (err) {
+                              console.error('Upload error:', err)
+                              alert('Error uploading image')
+                            } finally {
+                              setUploading(false)
+                            }
+                          }
+                        }}
+                        disabled={uploading}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newImages = (formData.background_images || []).filter((_: string, i: number) => i !== index)
+                        handleChange('background_images', newImages)
+                      }}
+                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {(formData.background_images || []).length < 5 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const newImages = [...(formData.background_images || []), '']
+                  handleChange('background_images', newImages)
+                }}
+                className="mt-2 flex items-center gap-2 px-3 py-2 text-sm text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+              >
+                <Plus className="size-4" />
+                Add Image ({(formData.background_images || []).length}/5)
+              </button>
+            )}
+          </div>
+
+          {/* Image Transition Seconds */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+              Image Transition (seconds)
+            </label>
+            <p className="text-xs text-neutral-500 mb-2">
+              How long each background image displays before fading to the next.
+            </p>
+            <input
+              type="number"
+              value={formData.image_transition_seconds || 8}
+              onChange={(e) => handleChange('image_transition_seconds', Number(e.target.value))}
+              min={1}
+              max={60}
+              className="w-24 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+            />
+            <span className="ml-2 text-sm text-neutral-500">seconds</span>
+          </div>
+        </div>
+      )}
 
       {/* Newsletter Button Colors Section */}
       {isNewsletterSection && (
