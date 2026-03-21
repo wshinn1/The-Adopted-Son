@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
+import { ChevronDown } from 'lucide-react'
 
 export interface HeroSlider1Data {
   // Headlines - up to 20, rotates daily at 12:30 AM EST
@@ -16,6 +17,9 @@ export interface HeroSlider1Data {
   overlay_opacity: number
   // Image transition speed in seconds
   image_transition_speed: number
+  // Scroll arrow colors
+  arrow_color: string
+  arrow_hover_color: string
 }
 
 interface HeroSlider1Props {
@@ -57,7 +61,12 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
     text_color = '#ffffff',
     overlay_opacity = 0.3,
     image_transition_speed = 8,
+    arrow_color = '#ffffff',
+    arrow_hover_color = '#FFB84D',
   } = data
+  
+  // Arrow hover state
+  const [isArrowHovered, setIsArrowHovered] = useState(false)
 
   // Filter out empty headlines and images
   const validHeadlines = useMemo(() => headlines.filter(h => h && h.trim()), [headlines])
@@ -167,6 +176,27 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
             {subtitle}
           </p>
         )}
+
+        {/* Scroll Down Arrow */}
+        <button
+          onClick={() => {
+            // Find the next sibling section and scroll to it
+            const heroSection = document.querySelector('section')
+            if (heroSection?.nextElementSibling) {
+              heroSection.nextElementSibling.scrollIntoView({ behavior: 'smooth' })
+            }
+          }}
+          onMouseEnter={() => setIsArrowHovered(true)}
+          onMouseLeave={() => setIsArrowHovered(false)}
+          className="mt-12 inline-flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300 hover:scale-110"
+          style={{
+            borderColor: isArrowHovered ? arrow_hover_color : arrow_color,
+            color: isArrowHovered ? arrow_hover_color : arrow_color,
+          }}
+          aria-label="Scroll to next section"
+        >
+          <ChevronDown className="size-7" />
+        </button>
       </div>
 
       {/* Image indicators */}
