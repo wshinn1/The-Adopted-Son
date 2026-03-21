@@ -20,6 +20,10 @@ export interface HeroSlider1Data {
   // Scroll arrow colors
   arrow_color: string
   arrow_hover_color: string
+  // Arrow glass effect
+  arrow_glass_opacity: number
+  arrow_glass_blur: number
+  arrow_delay_seconds: number
 }
 
 interface HeroSlider1Props {
@@ -63,10 +67,24 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
     image_transition_speed = 8,
     arrow_color = '#ffffff',
     arrow_hover_color = '#FFB84D',
+    arrow_glass_opacity = 0.2,
+    arrow_glass_blur = 10,
+    arrow_delay_seconds = 2,
   } = data
   
   // Arrow hover state
   const [isArrowHovered, setIsArrowHovered] = useState(false)
+  // Arrow visibility state (for delayed fade-in)
+  const [isArrowVisible, setIsArrowVisible] = useState(false)
+  
+  // Delay the arrow appearing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsArrowVisible(true)
+    }, arrow_delay_seconds * 1000)
+    
+    return () => clearTimeout(timer)
+  }, [arrow_delay_seconds])
 
   // Filter out empty headlines and images
   const validHeadlines = useMemo(() => headlines.filter(h => h && h.trim()), [headlines])
@@ -177,7 +195,7 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
           </p>
         )}
 
-        {/* Scroll Down Arrow */}
+        {/* Scroll Down Arrow with Glass Effect and Delayed Fade-in */}
         <button
           onClick={() => {
             // Find the next sibling section and scroll to it
@@ -188,10 +206,15 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
           }}
           onMouseEnter={() => setIsArrowHovered(true)}
           onMouseLeave={() => setIsArrowHovered(false)}
-          className="mt-12 inline-flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-300 hover:scale-110"
+          className="mt-12 inline-flex items-center justify-center w-14 h-14 rounded-full border-2 transition-all duration-700 hover:scale-110"
           style={{
             borderColor: isArrowHovered ? arrow_hover_color : arrow_color,
             color: isArrowHovered ? arrow_hover_color : arrow_color,
+            backgroundColor: `rgba(255, 255, 255, ${arrow_glass_opacity})`,
+            backdropFilter: `blur(${arrow_glass_blur}px)`,
+            WebkitBackdropFilter: `blur(${arrow_glass_blur}px)`,
+            opacity: isArrowVisible ? 1 : 0,
+            transform: isArrowVisible ? 'translateY(0)' : 'translateY(20px)',
           }}
           aria-label="Scroll to next section"
         >
