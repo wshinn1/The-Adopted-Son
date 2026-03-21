@@ -6,6 +6,7 @@ import BlogGallery1 from '@/components/sections/BlogGallery1'
 import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
 import ContactForm1 from '@/components/sections/ContactForm1'
 import MoreInfo from '@/components/sections/MoreInfo'
+import HeroSlider1 from '@/components/sections/HeroSlider1'
 
 const SECTION_MAP: Record<string, ComponentType<{ data: any }>> = {
   Home1,
@@ -14,6 +15,7 @@ const SECTION_MAP: Record<string, ComponentType<{ data: any }>> = {
   NewsletterSignUp,
   ContactForm1,
   MoreInfo,
+  HeroSlider1,
 }
 
 interface PageSection {
