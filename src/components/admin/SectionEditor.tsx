@@ -119,7 +119,7 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
 }
 
 // HeroSlider1 specific fields - these are handled separately with custom UI
-const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds']
+const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds']
 
 export default function SectionEditor({ 
   data, 
@@ -518,6 +518,79 @@ export default function SectionEditor({
               className="w-24 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
             />
             <span className="ml-2 text-sm text-neutral-500">seconds</span>
+          </div>
+
+          {/* Arrow Colors */}
+          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">
+              Scroll Arrow
+            </h4>
+            <div className="grid gap-6 md:grid-cols-2">
+              <ColorField
+                label="Arrow Color"
+                value={formData.arrow_color || '#ffffff'}
+                onChange={(val) => handleChange('arrow_color', val)}
+              />
+              <ColorField
+                label="Arrow Hover Color"
+                value={formData.arrow_hover_color || '#FFB84D'}
+                onChange={(val) => handleChange('arrow_hover_color', val)}
+              />
+            </div>
+
+            {/* Glass Effect Settings */}
+            <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-800">
+              <h5 className="text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-4">
+                Glass Effect
+              </h5>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div>
+                  <label className="block text-xs text-neutral-500 mb-1">
+                    Delay (seconds)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.arrow_delay_seconds ?? 2}
+                    onChange={(e) => handleChange('arrow_delay_seconds', Number(e.target.value))}
+                    min={0}
+                    max={10}
+                    step={0.5}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                  <p className="text-xs text-neutral-400 mt-1">Fade-in delay</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-neutral-500 mb-1">
+                    Glass Opacity (0-1)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.arrow_glass_opacity ?? 0.2}
+                    onChange={(e) => handleChange('arrow_glass_opacity', Number(e.target.value))}
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                  <p className="text-xs text-neutral-400 mt-1">Background overlay</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-neutral-500 mb-1">
+                    Blur Amount (px)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.arrow_glass_blur ?? 10}
+                    onChange={(e) => handleChange('arrow_glass_blur', Number(e.target.value))}
+                    min={0}
+                    max={30}
+                    step={1}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                  <p className="text-xs text-neutral-400 mt-1">Frosted glass blur</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
