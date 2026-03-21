@@ -119,7 +119,7 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
 }
 
 // HeroSlider1 specific fields - these are handled separately with custom UI
-const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images']
+const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds']
 
 export default function SectionEditor({ 
   data, 
@@ -499,6 +499,25 @@ export default function SectionEditor({
                 Add Image ({(formData.background_images || []).length}/5)
               </button>
             )}
+          </div>
+
+          {/* Image Transition Seconds */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+              Image Transition (seconds)
+            </label>
+            <p className="text-xs text-neutral-500 mb-2">
+              How long each background image displays before fading to the next.
+            </p>
+            <input
+              type="number"
+              value={formData.image_transition_seconds || 8}
+              onChange={(e) => handleChange('image_transition_seconds', Number(e.target.value))}
+              min={1}
+              max={60}
+              className="w-24 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+            />
+            <span className="ml-2 text-sm text-neutral-500">seconds</span>
           </div>
         </div>
       )}
