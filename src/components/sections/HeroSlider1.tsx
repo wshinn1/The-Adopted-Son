@@ -7,9 +7,9 @@ import { ChevronDown } from 'lucide-react'
 export interface HeroSlider1Data {
   // Headlines - up to 20, rotates daily at 12:30 AM EST
   headlines: string[]
-  // Subtitle (optional, default off)
-  show_subtitle: boolean
-  subtitle: string
+  // Subheadline (optional, default off)
+  show_subheadline: boolean
+  subheadline: string
   // Background images - up to 5, fades between them
   background_images: string[]
   // Styling
@@ -59,8 +59,8 @@ function getDailyHeadlineIndex(totalHeadlines: number): number {
 export default function HeroSlider1({ data }: HeroSlider1Props) {
   const {
     headlines = [],
-    show_subtitle = false,
-    subtitle = '',
+    show_subheadline = false,
+    subheadline = '',
     background_images = [],
     text_color = '#ffffff',
     overlay_opacity = 0.3,
@@ -190,13 +190,13 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
           {currentHeadline}
         </h1>
 
-        {/* Optional Subtitle */}
-        {show_subtitle && subtitle && (
+        {/* Optional Subheadline */}
+        {show_subheadline && subheadline && (
           <p 
             className="mt-6 text-lg md:text-xl lg:text-2xl font-body max-w-3xl mx-auto leading-relaxed"
             style={{ color: text_color, opacity: 0.9 }}
           >
-            {subtitle}
+            {subheadline}
           </p>
         )}
 
