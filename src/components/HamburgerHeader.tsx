@@ -22,6 +22,39 @@ export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, 
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  // Track desktop breakpoint
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024) // lg breakpoint
+    }
+    
+    checkDesktop()
+    window.addEventListener('resize', checkDesktop)
+    return () => window.removeEventListener('resize', checkDesktop)
+  }, [])
+
+  // Handle scroll to show/hide header on desktop
+  useEffect(() => {
+    if (!isDesktop) {
+      setIsHeaderVisible(true)
+      return
+    }
+
+    const handleScroll = () => {
+      // Show header after scrolling down 100px
+      const shouldShow = window.scrollY > 100
+      setIsHeaderVisible(shouldShow)
+    }
+
+    // Initial check
+    handleScroll()
+    
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isDesktop])
 
   useEffect(() => {
     const supabase = createClient()
@@ -45,8 +78,12 @@ export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, 
 
   return (
     <>
-      {/* Fixed Header */}
-      <header className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 lg:px-24 bg-white/80 backdrop-blur-sm">
+      {/* Fixed Header - hidden on desktop until user scrolls */}
+      <header 
+        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 lg:px-24 bg-white/80 backdrop-blur-sm transition-transform duration-300 ease-in-out ${
+          isDesktop && !isHeaderVisible ? '-translate-y-full' : 'translate-y-0'
+        }`}
+      >
         {/* Logo / Site Name */}
         <Link href="/" className="text-lg font-medium text-neutral-900">
           {showImageLogo ? (
