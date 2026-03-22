@@ -338,18 +338,18 @@ export default function SectionEditor({
             </p>
             <div className="space-y-2">
               {(formData.headlines || ['']).map((headline: string, index: number) => (
-                <div key={index} className="flex items-center gap-2">
-                  <span className="text-xs text-neutral-400 w-6">{index + 1}.</span>
-                  <input
-                    type="text"
+                <div key={index} className="flex items-start gap-2">
+                  <span className="text-xs text-neutral-400 w-6 pt-2">{index + 1}.</span>
+                  <textarea
                     value={headline}
                     onChange={(e) => {
                       const newHeadlines = [...(formData.headlines || [''])]
                       newHeadlines[index] = e.target.value
                       handleChange('headlines', newHeadlines)
                     }}
-                    placeholder={`Headline ${index + 1}`}
-                    className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    placeholder={`Headline ${index + 1} - Press Enter for new line`}
+                    rows={3}
+                    className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm resize-y min-h-[60px]"
                   />
                   {(formData.headlines || []).length > 1 && (
                     <button

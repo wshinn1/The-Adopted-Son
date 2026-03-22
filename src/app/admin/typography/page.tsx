@@ -108,6 +108,10 @@ export default function TypographyPage() {
   const [captionSize, setCaptionSize] = useState('10')
   const [captionWeight, setCaptionWeight] = useState('400')
   const [captionStyle, setCaptionStyle] = useState('italic')
+  const [heroFont, setHeroFont] = useState('Raleway')
+  const [heroSize, setHeroSize] = useState('48')
+  const [heroWeight, setHeroWeight] = useState('700')
+  const [heroStyle, setHeroStyle] = useState('italic')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -158,6 +162,7 @@ export default function TypographyPage() {
     if (GOOGLE_FONT_MAP[bodyFont] && bodyFont !== headingFont) fontsToLoad.push(GOOGLE_FONT_MAP[bodyFont])
     if (GOOGLE_FONT_MAP[accentFont] && accentFont !== headingFont && accentFont !== bodyFont) fontsToLoad.push(GOOGLE_FONT_MAP[accentFont])
     if (GOOGLE_FONT_MAP[captionFont] && captionFont !== headingFont && captionFont !== bodyFont && captionFont !== accentFont) fontsToLoad.push(GOOGLE_FONT_MAP[captionFont])
+    if (GOOGLE_FONT_MAP[heroFont] && heroFont !== headingFont && heroFont !== bodyFont && heroFont !== accentFont && heroFont !== captionFont) fontsToLoad.push(GOOGLE_FONT_MAP[heroFont])
 
     if (fontsToLoad.length > 0) {
       const linkId = 'admin-preview-fonts'
@@ -170,7 +175,7 @@ export default function TypographyPage() {
       }
       link.href = `https://fonts.googleapis.com/css2?${fontsToLoad.map(f => `family=${f}`).join('&')}&display=swap`
     }
-  }, [headingFont, bodyFont, accentFont, captionFont])
+  }, [headingFont, bodyFont, accentFont, captionFont, heroFont])
 
   const loadSettings = async () => {
     try {
@@ -200,6 +205,10 @@ export default function TypographyPage() {
         setCaptionSize(typography.caption_size || '10')
         setCaptionWeight(typography.caption_weight || '400')
         setCaptionStyle(typography.caption_style || 'italic')
+        setHeroFont(typography.hero_font || 'Raleway')
+        setHeroSize(typography.hero_size || '48')
+        setHeroWeight(typography.hero_weight || '700')
+        setHeroStyle(typography.hero_style || 'italic')
       }
     } catch (err) {
       console.error('Error loading typography settings:', err)
@@ -232,6 +241,10 @@ export default function TypographyPage() {
             caption_size: captionSize,
             caption_weight: captionWeight,
             caption_style: captionStyle,
+            hero_font: heroFont,
+            hero_size: heroSize,
+            hero_weight: heroWeight,
+            hero_style: heroStyle,
           })
         }, { onConflict: 'key' })
 
@@ -261,7 +274,7 @@ export default function TypographyPage() {
           
           <div className="space-y-6">
             {/* Heading Font */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                   Heading Font
@@ -298,44 +311,42 @@ export default function TypographyPage() {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    Weight
-                  </label>
-                  <select
-                    value={headingWeight}
-                    onChange={(e) => setHeadingWeight(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-                  >
-                    {FONT_WEIGHT_OPTIONS.map((w) => (
-                      <option key={w.value} value={w.value}>
-                        {w.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    Style
-                  </label>
-                  <select
-                    value={headingStyle}
-                    onChange={(e) => setHeadingStyle(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-                  >
-                    {FONT_STYLE_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Weight
+                </label>
+                <select
+                  value={headingWeight}
+                  onChange={(e) => setHeadingWeight(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  {FONT_WEIGHT_OPTIONS.map((w) => (
+                    <option key={w.value} value={w.value}>
+                      {w.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Style
+                </label>
+                <select
+                  value={headingStyle}
+                  onChange={(e) => setHeadingStyle(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  {FONT_STYLE_OPTIONS.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
             {/* Body Font */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                   Body Font
@@ -372,39 +383,37 @@ export default function TypographyPage() {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    Weight
-                  </label>
-                  <select
-                    value={bodyWeight}
-                    onChange={(e) => setBodyWeight(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-                  >
-                    {FONT_WEIGHT_OPTIONS.map((w) => (
-                      <option key={w.value} value={w.value}>
-                        {w.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    Style
-                  </label>
-                  <select
-                    value={bodyStyle}
-                    onChange={(e) => setBodyStyle(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-                  >
-                    {FONT_STYLE_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Weight
+                </label>
+                <select
+                  value={bodyWeight}
+                  onChange={(e) => setBodyWeight(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  {FONT_WEIGHT_OPTIONS.map((w) => (
+                    <option key={w.value} value={w.value}>
+                      {w.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Style
+                </label>
+                <select
+                  value={bodyStyle}
+                  onChange={(e) => setBodyStyle(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  {FONT_STYLE_OPTIONS.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -555,6 +564,79 @@ export default function TypographyPage() {
                     ))}
                   </select>
                 </div>
+              </div>
+            </div>
+
+            {/* Hero Font */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Hero Font
+                </label>
+                <select
+                  value={heroFont}
+                  onChange={(e) => setHeroFont(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {Object.entries(groupedFonts).map(([category, fonts]) => (
+                    <optgroup key={category} label={category}>
+                      {fonts.map((font) => (
+                        <option key={font.value} value={font.value}>
+                          {font.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                <p className="text-xs text-neutral-500 mt-1">Used for Hero Slider headlines</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Size
+                </label>
+                <select
+                  value={heroSize}
+                  onChange={(e) => setHeroSize(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {HEADING_SIZE_OPTIONS.map((size) => (
+                    <option key={size.value} value={size.value}>
+                      {size.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Weight
+                </label>
+                <select
+                  value={heroWeight}
+                  onChange={(e) => setHeroWeight(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  {FONT_WEIGHT_OPTIONS.map((w) => (
+                    <option key={w.value} value={w.value}>
+                      {w.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Style
+                </label>
+                <select
+                  value={heroStyle}
+                  onChange={(e) => setHeroStyle(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  {FONT_STYLE_OPTIONS.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

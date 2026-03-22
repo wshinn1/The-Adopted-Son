@@ -179,8 +179,13 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
         {/* Main Headline */}
         <h1 
-          className="text-4xl md:text-6xl lg:text-7xl font-bold uppercase tracking-wider font-heading"
-          style={{ color: text_color }}
+          className="text-4xl md:text-6xl lg:text-7xl uppercase tracking-wider whitespace-pre-line"
+          style={{ 
+            color: text_color,
+            fontFamily: 'var(--font-hero)',
+            fontWeight: 'var(--font-weight-hero)',
+            fontStyle: 'var(--font-style-hero)',
+          }}
         >
           {currentHeadline}
         </h1>
