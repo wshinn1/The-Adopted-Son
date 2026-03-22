@@ -23,6 +23,10 @@
   --font-size-caption: 10pt;
   --font-weight-caption: 400;
   --font-style-caption: italic;
+  --font-hero: 'Raleway', sans-serif;
+  --font-size-hero: 48pt;
+  --font-weight-hero: 700;
+  --font-style-hero: italic;
   
   /* Dynamic site colors - set by ColorProvider */
   --color-button-primary: #2B4A6F;
@@ -70,6 +74,12 @@
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-caption);
   font-style: var(--font-style-caption);
+}
+
+@utility font-hero {
+  font-family: var(--font-hero);
+  font-weight: var(--font-weight-hero);
+  font-style: var(--font-style-hero);
 }
 
 /* Site color utilities - controlled by ColorProvider */

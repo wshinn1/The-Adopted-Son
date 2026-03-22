@@ -88,6 +88,10 @@ interface TypographySettings {
   caption_size?: string
   caption_weight?: string
   caption_style?: string
+  hero_font?: string
+  hero_size?: string
+  hero_weight?: string
+  hero_style?: string
 }
 
 interface FontProviderProps {
@@ -118,6 +122,10 @@ export default function FontProvider({
   const [captionSize, setCaptionSize] = useState(initialTypography?.caption_size || '10')
   const [captionWeight, setCaptionWeight] = useState(initialTypography?.caption_weight || '400')
   const [captionStyle, setCaptionStyle] = useState(initialTypography?.caption_style || 'italic')
+  const [heroFont, setHeroFont] = useState(initialTypography?.hero_font || 'Raleway')
+  const [heroSize, setHeroSize] = useState(initialTypography?.hero_size || '48')
+  const [heroWeight, setHeroWeight] = useState(initialTypography?.hero_weight || '700')
+  const [heroStyle, setHeroStyle] = useState(initialTypography?.hero_style || 'italic')
   const [hasFetched, setHasFetched] = useState(!!initialTypography)
 
   useEffect(() => {
@@ -155,6 +163,10 @@ export default function FontProvider({
           if (typography.caption_size) setCaptionSize(typography.caption_size)
           if (typography.caption_weight) setCaptionWeight(typography.caption_weight)
           if (typography.caption_style) setCaptionStyle(typography.caption_style)
+          if (typography.hero_font) setHeroFont(typography.hero_font)
+          if (typography.hero_size) setHeroSize(typography.hero_size)
+          if (typography.hero_weight) setHeroWeight(typography.hero_weight)
+          if (typography.hero_style) setHeroStyle(typography.hero_style)
         }
       } catch (err) {
         console.error('Error loading typography settings:', err)
@@ -181,6 +193,9 @@ export default function FontProvider({
     }
     if (GOOGLE_FONT_MAP[captionFont] && captionFont !== headingFont && captionFont !== bodyFont && captionFont !== accentFont) {
       fontsToLoad.push(GOOGLE_FONT_MAP[captionFont])
+    }
+    if (GOOGLE_FONT_MAP[heroFont] && heroFont !== headingFont && heroFont !== bodyFont && heroFont !== accentFont && heroFont !== captionFont) {
+      fontsToLoad.push(GOOGLE_FONT_MAP[heroFont])
     }
 
     if (fontsToLoad.length > 0) {
@@ -266,7 +281,24 @@ export default function FontProvider({
       '--font-style-caption',
       captionStyle || 'italic'
     )
-  }, [headingFont, bodyFont, accentFont, captionFont, headingSize, bodySize, accentSize, captionSize, headingWeight, bodyWeight, accentWeight, captionWeight, headingStyle, bodyStyle, accentStyle, captionStyle])
+    // Hero font
+    document.documentElement.style.setProperty(
+      '--font-hero',
+      FONT_FAMILY_MAP[heroFont] || FONT_FAMILY_MAP['Raleway']
+    )
+    document.documentElement.style.setProperty(
+      '--font-size-hero',
+      `${heroSize || '48'}pt`
+    )
+    document.documentElement.style.setProperty(
+      '--font-weight-hero',
+      heroWeight || '700'
+    )
+    document.documentElement.style.setProperty(
+      '--font-style-hero',
+      heroStyle || 'italic'
+    )
+  }, [headingFont, bodyFont, accentFont, captionFont, heroFont, headingSize, bodySize, accentSize, captionSize, heroSize, headingWeight, bodyWeight, accentWeight, captionWeight, heroWeight, headingStyle, bodyStyle, accentStyle, captionStyle, heroStyle])
 
   return <>{children}</>
 }
