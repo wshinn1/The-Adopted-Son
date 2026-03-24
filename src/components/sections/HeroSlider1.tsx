@@ -99,15 +99,7 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
   const headlineIndex = getDailyHeadlineIndex(validHeadlines.length)
   const currentHeadline = validHeadlines[headlineIndex] || 'Welcome'
 
-  // Debug: Log hero font CSS variables
-  useEffect(() => {
-    const styles = getComputedStyle(document.documentElement)
-    console.log('[v0] HeroSlider1 CSS vars:', {
-      fontHero: styles.getPropertyValue('--font-hero'),
-      weightHero: styles.getPropertyValue('--font-weight-hero'),
-      styleHero: styles.getPropertyValue('--font-style-hero'),
-    })
-  }, [])
+  
 
   // Rotate background images
   useEffect(() => {
@@ -194,12 +186,13 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
         {/* Main Headline */}
         <h1 
-          className="text-4xl md:text-6xl lg:text-7xl uppercase tracking-wider whitespace-pre-line"
+          className="uppercase tracking-wider whitespace-pre-line"
           style={{ 
             color: text_color,
             fontFamily: 'var(--font-hero)',
             fontWeight: 'var(--font-weight-hero)',
             fontStyle: 'var(--font-style-hero)',
+            fontSize: 'clamp(2rem, 5vw, var(--font-size-hero, 3.5rem))',
           }}
         >
           {currentHeadline}
