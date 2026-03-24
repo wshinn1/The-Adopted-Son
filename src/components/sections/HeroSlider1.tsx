@@ -69,6 +69,13 @@ function getDailyHeadlineIndex(totalHeadlines: number): number {
 }
 
 export default function HeroSlider1({ data }: HeroSlider1Props) {
+  // Debug: log incoming overlay data
+  console.log('[v0] HeroSlider1 overlay data:', { 
+    overlay_color: data.overlay_color, 
+    overlay_opacity: data.overlay_opacity,
+    raw_data: data
+  })
+  
   const {
     headlines = [],
     show_subheadline = false,
