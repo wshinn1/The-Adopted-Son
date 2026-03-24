@@ -99,6 +99,16 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
   const headlineIndex = getDailyHeadlineIndex(validHeadlines.length)
   const currentHeadline = validHeadlines[headlineIndex] || 'Welcome'
 
+  // Debug: Log hero font CSS variables
+  useEffect(() => {
+    const styles = getComputedStyle(document.documentElement)
+    console.log('[v0] HeroSlider1 CSS vars:', {
+      fontHero: styles.getPropertyValue('--font-hero'),
+      weightHero: styles.getPropertyValue('--font-weight-hero'),
+      styleHero: styles.getPropertyValue('--font-style-hero'),
+    })
+  }, [])
+
   // Rotate background images
   useEffect(() => {
     if (validImages.length <= 1) return

@@ -167,6 +167,12 @@ export default function FontProvider({
           if (typography.hero_size) setHeroSize(typography.hero_size)
           if (typography.hero_weight) setHeroWeight(typography.hero_weight)
           if (typography.hero_style) setHeroStyle(typography.hero_style)
+          console.log('[v0] Loaded hero typography:', { 
+            hero_font: typography.hero_font, 
+            hero_size: typography.hero_size,
+            hero_weight: typography.hero_weight, 
+            hero_style: typography.hero_style 
+          })
         }
       } catch (err) {
         console.error('Error loading typography settings:', err)
@@ -298,6 +304,12 @@ export default function FontProvider({
       '--font-style-hero',
       heroStyle || 'italic'
     )
+    console.log('[v0] Applied hero CSS vars:', {
+      fontHero: FONT_FAMILY_MAP[heroFont] || FONT_FAMILY_MAP['Raleway'],
+      sizeHero: `${heroSize || '48'}pt`,
+      weightHero: heroWeight || '700',
+      styleHero: heroStyle || 'italic'
+    })
   }, [headingFont, bodyFont, accentFont, captionFont, heroFont, headingSize, bodySize, accentSize, captionSize, heroSize, headingWeight, bodyWeight, accentWeight, captionWeight, heroWeight, headingStyle, bodyStyle, accentStyle, captionStyle, heroStyle])
 
   return <>{children}</>
