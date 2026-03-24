@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import { ChevronDown } from 'lucide-react'
+import { TextGenerateEffect } from '@/components/ui/text-generate-effect'
+import BlurText from '@/components/ui/blur-text'
 
 export interface HeroSlider1Data {
   // Headlines - up to 20, rotates daily at 12:30 AM EST
@@ -25,6 +27,14 @@ export interface HeroSlider1Data {
   arrow_glass_opacity: number
   arrow_glass_blur: number
   arrow_delay_seconds: number
+  // Text animation settings
+  text_animation_duration: number
+  text_animation_stagger: number
+  text_animation_blur: number
+  // Subheadline animation settings
+  subheadline_animation_delay: number
+  subheadline_animation_speed: number
+  subheadline_animation_blur: number
 }
 
 interface HeroSlider1Props {
@@ -72,6 +82,12 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
     arrow_glass_opacity = 0.2,
     arrow_glass_blur = 10,
     arrow_delay_seconds = 2,
+    text_animation_duration = 0.5,
+    text_animation_stagger = 0.1,
+    text_animation_blur = 10,
+    subheadline_animation_delay = 1.5,
+    subheadline_animation_speed = 0.35,
+    subheadline_animation_blur = 10,
   } = data
   
   // Arrow hover state
@@ -184,9 +200,15 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
 
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-        {/* Main Headline */}
-        <h1 
-          className="uppercase tracking-wider whitespace-pre-line"
+        {/* Main Headline with Text Generate Animation */}
+        <TextGenerateEffect
+          key={currentHeadline}
+          words={currentHeadline}
+          className="uppercase tracking-wider"
+          filter={true}
+          duration={text_animation_duration}
+          staggerDelay={text_animation_stagger}
+          blurAmount={text_animation_blur}
           style={{ 
             color: text_color,
             fontFamily: 'var(--font-hero)',
@@ -194,18 +216,21 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
             fontStyle: 'var(--font-style-hero)',
             fontSize: 'clamp(2rem, 5vw, var(--font-size-hero, 3.5rem))',
           }}
-        >
-          {currentHeadline}
-        </h1>
+        />
 
-        {/* Optional Subheadline */}
+        {/* Optional Subheadline with Blur Animation */}
         {show_subheadline && subheadline && (
-          <p 
-            className="mt-6 text-lg md:text-xl lg:text-2xl font-body max-w-3xl mx-auto leading-relaxed"
+          <BlurText
+            key={subheadline}
+            text={subheadline}
+            className="mt-6 text-lg md:text-xl lg:text-2xl font-body max-w-3xl mx-auto leading-relaxed justify-center"
+            animateBy="words"
+            direction="bottom"
+            stepDuration={subheadline_animation_speed}
+            blurAmount={subheadline_animation_blur}
+            initialDelay={subheadline_animation_delay}
             style={{ color: text_color, opacity: 0.9 }}
-          >
-            {subheadline}
-          </p>
+          />
         )}
 
         {/* Scroll Down Arrow with Glass Effect and Delayed Fade-in */}
