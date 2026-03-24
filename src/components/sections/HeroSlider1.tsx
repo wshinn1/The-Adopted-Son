@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import { ChevronDown } from 'lucide-react'
+import { TextGenerateEffect } from '@/components/ui/text-generate-effect'
 
 export interface HeroSlider1Data {
   // Headlines - up to 20, rotates daily at 12:30 AM EST
@@ -184,9 +185,13 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
 
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-        {/* Main Headline */}
-        <h1 
-          className="uppercase tracking-wider whitespace-pre-line"
+        {/* Main Headline with Text Generate Animation */}
+        <TextGenerateEffect
+          words={currentHeadline}
+          className="uppercase tracking-wider"
+          filter={true}
+          duration={0.5}
+          staggerDelay={0.1}
           style={{ 
             color: text_color,
             fontFamily: 'var(--font-hero)',
@@ -194,9 +199,7 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
             fontStyle: 'var(--font-style-hero)',
             fontSize: 'clamp(2rem, 5vw, var(--font-size-hero, 3.5rem))',
           }}
-        >
-          {currentHeadline}
-        </h1>
+        />
 
         {/* Optional Subheadline */}
         {show_subheadline && subheadline && (
