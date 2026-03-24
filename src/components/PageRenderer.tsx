@@ -1,3 +1,5 @@
+'use client'
+
 // static imports — no dynamic() to avoid Turbopack workspace root misdetection
 import type { ComponentType } from 'react'
 import Home1 from '@/components/sections/Home1'
