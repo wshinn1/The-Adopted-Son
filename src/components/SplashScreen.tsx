@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 
 interface SplashScreenProps {
@@ -11,11 +11,19 @@ interface SplashScreenProps {
 export default function SplashScreen({ onComplete, duration = 5000 }: SplashScreenProps) {
   const [isVisible, setIsVisible] = useState(true)
   const [textAnimationComplete, setTextAnimationComplete] = useState(false)
+  const onCompleteRef = useRef(onComplete)
+  const hasCompletedRef = useRef(false)
+  
+  // Keep ref up to date
+  onCompleteRef.current = onComplete
 
   const text = "Deep, honest devotionals for those ready to go somewhere with God."
   const words = text.split(' ')
 
   useEffect(() => {
+    // Prevent double execution
+    if (hasCompletedRef.current) return
+    
     // Start fade out after duration
     const fadeTimer = setTimeout(() => {
       setIsVisible(false)
@@ -23,14 +31,17 @@ export default function SplashScreen({ onComplete, duration = 5000 }: SplashScre
 
     // Call onComplete after fade animation finishes
     const completeTimer = setTimeout(() => {
-      onComplete()
+      if (!hasCompletedRef.current) {
+        hasCompletedRef.current = true
+        onCompleteRef.current()
+      }
     }, duration + 1000) // 1s for fade out animation
 
     return () => {
       clearTimeout(fadeTimer)
       clearTimeout(completeTimer)
     }
-  }, [duration, onComplete])
+  }, [duration]) // Remove onComplete from deps - use ref instead
 
   return (
     <AnimatePresence>
