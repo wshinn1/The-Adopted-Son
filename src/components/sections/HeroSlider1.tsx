@@ -94,6 +94,8 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
   const [isArrowHovered, setIsArrowHovered] = useState(false)
   // Arrow visibility state (for delayed fade-in)
   const [isArrowVisible, setIsArrowVisible] = useState(false)
+  // Track if initial image has loaded
+  const [isFirstImageLoaded, setIsFirstImageLoaded] = useState(false)
   
   // Delay the arrow appearing
   useEffect(() => {
@@ -129,14 +131,17 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
   }, [validImages.length, image_transition_speed])
 
   return (
-    <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
+    <section 
+      className="relative min-h-screen w-full flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: overlay_color }}
+    >
       {/* Background Images with Crossfade */}
       {validImages.map((imageUrl, index) => (
         <div
-          key={index}
-          className="absolute inset-0 transition-opacity duration-1000"
+          key={imageUrl}
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
           style={{
-            opacity: index === currentImageIndex ? 1 : 0,
+            opacity: index === currentImageIndex && isFirstImageLoaded ? 1 : 0,
             zIndex: 0,
           }}
         >
@@ -147,6 +152,11 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
             priority={index === 0}
             className="object-cover"
             unoptimized={imageUrl.includes('blob.vercel-storage.com')}
+            onLoad={() => {
+              if (index === 0) {
+                setIsFirstImageLoaded(true)
+              }
+            }}
           />
         </div>
       ))}
