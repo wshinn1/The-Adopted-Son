@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X, User } from 'lucide-react'
@@ -19,10 +20,13 @@ interface HamburgerHeaderProps {
 }
 
 export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, navLinks }: HamburgerHeaderProps) {
+  const pathname = usePathname()
+  const isHomepage = pathname === '/'
+  
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [isHeaderVisible, setIsHeaderVisible] = useState(false)
+  const [isHeaderVisible, setIsHeaderVisible] = useState(!isHomepage)
   const [isDesktop, setIsDesktop] = useState(false)
 
   // Track desktop breakpoint
@@ -36,15 +40,16 @@ export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, 
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
 
-  // Handle scroll to show/hide header on desktop
+  // Handle scroll to show/hide header on desktop (only on homepage)
   useEffect(() => {
-    if (!isDesktop) {
+    // Always show header on non-homepage or mobile
+    if (!isDesktop || !isHomepage) {
       setIsHeaderVisible(true)
       return
     }
 
     const handleScroll = () => {
-      // Show header after scrolling down 100px
+      // Show header after scrolling down 100px (homepage only)
       const shouldShow = window.scrollY > 100
       setIsHeaderVisible(shouldShow)
     }
@@ -54,7 +59,7 @@ export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, 
     
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [isDesktop])
+  }, [isDesktop, isHomepage])
 
   useEffect(() => {
     const supabase = createClient()
