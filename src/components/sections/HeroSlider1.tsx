@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { ChevronDown } from 'lucide-react'
 import { TextGenerateEffect } from '@/components/ui/text-generate-effect'
 import BlurText from '@/components/ui/blur-text'
+import { useSplashComplete } from '@/components/SplashContext'
 
 export interface HeroSlider1Data {
   // Headlines - up to 20, rotates daily at 12:30 AM EST
@@ -90,12 +91,28 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
     subheadline_animation_blur = 10,
   } = data
   
+  // Check if splash screen is complete
+  const isSplashComplete = useSplashComplete()
+  // Track if animations should start
+  const [shouldAnimate, setShouldAnimate] = useState(false)
+  
   // Arrow hover state
   const [isArrowHovered, setIsArrowHovered] = useState(false)
   // Arrow visibility state (for delayed fade-in)
   const [isArrowVisible, setIsArrowVisible] = useState(false)
   // Track if initial image has loaded
   const [isFirstImageLoaded, setIsFirstImageLoaded] = useState(false)
+  
+  // Start animations only after splash is complete
+  useEffect(() => {
+    if (isSplashComplete) {
+      // Small delay to let the page settle
+      const timer = setTimeout(() => {
+        setShouldAnimate(true)
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [isSplashComplete])
   
   // Delay the arrow appearing
   useEffect(() => {
@@ -210,26 +227,41 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
 
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-        {/* Main Headline with Text Generate Animation */}
-        <TextGenerateEffect
-          key={currentHeadline}
-          words={currentHeadline}
-          className="uppercase tracking-wider"
-          filter={true}
-          duration={text_animation_duration}
-          staggerDelay={text_animation_stagger}
-          blurAmount={text_animation_blur}
-          style={{ 
-            color: text_color,
-            fontFamily: 'var(--font-hero)',
-            fontWeight: 'var(--font-weight-hero)',
-            fontStyle: 'var(--font-style-hero)',
-            fontSize: 'clamp(2rem, 5vw, var(--font-size-hero, 3.5rem))',
-          }}
-        />
+        {/* Main Headline with Text Generate Animation - only starts after splash */}
+        {shouldAnimate ? (
+          <TextGenerateEffect
+            key={currentHeadline}
+            words={currentHeadline}
+            className="uppercase tracking-wider"
+            filter={true}
+            duration={text_animation_duration}
+            staggerDelay={text_animation_stagger}
+            blurAmount={text_animation_blur}
+            style={{ 
+              color: text_color,
+              fontFamily: 'var(--font-hero)',
+              fontWeight: 'var(--font-weight-hero)',
+              fontStyle: 'var(--font-style-hero)',
+              fontSize: 'clamp(2rem, 5vw, var(--font-size-hero, 3.5rem))',
+            }}
+          />
+        ) : (
+          <div 
+            className="uppercase tracking-wider opacity-0"
+            style={{ 
+              color: text_color,
+              fontFamily: 'var(--font-hero)',
+              fontWeight: 'var(--font-weight-hero)',
+              fontStyle: 'var(--font-style-hero)',
+              fontSize: 'clamp(2rem, 5vw, var(--font-size-hero, 3.5rem))',
+            }}
+          >
+            {currentHeadline}
+          </div>
+        )}
 
-        {/* Optional Subheadline with Blur Animation */}
-        {show_subheadline && subheadline && (
+        {/* Optional Subheadline with Blur Animation - only starts after splash */}
+        {show_subheadline && subheadline && shouldAnimate && (
           <BlurText
             key={subheadline}
             text={subheadline}

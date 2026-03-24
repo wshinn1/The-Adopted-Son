@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from 'react'
 import SplashScreen from './SplashScreen'
+import { SplashContext } from './SplashContext'
 
 interface HomePageClientProps {
   children: ReactNode
@@ -10,6 +11,7 @@ interface HomePageClientProps {
 export default function HomePageClient({ children }: HomePageClientProps) {
   const [showSplash, setShowSplash] = useState(true)
   const [hasSeenSplash, setHasSeenSplash] = useState(false)
+  const [isSplashComplete, setIsSplashComplete] = useState(false)
 
   // Check if user has seen splash in this session
   useEffect(() => {
@@ -17,6 +19,7 @@ export default function HomePageClient({ children }: HomePageClientProps) {
     if (seen === 'true') {
       setShowSplash(false)
       setHasSeenSplash(true)
+      setIsSplashComplete(true)
     }
   }, [])
 
@@ -24,10 +27,14 @@ export default function HomePageClient({ children }: HomePageClientProps) {
     setShowSplash(false)
     setHasSeenSplash(true)
     sessionStorage.setItem('hasSeenSplash', 'true')
+    // Small delay to let the page render before starting animations
+    setTimeout(() => {
+      setIsSplashComplete(true)
+    }, 300)
   }
 
   return (
-    <>
+    <SplashContext.Provider value={{ isSplashComplete }}>
       {showSplash && !hasSeenSplash && (
         <SplashScreen onComplete={handleSplashComplete} duration={5000} />
       )}
@@ -39,6 +46,6 @@ export default function HomePageClient({ children }: HomePageClientProps) {
       >
         {children}
       </div>
-    </>
+    </SplashContext.Provider>
   )
 }
