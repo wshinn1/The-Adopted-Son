@@ -1,6 +1,7 @@
 import { getHomepage, getSiteSettings } from '@/lib/site-settings'
 import { createClient } from '@/lib/supabase/server'
 import HomePageClient from '@/components/HomePageClient'
+import PageRenderer from '@/components/PageRenderer'
 import type { Metadata } from 'next'
 
 const DEFAULT_OG = 'https://www.theadoptedson.com/og-image.jpg'
@@ -74,5 +75,9 @@ export default async function HomePage() {
     return s
   })
 
-  return <HomePageClient sections={sections} />
+  return (
+    <HomePageClient>
+      <PageRenderer sections={sections} />
+    </HomePageClient>
+  )
 }

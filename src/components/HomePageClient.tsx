@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import SplashScreen from './SplashScreen'
-import PageRenderer from './PageRenderer'
 
 interface HomePageClientProps {
-  sections: any[]
+  children: ReactNode
 }
 
-export default function HomePageClient({ sections }: HomePageClientProps) {
+export default function HomePageClient({ children }: HomePageClientProps) {
   const [showSplash, setShowSplash] = useState(true)
   const [hasSeenSplash, setHasSeenSplash] = useState(false)
 
@@ -38,7 +37,7 @@ export default function HomePageClient({ sections }: HomePageClientProps) {
           transition: 'opacity 0.5s ease-in-out',
         }}
       >
-        <PageRenderer sections={sections} />
+        {children}
       </div>
     </>
   )
