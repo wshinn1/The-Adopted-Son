@@ -2,7 +2,6 @@
 
 import { motion, stagger, useAnimate } from "motion/react"
 import * as React from "react"
-import { cn } from "@/lib/utils"
 
 type TextGenerateEffectProps = Omit<React.ComponentProps<"div">, "children"> & {
   words: string
@@ -46,7 +45,7 @@ function TextGenerateEffect({
 
   return (
     <div
-      className={cn("font-bold", className)}
+      className={`font-bold ${className || ''}`}
       data-slot="text-generate-effect"
       ref={localRef}
       {...(props as any)}

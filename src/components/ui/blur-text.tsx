@@ -75,21 +75,16 @@ const BlurText: React.FC<BlurTextProps> = ({
   const defaultFrom = useMemo(
     () =>
       direction === "top"
-        ? { filter: `blur(${blurAmount}px)`, opacity: 0, y: -50 }
-        : { filter: `blur(${blurAmount}px)`, opacity: 0, y: 50 },
+        ? { filter: `blur(${blurAmount}px)`, opacity: 0, y: -20 }
+        : { filter: `blur(${blurAmount}px)`, opacity: 0, y: 20 },
     [direction, blurAmount],
   )
 
   const defaultTo = useMemo(
     () => [
-      {
-        filter: `blur(${blurAmount / 2}px)`,
-        opacity: 0.5,
-        y: direction === "top" ? 5 : -5,
-      },
       { filter: "blur(0px)", opacity: 1, y: 0 },
     ],
-    [direction, blurAmount],
+    [],
   )
 
   const fromSnapshot = animationFrom ?? defaultFrom
