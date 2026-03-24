@@ -14,6 +14,7 @@ export interface HeroSlider1Data {
   background_images: string[]
   // Styling
   text_color: string
+  overlay_color: string
   overlay_opacity: number
   // Image transition speed in seconds
   image_transition_speed: number
@@ -63,6 +64,7 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
     subheadline = '',
     background_images = [],
     text_color = '#ffffff',
+    overlay_color = '#000000',
     overlay_opacity = 0.3,
     image_transition_speed = 8,
     arrow_color = '#ffffff',
@@ -169,10 +171,13 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
         }}
       />
 
-      {/* Dark overlay */}
+      {/* Color overlay */}
       <div 
         className="absolute inset-0 z-[2]"
-        style={{ backgroundColor: `rgba(0, 0, 0, ${overlay_opacity})` }}
+        style={{ 
+          backgroundColor: overlay_color,
+          opacity: overlay_opacity,
+        }}
       />
 
       {/* Content */}
