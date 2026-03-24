@@ -119,7 +119,7 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
 }
 
 // HeroSlider1 specific fields - these are handled separately with custom UI
-const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity']
+const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur']
 
 export default function SectionEditor({ 
   data, 
@@ -532,6 +532,81 @@ export default function SectionEditor({
                 </div>
                 <p className="text-xs text-neutral-500 mt-2">
                   Adjust how dark/light the overlay appears over the background images.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Text Animation Settings */}
+          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">
+              Text Animation
+            </h4>
+            <div className="grid gap-6 md:grid-cols-3">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                  Reveal Speed
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={0.1}
+                    max={2}
+                    step={0.1}
+                    value={formData.text_animation_duration ?? 0.5}
+                    onChange={(e) => handleChange('text_animation_duration', Number(e.target.value))}
+                    className="flex-1 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                  />
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400 w-12 text-right">
+                    {formData.text_animation_duration ?? 0.5}s
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Duration for each word to appear.
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                  Stagger Delay
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={0.02}
+                    max={0.5}
+                    step={0.02}
+                    value={formData.text_animation_stagger ?? 0.1}
+                    onChange={(e) => handleChange('text_animation_stagger', Number(e.target.value))}
+                    className="flex-1 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                  />
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400 w-12 text-right">
+                    {formData.text_animation_stagger ?? 0.1}s
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Delay between each word.
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                  Blur Amount
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={0}
+                    max={30}
+                    step={1}
+                    value={formData.text_animation_blur ?? 10}
+                    onChange={(e) => handleChange('text_animation_blur', Number(e.target.value))}
+                    className="flex-1 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                  />
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400 w-12 text-right">
+                    {formData.text_animation_blur ?? 10}px
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Initial blur before reveal.
                 </p>
               </div>
             </div>

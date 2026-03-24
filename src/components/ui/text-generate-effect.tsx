@@ -9,6 +9,7 @@ type TextGenerateEffectProps = Omit<React.ComponentProps<"div">, "children"> & {
   filter?: boolean
   duration?: number
   staggerDelay?: number
+  blurAmount?: number
 }
 
 function TextGenerateEffect({
@@ -18,6 +19,7 @@ function TextGenerateEffect({
   filter = true,
   duration = 0.5,
   staggerDelay = 0.2,
+  blurAmount = 10,
   ...props
 }: TextGenerateEffectProps) {
   const localRef = React.useRef<HTMLDivElement>(null)
@@ -40,7 +42,7 @@ function TextGenerateEffect({
         },
       )
     }
-  }, [animate, duration, filter, scope, staggerDelay])
+  }, [animate, duration, filter, scope, staggerDelay, blurAmount])
 
   return (
     <div
@@ -55,7 +57,7 @@ function TextGenerateEffect({
             className="opacity-0 will-change-transform will-change-opacity will-change-filter"
             key={`${word}-${idx}`}
             style={{
-              filter: filter ? "blur(10px)" : "none",
+              filter: filter ? `blur(${blurAmount}px)` : "none",
             }}
           >
             {word}{" "}

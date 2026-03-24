@@ -26,6 +26,10 @@ export interface HeroSlider1Data {
   arrow_glass_opacity: number
   arrow_glass_blur: number
   arrow_delay_seconds: number
+  // Text animation settings
+  text_animation_duration: number
+  text_animation_stagger: number
+  text_animation_blur: number
 }
 
 interface HeroSlider1Props {
@@ -73,6 +77,9 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
     arrow_glass_opacity = 0.2,
     arrow_glass_blur = 10,
     arrow_delay_seconds = 2,
+    text_animation_duration = 0.5,
+    text_animation_stagger = 0.1,
+    text_animation_blur = 10,
   } = data
   
   // Arrow hover state
@@ -187,11 +194,13 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
         {/* Main Headline with Text Generate Animation */}
         <TextGenerateEffect
+          key={currentHeadline}
           words={currentHeadline}
           className="uppercase tracking-wider"
           filter={true}
-          duration={0.5}
-          staggerDelay={0.1}
+          duration={text_animation_duration}
+          staggerDelay={text_animation_stagger}
+          blurAmount={text_animation_blur}
           style={{ 
             color: text_color,
             fontFamily: 'var(--font-hero)',
