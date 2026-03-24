@@ -1,5 +1,6 @@
 import { getHomepage, getSiteSettings } from '@/lib/site-settings'
 import { createClient } from '@/lib/supabase/server'
+import HomePageClient from '@/components/HomePageClient'
 import PageRenderer from '@/components/PageRenderer'
 import type { Metadata } from 'next'
 
@@ -74,5 +75,9 @@ export default async function HomePage() {
     return s
   })
 
-  return <PageRenderer sections={sections} />
+  return (
+    <HomePageClient>
+      <PageRenderer sections={sections} />
+    </HomePageClient>
+  )
 }
