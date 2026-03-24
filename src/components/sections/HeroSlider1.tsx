@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import { ChevronDown } from 'lucide-react'
 import { TextGenerateEffect } from '@/components/ui/text-generate-effect'
+import BlurText from '@/components/ui/blur-text'
 
 export interface HeroSlider1Data {
   // Headlines - up to 20, rotates daily at 12:30 AM EST
@@ -30,6 +31,10 @@ export interface HeroSlider1Data {
   text_animation_duration: number
   text_animation_stagger: number
   text_animation_blur: number
+  // Subheadline animation settings
+  subheadline_animation_delay: number
+  subheadline_animation_speed: number
+  subheadline_animation_blur: number
 }
 
 interface HeroSlider1Props {
@@ -80,6 +85,9 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
     text_animation_duration = 0.5,
     text_animation_stagger = 0.1,
     text_animation_blur = 10,
+    subheadline_animation_delay = 1.5,
+    subheadline_animation_speed = 0.35,
+    subheadline_animation_blur = 10,
   } = data
   
   // Arrow hover state
@@ -210,14 +218,19 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
           }}
         />
 
-        {/* Optional Subheadline */}
+        {/* Optional Subheadline with Blur Animation */}
         {show_subheadline && subheadline && (
-          <p 
-            className="mt-6 text-lg md:text-xl lg:text-2xl font-body max-w-3xl mx-auto leading-relaxed"
+          <BlurText
+            key={subheadline}
+            text={subheadline}
+            className="mt-6 text-lg md:text-xl lg:text-2xl font-body max-w-3xl mx-auto leading-relaxed justify-center"
+            animateBy="words"
+            direction="bottom"
+            stepDuration={subheadline_animation_speed}
+            blurAmount={subheadline_animation_blur}
+            initialDelay={subheadline_animation_delay}
             style={{ color: text_color, opacity: 0.9 }}
-          >
-            {subheadline}
-          </p>
+          />
         )}
 
         {/* Scroll Down Arrow with Glass Effect and Delayed Fade-in */}
