@@ -45,10 +45,10 @@ async function runQueriesSequentially<T>(queries: (() => Promise<T>)[]): Promise
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const daysParam = searchParams.get('days') ?? '7'
-  const isYesterday = daysParam === 'yesterday'
+  const isYesterday = daysParam === '24h'
   const LOOKBACK_DAYS = isYesterday ? 1 : parseInt(daysParam, 10)
   const dateFilter = isYesterday
-    ? `toDate(timestamp) = yesterday()`
+    ? `timestamp >= now() - INTERVAL 24 HOUR`
     : `timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY`
 
   try {
@@ -179,7 +179,7 @@ export async function GET(request: Request) {
         country: r[3],
         views: r[4] 
       })),
-      lookbackDays: isYesterday ? 'yesterday' : LOOKBACK_DAYS,
+      lookbackDays: isYesterday ? '24h' : LOOKBACK_DAYS,
     })
   } catch (err) {
     console.error('[v0] Analytics API error:', err)
