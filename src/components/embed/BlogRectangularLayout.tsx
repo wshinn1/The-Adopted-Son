@@ -97,6 +97,13 @@ export default function BlogRectangularLayout({ posts }: { posts: Devotional[] }
           </a>
         </div>
       </div>
+      <script dangerouslySetInnerHTML={{ __html: `
+        function sendHeight() {
+          window.parent.postMessage({ type: 'tas-resize', height: document.body.scrollHeight }, '*');
+        }
+        window.addEventListener('load', sendHeight);
+        new ResizeObserver(sendHeight).observe(document.body);
+      ` }} />
     </section>
   )
 }
