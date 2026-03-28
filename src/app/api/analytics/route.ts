@@ -62,7 +62,7 @@ export async function GET(request: Request) {
           countIf(timestamp >= now() - INTERVAL 5 MINUTE) as active_recent
         FROM events
         WHERE event = '$pageview'
-          AND properties['$host'] = 'theadoptedson.com'
+          AND properties['$host'] LIKE '%theadoptedson.com'
           AND ${dateFilter}
       `),
     ])
@@ -78,7 +78,7 @@ export async function GET(request: Request) {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND properties['$host'] = 'theadoptedson.com'
+          AND properties['$host'] LIKE '%theadoptedson.com'
           AND ${dateFilter}
         GROUP BY page
         ORDER BY views DESC
@@ -90,7 +90,7 @@ export async function GET(request: Request) {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND properties['$host'] = 'theadoptedson.com'
+          AND properties['$host'] LIKE '%theadoptedson.com'
           AND ${dateFilter}
         GROUP BY day
         ORDER BY day ASC
@@ -107,7 +107,7 @@ export async function GET(request: Request) {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND properties['$host'] = 'theadoptedson.com'
+          AND properties['$host'] LIKE '%theadoptedson.com'
           AND ${dateFilter}
           AND properties['$current_url'] LIKE '%/devotionals/%'
           AND NOT properties['$current_url'] LIKE '%/admin/%'
@@ -129,7 +129,7 @@ export async function GET(request: Request) {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND properties['$host'] = 'theadoptedson.com'
+          AND properties['$host'] LIKE '%theadoptedson.com'
           AND ${dateFilter}
           AND properties['$geoip_country_name'] IS NOT NULL
           AND properties['$geoip_country_name'] != ''
@@ -146,7 +146,7 @@ export async function GET(request: Request) {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND properties['$host'] = 'theadoptedson.com'
+          AND properties['$host'] LIKE '%theadoptedson.com'
           AND ${dateFilter}
           AND properties['$geoip_city_name'] IS NOT NULL
           AND properties['$geoip_city_name'] != ''
