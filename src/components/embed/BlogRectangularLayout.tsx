@@ -15,6 +15,7 @@ export default function BlogRectangularLayout({ posts }: { posts: Devotional[] }
       <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', background: 'white' }}>
         <div style={{ borderBottom: '1px solid #e5e7eb', padding: '20px 24px' }}>
           <h2 style={{ fontWeight: 600, fontSize: '18px', letterSpacing: '-0.02em', color: '#111' }}>Recent Devotionals</h2>
+          <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>From The Adopted Son</p>
         </div>
         {posts.map((post, i) => {
           const author = Array.isArray(post.authors) ? post.authors[0] : post.authors
@@ -76,6 +77,25 @@ export default function BlogRectangularLayout({ posts }: { posts: Devotional[] }
             </a>
           )
         })}
+        <div style={{ padding: '16px 24px', borderTop: '1px solid #e5e7eb' }}>
+          <a
+            href="https://www.theadoptedson.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-block',
+              padding: '8px 20px',
+              background: '#6366f1',
+              color: 'white',
+              borderRadius: '6px',
+              fontSize: '13px',
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
+          >
+            Learn More
+          </a>
+        </div>
       </div>
     </section>
   )
