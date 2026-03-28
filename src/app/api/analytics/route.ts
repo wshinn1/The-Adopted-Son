@@ -5,9 +5,6 @@ const PROJECT_ID = process.env.POSTHOG_PROJECT_ID || '341992'
 // Note: API endpoint is us.posthog.com (not us.i.posthog.com which is for client tracking)
 const POSTHOG_API_URL = 'https://us.posthog.com'
 
-// Use 7 days instead of 30 to reduce query load and avoid timeouts
-const LOOKBACK_DAYS = 7
-
 async function runQuery(query: string) {
   const apiKey = process.env.POSTHOG_PERSONAL_API_KEY
   if (!apiKey) {
@@ -45,7 +42,15 @@ async function runQueriesSequentially<T>(queries: (() => Promise<T>)[]): Promise
   return results
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const daysParam = searchParams.get('days') ?? '7'
+  const isYesterday = daysParam === 'yesterday'
+  const LOOKBACK_DAYS = isYesterday ? 1 : parseInt(daysParam, 10)
+  const dateFilter = isYesterday
+    ? `toDate(timestamp) = yesterday()`
+    : `timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY`
+
   try {
     // Run queries in batches of 2 to stay under PostHog's concurrency limit of 3
     // Batch 1: Core metrics
@@ -57,7 +62,8 @@ export async function GET() {
           countIf(timestamp >= now() - INTERVAL 5 MINUTE) as active_recent
         FROM events
         WHERE event = '$pageview'
-          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
+          AND properties['$host'] = 'theadoptedson.com'
+          AND ${dateFilter}
       `),
     ])
     
@@ -72,7 +78,8 @@ export async function GET() {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
+          AND properties['$host'] = 'theadoptedson.com'
+          AND ${dateFilter}
         GROUP BY page
         ORDER BY views DESC
         LIMIT 10
@@ -83,7 +90,8 @@ export async function GET() {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
+          AND properties['$host'] = 'theadoptedson.com'
+          AND ${dateFilter}
         GROUP BY day
         ORDER BY day ASC
       `),
@@ -99,7 +107,8 @@ export async function GET() {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
+          AND properties['$host'] = 'theadoptedson.com'
+          AND ${dateFilter}
           AND properties['$current_url'] LIKE '%/devotionals/%'
           AND NOT properties['$current_url'] LIKE '%/admin/%'
         GROUP BY page
@@ -120,7 +129,8 @@ export async function GET() {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
+          AND properties['$host'] = 'theadoptedson.com'
+          AND ${dateFilter}
           AND properties['$geoip_country_name'] IS NOT NULL
           AND properties['$geoip_country_name'] != ''
         GROUP BY country, countryCode
@@ -136,7 +146,8 @@ export async function GET() {
           count() as views
         FROM events
         WHERE event = '$pageview'
-          AND timestamp >= now() - INTERVAL ${LOOKBACK_DAYS} DAY
+          AND properties['$host'] = 'theadoptedson.com'
+          AND ${dateFilter}
           AND properties['$geoip_city_name'] IS NOT NULL
           AND properties['$geoip_city_name'] != ''
         GROUP BY city, state, countryCode, country
@@ -168,7 +179,7 @@ export async function GET() {
         country: r[3],
         views: r[4] 
       })),
-      lookbackDays: LOOKBACK_DAYS,
+      lookbackDays: isYesterday ? 'yesterday' : LOOKBACK_DAYS,
     })
   } catch (err) {
     console.error('[v0] Analytics API error:', err)
