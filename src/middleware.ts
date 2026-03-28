@@ -3,15 +3,9 @@ import { type NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const isEmbed = request.nextUrl.pathname.startsWith('/embed/')
-
-  if (isEmbed) {
-    // Pass embed routes through with a flag — no auth session needed
-    const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-is-embed', '1')
-    return NextResponse.next({ request: { headers: requestHeaders } })
+  if (request.nextUrl.pathname.startsWith('/embed/')) {
+    return NextResponse.next()
   }
-
   return await updateSession(request)
 }
 
