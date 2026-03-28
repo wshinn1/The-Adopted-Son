@@ -1,6 +1,7 @@
 import '@/styles/tailwind.css'
 import { Metadata } from 'next'
 import { Be_Vietnam_Pro } from 'next/font/google'
+import { headers } from 'next/headers'
 import ThemeProvider from './theme-provider'
 import FontProvider from '@/components/FontProvider'
 import PostHogProvider from '@/components/PostHogProvider'
@@ -53,6 +54,19 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const headersList = await headers()
+  const isEmbed = headersList.get('x-is-embed') === '1'
+
+  if (isEmbed) {
+    return (
+      <html lang="en">
+        <body style={{ margin: 0, padding: 0, fontFamily: 'system-ui, -apple-system, sans-serif', background: 'white' }}>
+          {children}
+        </body>
+      </html>
+    )
+  }
+
   const supabase = await createClient()
   
   // Batch fetch site settings to avoid waterfall
