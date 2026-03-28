@@ -13,7 +13,14 @@ export default async function ComponentsPage() {
 
   const posts = data ?? []
   const embedUrl = 'https://theadoptedson.com/embed/blog-rectangular'
-  const iframeCode = `<iframe src="${embedUrl}" width="100%" height="420" frameborder="0" style="border-radius:8px;overflow:hidden;" loading="lazy"></iframe>`
+  const iframeCode = `<iframe id="tas-embed" src="${embedUrl}" width="100%" height="500" frameborder="0" scrolling="no" style="border:none;border-radius:8px;" loading="lazy"></iframe>
+<script>
+  window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'tas-resize') {
+      document.getElementById('tas-embed').style.height = e.data.height + 'px';
+    }
+  });
+</script>`
 
   return (
     <div className="space-y-6">
