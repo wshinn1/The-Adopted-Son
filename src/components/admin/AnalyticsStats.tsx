@@ -393,40 +393,85 @@ export default function AnalyticsStats() {
         </div>
       </div>
 
-      {/* Top Pages - Full Width */}
-      <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Top Pages</h3>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
-            {dateRange === 'yesterday' ? 'Yesterday' : `${dateRange} days`}
-          </span>
-        </div>
-        {isLoading ? (
-          <div className="space-y-3">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-6 bg-neutral-100 dark:bg-neutral-800 rounded animate-pulse" />
-            ))}
+      {/* Top Pages + Top Devotionals - Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* Top Pages */}
+        <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Top Pages</h3>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
+              {dateRange === 'yesterday' ? 'Yesterday' : `${dateRange} days`}
+            </span>
           </div>
-        ) : (
-          <ul className="space-y-3">
-            {data?.topPages?.slice(0, 8).map((p: { page: string; views: number }, i: number) => {
-              const maxViews = data.topPages[0]?.views || 1
-              const pct = Math.round((p.views / maxViews) * 100)
-              const colors = ['bg-indigo-500', 'bg-blue-500', 'bg-violet-500', 'bg-purple-500', 'bg-sky-500', 'bg-teal-500', 'bg-rose-500', 'bg-orange-500']
-              return (
-                <li key={i} className="text-sm">
-                  <div className="flex items-center justify-between mb-1 gap-4">
-                    <span className="text-xs text-neutral-600 dark:text-neutral-400 break-all">{p.page || '/'}</span>
-                    <span className="font-semibold text-neutral-900 dark:text-neutral-100 shrink-0">{p.views}</span>
-                  </div>
-                  <div className="h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full">
-                    <div className={`h-1.5 rounded-full ${colors[i % colors.length]}`} style={{ width: `${pct}%` }} />
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        )}
+          {isLoading ? (
+            <div className="space-y-3">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="h-6 bg-neutral-100 dark:bg-neutral-800 rounded animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {data?.topPages?.slice(0, 8).map((p: { page: string; views: number }, i: number) => {
+                const maxViews = data.topPages[0]?.views || 1
+                const pct = Math.round((p.views / maxViews) * 100)
+                const colors = ['bg-indigo-500', 'bg-blue-500', 'bg-violet-500', 'bg-purple-500', 'bg-sky-500', 'bg-teal-500', 'bg-rose-500', 'bg-orange-500']
+                return (
+                  <li key={i} className="text-sm">
+                    <div className="flex items-center justify-between mb-1 gap-4">
+                      <span className="text-xs text-neutral-600 dark:text-neutral-400 break-all">{p.page || '/'}</span>
+                      <span className="font-semibold text-neutral-900 dark:text-neutral-100 shrink-0">{p.views}</span>
+                    </div>
+                    <div className="h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full">
+                      <div className={`h-1.5 rounded-full ${colors[i % colors.length]}`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+
+        {/* Top Devotionals */}
+        <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Top Devotionals</h3>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
+              {dateRange === 'yesterday' ? 'Yesterday' : `${dateRange} days`}
+            </span>
+          </div>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="h-6 bg-neutral-100 dark:bg-neutral-800 rounded animate-pulse" />
+              ))}
+            </div>
+          ) : data?.topDevotionals?.length === 0 || !data?.topDevotionals ? (
+            <p className="text-sm text-neutral-400 dark:text-neutral-500">No devotional views yet for this period.</p>
+          ) : (
+            <ul className="space-y-3">
+              {data?.topDevotionals?.slice(0, 8).map((p: { page: string; views: number }, i: number) => {
+                const maxViews = data.topDevotionals[0]?.views || 1
+                const pct = Math.round((p.views / maxViews) * 100)
+                const colors = ['bg-amber-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-emerald-500', 'bg-teal-500', 'bg-cyan-500', 'bg-sky-500']
+                // Strip the domain, show just the path
+                const path = p.page?.replace(/^https?:\/\/[^/]+/, '') || '/'
+                return (
+                  <li key={i} className="text-sm">
+                    <div className="flex items-center justify-between mb-1 gap-4">
+                      <span className="text-xs text-neutral-600 dark:text-neutral-400 break-all">{path}</span>
+                      <span className="font-semibold text-neutral-900 dark:text-neutral-100 shrink-0">{p.views}</span>
+                    </div>
+                    <div className="h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full">
+                      <div className={`h-1.5 rounded-full ${colors[i % colors.length]}`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+
       </div>
 
       {/* Traffic Overview Chart */}
