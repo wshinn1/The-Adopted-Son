@@ -104,7 +104,7 @@ export default function AnalyticsStats() {
             onChange={(e) => setDateRange(e.target.value)}
             className="px-3 py-2 text-sm rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
           >
-            <option value="yesterday">Yesterday</option>
+            <option value="24h">Today</option>
             <option value="7">7 days</option>
             <option value="30">30 days</option>
           </select>
@@ -270,7 +270,7 @@ export default function AnalyticsStats() {
         <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">States</h3>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">{dateRange === 'yesterday' ? 'Yesterday' : `${dateRange} days`}</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">{dateRange === '24h' ? '24 hrs' : `${dateRange} days`}</span>
           </div>
           {isLoading ? (
             <div className="space-y-2">
@@ -297,7 +297,7 @@ export default function AnalyticsStats() {
         <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Cities</h3>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">{dateRange === 'yesterday' ? 'Yesterday' : `${dateRange} days`}</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">{dateRange === '24h' ? '24 hrs' : `${dateRange} days`}</span>
           </div>
           {isLoading ? (
             <div className="space-y-2">
@@ -324,7 +324,7 @@ export default function AnalyticsStats() {
         <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Audience Metrics</h3>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">{dateRange === 'yesterday' ? 'Yesterday' : `${dateRange} days`}</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">{dateRange === '24h' ? '24 hrs' : `${dateRange} days`}</span>
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -401,7 +401,7 @@ export default function AnalyticsStats() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Top Pages</h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
-              {dateRange === 'yesterday' ? 'Yesterday' : `${dateRange} days`}
+              {dateRange === '24h' ? '24 hrs' : `${dateRange} days`}
             </span>
           </div>
           {isLoading ? (
@@ -437,7 +437,7 @@ export default function AnalyticsStats() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Top Devotionals</h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500">
-              {dateRange === 'yesterday' ? 'Yesterday' : `${dateRange} days`}
+              {dateRange === '24h' ? '24 hrs' : `${dateRange} days`}
             </span>
           </div>
           {isLoading ? (
