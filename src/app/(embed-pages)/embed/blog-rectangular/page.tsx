@@ -1,21 +1,22 @@
+import { createClient } from '@supabase/supabase-js'
 import BlogRectangularLayout from '@/components/embed/BlogRectangularLayout'
 
 export const dynamic = 'force-dynamic'
 
 export default async function BlogRectangularEmbed() {
-  let posts: any[] = []
+  // Service role client bypasses RLS — safe for server-side only use
+  // Standard session cookies are not available in cross-origin iframe requests
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
-  try {
-    const res = await fetch('https://www.theadoptedson.com/api/devotionals/recent?limit=3', {
-      cache: 'no-store',
-    })
-    if (res.ok) {
-      const json = await res.json()
-      posts = json.devotionals ?? []
-    }
-  } catch {
-    // Render empty state if fetch fails
-  }
+  const { data } = await supabase
+    .from('devotionals')
+    .select('id, title, slug, excerpt, cover_image_url, published_at, category, authors(name, avatar_url)')
+    .eq('is_published', true)
+    .order('published_at', { ascending: false })
+    .limit(3)
 
-  return <BlogRectangularLayout posts={posts} />
+  return <BlogRectangularLayout posts={data ?? []} />
 }
