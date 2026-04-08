@@ -50,7 +50,7 @@ const SectionLargeSlider: FC<Props> = ({ posts, heading, className, subHeading, 
       )}
       {posts.map((item, index) => {
         if (indexActive !== index) return null
-        return <CardLarge1 key={index} onClickNext={handleClickNext} onClickPrev={handleClickPrev} post={item} />
+        return <CardLarge1 key={item.id} onClickNext={handleClickNext} onClickPrev={handleClickPrev} post={item} />
       })}
     </div>
   )

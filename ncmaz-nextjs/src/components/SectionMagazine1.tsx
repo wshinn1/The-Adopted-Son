@@ -30,7 +30,7 @@ const SectionMagazine1: FC<Props> = ({ posts, heading, className, subHeading, di
           {posts
             .filter((_, i) => i < 4 && i > 0)
             .map((item, index) => (
-              <Card6 key={index} post={item} />
+              <Card6 key={item.id} post={item} />
             ))}
         </div>
       </div>

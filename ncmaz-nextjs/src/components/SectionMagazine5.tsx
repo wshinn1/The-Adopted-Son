@@ -29,7 +29,7 @@ const SectionMagazine5: FC<Props> = ({ posts, heading, className, subHeading, di
         {posts[0] && <Card12 post={posts[0]} />}
         <div className="flex flex-col gap-5 md:gap-7">
           {posts.slice(1, 5).map((item, index) => (
-            <Card13 className="flex-1" key={index} post={item} />
+            <Card13 className="flex-1" key={item.id} post={item} />
           ))}
         </div>
       </div>

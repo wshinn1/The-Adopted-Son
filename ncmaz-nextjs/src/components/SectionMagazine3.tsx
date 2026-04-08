@@ -30,7 +30,7 @@ const SectionMagazine3: FC<Props> = ({ posts, heading, className, subHeading, di
           {posts
             .filter((_, i) => i < 5 && i >= 1)
             .map((item, index) => (
-              <Card9 ratio="aspect-square" key={index} post={item} />
+              <Card9 ratio="aspect-square" key={item.id} post={item} />
             ))}
         </div>
       </div>

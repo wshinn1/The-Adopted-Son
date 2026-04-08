@@ -36,10 +36,10 @@ export const metadata: Metadata = {
 }
 
 const Page = () => {
-  const renderPricingItem = (pricing: (typeof pricings)[number], index: number) => {
+  const renderPricingItem = (pricing: (typeof pricings)[number]) => {
     return (
       <div
-        key={index}
+        key={pricing.name}
         className={`relative flex h-full flex-col overflow-hidden rounded-3xl border-2 px-6 py-8 ${
           pricing.isPopular ? 'border-primary-500' : 'border-neutral-100 dark:border-neutral-700'
         }`}
@@ -59,8 +59,8 @@ const Page = () => {
           </h2>
         </div>
         <nav className="mb-8 space-y-4">
-          {pricing.features.map((item, index) => (
-            <li className="flex items-center" key={index}>
+          {pricing.features.map((item) => (
+            <li className="flex items-center" key={item}>
               <span className="me-4 inline-flex shrink-0 text-primary-600">
                 <CheckIcon className="h-5 w-5" aria-hidden="true" />
               </span>

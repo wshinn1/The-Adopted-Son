@@ -19,7 +19,7 @@ const DashboardSubcription = () => {
           {data.map((item, index) => {
             return (
               <div
-                key={index}
+                key={item.name}
                 className={`${
                   index % 2 === 0 ? 'bg-neutral-50 dark:bg-neutral-800' : 'bg-white dark:bg-neutral-900'
                 } px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6`}
