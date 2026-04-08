@@ -22,10 +22,10 @@ import { FC } from 'react'
 const Currencies = ({ currencies }: { currencies: Awaited<ReturnType<typeof getCurrencies>> }) => {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      {currencies.map((item, index) => (
+      {currencies.map((item) => (
         <CloseButton
           as={Link}
-          key={index}
+          key={item.name}
           href={item.href}
           className={clsx(
             '-m-2.5 flex items-center rounded-lg p-2.5 transition duration-150 ease-in-out hover:bg-neutral-100 focus:outline-hidden dark:hover:bg-neutral-700',
@@ -43,11 +43,11 @@ const Currencies = ({ currencies }: { currencies: Awaited<ReturnType<typeof getC
 const Languages = ({ languages }: { languages: Awaited<ReturnType<typeof getLanguages>> }) => {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      {languages.map((item, index) => (
+      {languages.map((item) => (
         <CloseButton
           as={Link}
           href={item.href}
-          key={index}
+          key={item.name}
           className={clsx(
             '-m-2.5 flex items-center rounded-lg p-2.5 transition duration-150 ease-in-out hover:bg-neutral-100 focus:outline-hidden dark:hover:bg-neutral-700',
             item.active ? 'bg-neutral-100 dark:bg-neutral-700' : 'opacity-80'

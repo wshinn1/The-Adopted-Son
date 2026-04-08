@@ -42,22 +42,22 @@ const SectionPostsWithWidgets: FC<Props> = ({
   widgetPosts,
   dimHeading,
 }) => {
-  const renderCard = (post: TPost, index: number) => {
+  const renderCard = (post: TPost) => {
     switch (postCardName) {
       case 'card3':
-        return <Card3 key={index} className="py-3" post={post} />
+        return <Card3 key={post.id} className="py-3" post={post} />
       case 'card4':
-        return <Card4 key={index} post={post} />
+        return <Card4 key={post.id} post={post} />
       case 'card7':
-        return <Card7 key={index} post={post} ratio="aspect-1/1" />
+        return <Card7 key={post.id} post={post} ratio="aspect-1/1" />
       case 'card9':
-        return <Card9 key={index} post={post} />
+        return <Card9 key={post.id} post={post} />
       case 'card10':
-        return <Card10 key={index} post={post} />
+        return <Card10 key={post.id} post={post} />
       case 'card11':
-        return <Card11 key={index} post={post} />
+        return <Card11 key={post.id} post={post} />
       case 'card14':
-        return <Card14 key={index} post={post} />
+        return <Card14 key={post.id} post={post} />
       default:
         return null
     }

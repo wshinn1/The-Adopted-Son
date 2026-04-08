@@ -114,9 +114,9 @@ const LangDropdown: FC<LangDropdownProps> = ({ panelClassName = '' }) => {
   const renderLang = (close: () => void) => {
     return (
       <div className="grid gap-8 lg:grid-cols-2">
-        {headerLanguage.map((item, index) => (
+        {headerLanguage.map((item) => (
           <a
-            key={index}
+            key={`${item.id}-${item.description}`}
             href={item.href}
             onClick={() => close()}
             className={`-m-3 flex items-center rounded-lg p-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-hidden focus-visible:ring-3 focus-visible:ring-orange-500 dark:hover:bg-gray-700 ${
@@ -136,9 +136,9 @@ const LangDropdown: FC<LangDropdownProps> = ({ panelClassName = '' }) => {
   const renderCurr = (close: () => void) => {
     return (
       <div className="grid gap-7 lg:grid-cols-2">
-        {headerCurrency.map((item, index) => (
+        {headerCurrency.map((item) => (
           <a
-            key={index}
+            key={item.id}
             href={item.href}
             onClick={() => close()}
             className={`-m-3 flex items-center rounded-lg p-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-hidden focus-visible:ring-3 focus-visible:ring-orange-500 dark:hover:bg-gray-700 ${

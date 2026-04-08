@@ -10,7 +10,7 @@ const Lv1MenuItem = ({ menuItem }: { menuItem: TNavigationItem }) => {
   return (
     <Link
       className="flex items-center self-center rounded-full px-4 py-2.5 text-sm font-medium whitespace-nowrap text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 lg:text-[15px] xl:px-5 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
-      href={menuItem.href || '#'}
+      href={menuItem.href ?? ''}
     >
       {menuItem.name}
       {menuItem.children?.length && (
@@ -26,7 +26,7 @@ const MegaMenu = ({ menuItem, featuredPosts }: { menuItem: TNavigationItem; feat
       <li key={item.id} className={clsx('menu-item', item.isNew && 'menuIsNew')}>
         <Link
           className="font-normal text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
-          href={item.href || '#'}
+          href={item.href ?? ''}
         >
           {item.name}
         </Link>
@@ -44,8 +44,8 @@ const MegaMenu = ({ menuItem, featuredPosts }: { menuItem: TNavigationItem; feat
             <div className="container">
               <div className="flex border-t border-neutral-200 py-11 text-sm dark:border-neutral-700">
                 <div className="grid flex-1 grid-cols-4 gap-6 pe-10 xl:gap-8 2xl:pe-14">
-                  {menuItem.children?.map((menuChild, index) => (
-                    <div key={index}>
+                  {menuItem.children?.map((menuChild) => (
+                    <div key={menuChild.id}>
                       <p className="font-medium text-neutral-900 dark:text-neutral-200">{menuChild.name}</p>
                       <ul className="mt-4 grid space-y-4">{menuChild.children?.map(renderNavlink)}</ul>
                     </div>
@@ -70,7 +70,7 @@ const DropdownMenu = ({ menuItem }: { menuItem: TNavigationItem }) => {
     return (
       <Link
         className="flex items-center rounded-md px-4 py-2 font-normal text-neutral-600 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
-        href={menuItem.href || '#'}
+        href={menuItem.href ?? ''}
       >
         {menuItem.name}
         {menuItem.children?.length && <ChevronDownIcon className="ml-2 h-4 w-4 text-neutral-500" aria-hidden="true" />}

@@ -52,8 +52,8 @@ const EmblaCarousel = ({ images, option }: { images: string[]; option: EmblaOpti
     <div className="relative size-full embla">
       <div className="embla__viewport relative mx-auto size-full overflow-hidden" ref={emblaMainRef}>
         <div className="embla__container size-full">
-          {images.map((image, index) => (
-            <div className="relative z-50 flex embla__slide basis-full items-center justify-center" key={index}>
+          {images.map((image) => (
+            <div className="relative z-50 flex embla__slide basis-full items-center justify-center" key={image}>
               <Image
                 alt="Slide image"
                 src={image}
@@ -80,7 +80,7 @@ const EmblaCarousel = ({ images, option }: { images: string[]; option: EmblaOpti
           <div className="embla-thumbs__container flex">
             {images.map((image, index) => (
               <div
-                key={index}
+                key={image}
                 className={clsx(
                   'relative flex aspect-5/3 w-24 shrink-0 items-center justify-center transition-[transform,filter] duration-300 ease-in-out',
                   index === selectedIndex
@@ -160,7 +160,7 @@ const HeaderGalleryGrid1 = ({
       </div>
       <div className="hidden md:col-span-2 md:grid md:grid-cols-2 md:gap-2">
         {images.slice(1, 5).map((item, index) => (
-          <div className="relative aspect-2/2 size-full" key={index} onClick={() => handleOpenDialog(index + 1)}>
+          <div className="relative aspect-2/2 size-full" key={item} onClick={() => handleOpenDialog(index + 1)}>
             <Image
               fill
               className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -204,7 +204,7 @@ const HeaderGalleryGrid2 = ({
 
       <div className="hidden md:grid md:grid-cols-1 md:gap-y-2 md:ps-2">
         {images.slice(1, 4).map((item, index) => (
-          <div className="relative aspect-3/2 size-full" key={index} onClick={() => handleOpenDialog(index + 1)}>
+          <div className="relative aspect-3/2 size-full" key={item} onClick={() => handleOpenDialog(index + 1)}>
             <Image
               alt=""
               src={item}

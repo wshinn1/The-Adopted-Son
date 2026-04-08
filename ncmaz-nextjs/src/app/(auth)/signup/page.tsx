@@ -61,9 +61,9 @@ const Page = () => {
 
       <div className="mx-auto max-w-md space-y-6">
         <div className="grid gap-3">
-          {socials.map((item, index) => (
+          {socials.map((item) => (
             <Link
-              key={index}
+              key={item.name}
               href={item.href}
               className="flex w-full rounded-lg bg-primary-50 px-4 py-3 transition-transform hover:translate-y-0.5 dark:bg-neutral-800"
             >

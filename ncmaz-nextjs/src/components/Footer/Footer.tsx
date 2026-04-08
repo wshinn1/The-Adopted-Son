@@ -57,15 +57,14 @@ const widgetMenus: WidgetFooterMenu[] = [
 ]
 
 const Footer: React.FC = () => {
-  const renderWidgetMenuItem = (menu: WidgetFooterMenu, index: number) => {
+  const renderWidgetMenuItem = (menu: WidgetFooterMenu) => {
     return (
-      <div key={index} className="text-sm">
+      <div key={menu.id} className="text-sm">
         <h2 className="font-semibold text-neutral-700 dark:text-neutral-200">{menu.title}</h2>
         <ul className="mt-5 space-y-4">
-          {menu.menus.map((item, index) => (
-            <li key={index}>
+          {menu.menus.map((item) => (
+            <li key={item.label}>
               <a
-                key={index}
                 className="text-neutral-600 hover:text-black dark:text-neutral-300 dark:hover:text-white"
                 href={item.href}
               >

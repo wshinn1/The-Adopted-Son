@@ -59,12 +59,12 @@ export default function DropdownTravelers() {
       >
         <div>
           <div className="relative grid grid-cols-1 gap-7 bg-white p-7 dark:bg-neutral-800">
-            {solutions.map((item, index) => {
+            {solutions.map((item) => {
               const isActive = pathName === item.href
               return (
                 <CloseButton
                   as={Link}
-                  key={index}
+                  key={item.name}
                   href={item.href}
                   className={`focus-visible:ring-opacity-50 -m-3 flex items-center rounded-lg p-2 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 ${
                     isActive ? 'bg-neutral-50 dark:bg-neutral-700' : 'hover:bg-neutral-50 dark:hover:bg-neutral-700'

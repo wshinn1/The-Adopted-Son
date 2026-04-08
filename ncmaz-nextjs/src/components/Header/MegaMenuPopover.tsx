@@ -20,7 +20,7 @@ export default function MegaMenuPopover({
       <li key={item.id} className={`${item.isNew ? 'menuIsNew' : ''}`}>
         <Link
           className="font-normal text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
-          href={item.href || '#'}
+          href={item.href ?? ''}
         >
           {item.name}
         </Link>
@@ -45,8 +45,8 @@ export default function MegaMenuPopover({
               <div className="container">
                 <div className="flex py-12 text-sm">
                   <div className="grid flex-1 grid-cols-4 gap-6 pe-10 xl:gap-8 2xl:pe-14">
-                    {megamenu.children?.map((menuChild, index) => (
-                      <div key={index}>
+                    {megamenu.children?.map((menuChild) => (
+                      <div key={menuChild.id}>
                         <p className="font-medium text-neutral-900 dark:text-neutral-200">{menuChild.name}</p>
                         <ul className="mt-4 grid space-y-4">{menuChild.children?.map(renderNavlink)}</ul>
                       </div>

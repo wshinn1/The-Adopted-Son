@@ -98,8 +98,8 @@ const CommentCard: FC<Props> = ({ className, comment }) => {
                   <HugeiconsIcon icon={MoreHorizontalIcon} size={20} />
                 </DropdownButton>
                 <DropdownMenu>
-                  {commentActions.map((item, index) => (
-                    <DropdownItem key={index} onClick={item.onClick}>
+                  {commentActions.map((item) => (
+                    <DropdownItem key={item.name} onClick={item.onClick}>
                       <HugeiconsIcon icon={item.icon} size={20} data-slot="icon" />
                       {item.name}
                     </DropdownItem>

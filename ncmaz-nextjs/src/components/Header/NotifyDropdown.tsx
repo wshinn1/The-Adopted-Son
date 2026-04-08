@@ -59,10 +59,10 @@ const NotifyDropdown: FC<Props> = ({ className = '', notifications = _defaultNot
         >
           <div className="relative grid gap-8 bg-white p-7 dark:bg-neutral-800">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200">Notifications</h3>
-            {notifications.map((item, index) => (
+            {notifications.map((item) => (
               <CloseButton
                 as={Link}
-                key={index}
+                key={item.name}
                 href={item.href}
                 className="relative -m-3 flex rounded-lg p-2 pe-8 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-hidden focus-visible:ring-3 focus-visible:ring-orange-500/50 dark:hover:bg-gray-700"
               >

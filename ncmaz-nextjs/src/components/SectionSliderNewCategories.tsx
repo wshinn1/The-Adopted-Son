@@ -42,15 +42,15 @@ const SectionSliderNewCategories: FC<Props> = ({
     const topIndex = index < 3 ? `#${index + 1}` : undefined
     switch (categoryCardType) {
       case 'card1':
-        return <CardCategory1 key={index} category={item} />
+        return <CardCategory1 key={item.id} category={item} />
       case 'card2':
-        return <CardCategory2 key={index} badge={topIndex} category={item} />
+        return <CardCategory2 key={item.id} badge={topIndex} category={item} />
       case 'card3':
-        return <CardCategory3 key={index} category={item} />
+        return <CardCategory3 key={item.id} category={item} />
       case 'card4':
-        return <CardCategory4 key={index} badge={topIndex} category={item} />
+        return <CardCategory4 key={item.id} badge={topIndex} category={item} />
       case 'card5':
-        return <CardCategory5 key={index} category={item} />
+        return <CardCategory5 key={item.id} category={item} />
       default:
         return null
     }
