@@ -9,7 +9,6 @@ import ButtonCircle from '@/shared/ButtonCircle'
 import SocialsList from '@/shared/SocialsList'
 import { Dialog, DialogActions, DialogBody, DialogTitle } from '@/shared/dialog'
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from '@/shared/dropdown'
-import { GlobeAltIcon } from '@heroicons/react/24/outline'
 import {
   CopyLinkIcon,
   Facebook01Icon,
@@ -23,7 +22,6 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react'
 import clsx from 'clsx'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useState } from 'react'
 
 const PageHeader = ({ author, className }: { author: TAuthor; className?: string }) => {
@@ -61,10 +59,6 @@ const PageHeader = ({ author, className }: { author: TAuthor; className?: string
                 <VerifyIcon iconClass="size-6 lg:size-7" />
               </div>
               <p className="text-sm/6 text-neutral-600 dark:text-neutral-400">{description}</p>
-              <Link href="#" className="flex items-center gap-x-2 text-xs text-neutral-500 dark:text-neutral-400">
-                <GlobeAltIcon className="size-4" />
-                <span className="font-medium text-neutral-700 dark:text-neutral-300">https://example.com/me</span>
-              </Link>
               <SocialsList />
             </div>
           </div>
@@ -106,8 +100,8 @@ function ShareDropdown({ handle }: { handle: string }) {
         <HugeiconsIcon icon={Share03Icon} size={20} />
       </DropdownButton>
       <DropdownMenu>
-        {socialsShare.map((item, index) => (
-          <DropdownItem key={index} href={item.href}>
+        {socialsShare.map((item) => (
+          <DropdownItem key={item.name} href={item.href}>
             <HugeiconsIcon icon={item.icon} size={20} data-slot="icon" />
             {item.name}
           </DropdownItem>
@@ -151,8 +145,8 @@ function ActionDropdown({ handle, author }: { handle: string; author: TAuthor })
           <HugeiconsIcon icon={MoreHorizontalIcon} size={20} />
         </DropdownButton>
         <DropdownMenu>
-          {actions.map((item, index) => (
-            <DropdownItem key={index} onClick={item.onClick}>
+          {actions.map((item) => (
+            <DropdownItem key={item.name} onClick={item.onClick}>
               <HugeiconsIcon icon={item.icon} size={20} data-slot="icon" />
               {item.name}
             </DropdownItem>

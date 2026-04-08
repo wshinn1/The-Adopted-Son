@@ -52,7 +52,7 @@ const Page = async () => {
                       </div>
                       <div className="ms-4">
                         <div className="font-medium">{post.title}</div>
-                        <div className="mt-1 text-gray-500 dark:text-gray-400">{post.categories[0].name}</div>
+                        <div className="mt-1 text-gray-500 dark:text-gray-400">{post.categories?.[0]?.name}</div>
                       </div>
                     </div>
                   </td>
