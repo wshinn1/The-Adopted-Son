@@ -39,20 +39,20 @@ const SectionSliderPosts: FC<Props> = ({
   const [emblaRef, emblaApi] = useEmblaCarousel({ ...emblaOptions, direction: theme?.themeDir })
   const { prevBtnDisabled, nextBtnDisabled, onPrevButtonClick, onNextButtonClick } = useCarouselArrowButtons(emblaApi)
 
-  const renderCard = (item: TPost, index: number) => {
+  const renderCard = (item: TPost) => {
     switch (postCardName) {
       case 'card4':
-        return <Card4 key={index} post={item} />
+        return <Card4 key={item.id} post={item} />
       case 'card7':
-        return <Card7 key={index} post={item} />
+        return <Card7 key={item.id} post={item} />
       case 'card9':
-        return <Card9 key={index} post={item} />
+        return <Card9 key={item.id} post={item} />
       case 'card10':
-        return <Card10 key={index} post={item} />
+        return <Card10 key={item.id} post={item} />
       case 'card10V2':
-        return <Card10V2 key={index} post={item} />
+        return <Card10V2 key={item.id} post={item} />
       case 'card11':
-        return <Card11 key={index} post={item} />
+        return <Card11 key={item.id} post={item} />
 
       default:
         return null
@@ -75,9 +75,9 @@ const SectionSliderPosts: FC<Props> = ({
 
       <div className="embla" ref={emblaRef}>
         <div className="-ms-5 embla__container sm:-ms-7">
-          {posts.map((post, index) => (
+          {posts.map((post) => (
             <div key={post.id} className="embla__slide basis-[86%] ps-5 sm:ps-7 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-              {renderCard(post, index)}
+              {renderCard(post)}
             </div>
           ))}
         </div>

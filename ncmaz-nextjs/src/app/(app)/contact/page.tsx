@@ -35,8 +35,8 @@ const PageContact = () => {
           <div>
             <h1 className="max-w-2xl text-4xl font-semibold sm:text-5xl">Contact</h1>
             <div className="mt-10 flex max-w-sm flex-col gap-y-8 sm:mt-20">
-              {info.map((item, index) => (
-                <div key={index}>
+              {info.map((item) => (
+                <div key={item.title}>
                   <h3 className="text-sm font-semibold tracking-wider uppercase dark:text-neutral-200">{item.title}</h3>
                   <span className="mt-2 block text-neutral-500 dark:text-neutral-400">{item.description}</span>
                 </div>

@@ -16,7 +16,7 @@ const CategoryBadgeList: FC<Props> = ({ className, itemClass, categories }) => {
   return (
     <div className={clsx('category-badge-list flex flex-wrap gap-x-2 gap-y-1', className)}>
       {categories.map((item, index) => (
-        <BadgeButton className={itemClass} key={index} href={`/category/${item.handle}`} color={item.color as any}>
+        <BadgeButton className={itemClass} key={item.handle} href={`/category/${item.handle}`} color={item.color as any}>
           {item.name}
         </BadgeButton>
       ))}

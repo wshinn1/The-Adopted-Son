@@ -27,10 +27,10 @@ const SidebarNavigation: React.FC<Props> = ({ data }) => {
   ) => {
     return (
       <ul className="nav-mobile-sub-menu ps-6 pb-1 text-base">
-        {item.children?.map((childMenu, index) => (
-          <Disclosure key={index} as="li">
+        {item.children?.map((childMenu) => (
+          <Disclosure key={childMenu.id} as="li">
             <Link
-              href={childMenu.href || '#'}
+              href={childMenu.href ?? ''}
               onClick={handleClose}
               className={`mt-0.5 flex rounded-lg pe-4 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 ${itemClass}`}
             >
@@ -54,12 +54,12 @@ const SidebarNavigation: React.FC<Props> = ({ data }) => {
     )
   }
 
-  const _renderItem = (menu: TNavigationItem, index: number) => {
+  const _renderItem = (menu: TNavigationItem) => {
     return (
-      <Disclosure key={index} as="li" className="text-neutral-900 dark:text-white">
+      <Disclosure key={menu.id} as="li" className="text-neutral-900 dark:text-white">
         <DisclosureButton className="flex w-full cursor-pointer rounded-lg px-3 text-start text-sm font-medium tracking-wide uppercase hover:bg-neutral-100 dark:hover:bg-neutral-800">
           <Link
-            href={menu.href || '#'}
+            href={menu.href ?? ''}
             className={clsx(!menu.children?.length && 'flex-1', 'block py-2.5')}
             onClick={handleClose}
           >

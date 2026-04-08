@@ -33,7 +33,7 @@ const SectionHero2: FC<SectionHero2Props> = ({}) => {
               once thought to be unique to humans.
             </p>
             <div className="mt-11 flex space-x-4 rtl:space-x-reverse">
-              <ButtonPrimary href="#">Read more</ButtonPrimary>
+              <ButtonPrimary href="">Read more</ButtonPrimary>
 
               <Button color="white" onClick={() => setIsOpen(!isOpen)}>
                 Play video

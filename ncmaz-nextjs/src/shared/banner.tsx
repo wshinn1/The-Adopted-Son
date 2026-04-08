@@ -40,7 +40,7 @@ export default function Banner() {
       </div>
       <p className="text-sm/6 text-gray-900">
         -50% Intro price for the next 72 hours only!.{' '}
-        <a href="#" className="font-semibold whitespace-nowrap">
+        <a href="" className="font-semibold whitespace-nowrap">
           Buy now&nbsp;<span aria-hidden="true">&rarr;</span>
         </a>
       </p>
