@@ -232,11 +232,9 @@ export async function getCategoryByHandle(handle: string) {
 
   // get all categories
   const categories = await getCategories()
-  let category = categories.find((category) => category.handle === handle)
+  const category = categories.find((category) => category.handle === handle)
   if (!category) {
-    // return null
-    // for demo purpose, return the first category
-    category = categories[0]
+    return null
   }
   return {
     ...category,
@@ -372,11 +370,9 @@ export async function getTagByHandle(handle: string) {
   }
 
   const tags = await getTags()
-  let tag = tags.find((tag) => tag.handle === handle)
+  const tag = tags.find((tag) => tag.handle === handle)
   if (!tag) {
-    // return null
-    // for demo purpose, return the first tag
-    tag = tags[0]
+    return null
   }
   return {
     ...tag,

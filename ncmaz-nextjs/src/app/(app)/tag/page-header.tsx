@@ -87,8 +87,8 @@ function ShareDropdown({ handle }: { handle: string }) {
         <HugeiconsIcon icon={Share03Icon} size={20} />
       </DropdownButton>
       <DropdownMenu>
-        {socialsShare.map((item, index) => (
-          <DropdownItem key={index} href={item.href}>
+        {socialsShare.map((item) => (
+          <DropdownItem key={item.name} href={item.href}>
             <HugeiconsIcon icon={item.icon} size={20} data-slot="icon" />
             {item.name}
           </DropdownItem>
@@ -132,8 +132,8 @@ function ActionDropdown({ handle, tag }: { handle: string; tag: TTag }) {
           <HugeiconsIcon icon={MoreHorizontalIcon} size={20} />
         </DropdownButton>
         <DropdownMenu>
-          {actions.map((item, index) => (
-            <DropdownItem key={index} onClick={item.onClick}>
+          {actions.map((item) => (
+            <DropdownItem key={item.name} onClick={item.onClick}>
               <HugeiconsIcon icon={item.icon} size={20} data-slot="icon" />
               {item.name}
             </DropdownItem>

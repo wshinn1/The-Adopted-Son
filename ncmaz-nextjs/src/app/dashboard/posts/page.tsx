@@ -71,7 +71,7 @@ const Page = async () => {
                     <LocalDate date={post.date} />
                   </td>
                   <td className="relative py-5 ps-3 pe-4 text-right text-sm font-medium whitespace-nowrap sm:pe-0">
-                    <Link href={`#`} className="underline">
+                    <Link href={`/dashboard/edit-post/${post.handle}`} className="underline">
                       Edit<span className="sr-only">, {post.title}</span>
                     </Link>
                   </td>
