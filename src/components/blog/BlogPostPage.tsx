@@ -296,8 +296,8 @@ export default function BlogPostPage({ post, shareSettings, voiceId }: Props) {
         </div>
       </div>
 
-      {/* Sticky audio tab — only shown when admin has enabled it */}
-      {post.tts_enabled && (
+      {/* Sticky audio tab — only shown when audio has been generated */}
+      {post.tts_audio_url && (
         <AudioTab
           content={post.content}
           title={post.title}
