@@ -16,11 +16,22 @@ export default function AudioTab({ content, title, devotionalId, voiceId, cached
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="fixed bottom-8 right-0 z-50 flex items-end justify-end">
+    <div className="fixed top-24 left-0 z-50 flex flex-col items-start">
+      {/* Tab button */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label={open ? 'Close audio player' : 'Open audio player'}
+        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-3 rounded-r-xl shadow-lg transition-colors"
+      >
+        <SpeakerWaveIcon className="size-4 shrink-0" />
+        <span>Listen</span>
+      </button>
+
       {/* Expanded player panel — always mounted to preserve audio state */}
       <div
-        className={`mb-0 mr-10 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-2xl p-5 w-80 transition-all duration-200 ${
-          open ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2 pointer-events-none'
+        className={`mt-2 ml-0 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl shadow-2xl p-5 w-80 transition-all duration-200 ${
+          open ? 'opacity-100 visible translate-x-0' : 'opacity-0 invisible -translate-x-2 pointer-events-none'
         }`}
       >
         <div className="flex items-center justify-between mb-4">
@@ -42,18 +53,6 @@ export default function AudioTab({ content, title, devotionalId, voiceId, cached
           cachedAudioUrl={cachedAudioUrl}
         />
       </div>
-
-      {/* Tab button */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? 'Close audio player' : 'Open audio player'}
-        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-3 rounded-l-xl shadow-lg transition-colors"
-        style={{ writingMode: 'horizontal-tb' }}
-      >
-        <SpeakerWaveIcon className="size-4 shrink-0" />
-        <span className="hidden sm:inline">Listen</span>
-      </button>
     </div>
   )
 }
