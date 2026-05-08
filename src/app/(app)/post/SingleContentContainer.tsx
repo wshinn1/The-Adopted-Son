@@ -4,6 +4,7 @@ import CommentCard from '@/components/CommentCard/CommentCard'
 import PostCardCommentBtn from '@/components/PostCardCommentBtn'
 import PostCardLikeBtn from '@/components/PostCardLikeBtn'
 import SingleCommentForm from '@/components/SingleCommentForm'
+import TextToSpeechButton from '@/components/TextToSpeechButton'
 import { TComment, TPostDetail } from '@/data/posts'
 import useIntersectionObserver from '@/hooks/useIntersectionObserver'
 import Avatar from '@/shared/Avatar'
@@ -82,6 +83,11 @@ const SingleContentContainer: FC<Props> = ({ post, comments, className }) => {
   return (
     <div className={`relative ${className}`}>
       <div className="single-content space-y-10">
+        {/* TEXT TO SPEECH */}
+        <div className="mx-auto max-w-(--breakpoint-md)">
+          <TextToSpeechButton post={post} />
+        </div>
+
         {/* ENTRY CONTENT */}
         <div
           id="single-entry-content"
