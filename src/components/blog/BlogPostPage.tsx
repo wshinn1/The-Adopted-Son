@@ -31,6 +31,7 @@ interface BlogPost {
   author?: Author | null
   authors?: Author | null  // New field from authors table join
   author_name?: string | null
+  tts_audio_url?: string | null
 }
 
 interface ShareSettings {
@@ -231,7 +232,9 @@ export default function BlogPostPage({ post, shareSettings, voiceId }: Props) {
         <DevotionalTTSButton
           content={post.content}
           title={post.title}
+          devotionalId={post.id}
           voiceId={voiceId}
+          cachedAudioUrl={post.tts_audio_url}
           className="mt-8"
         />
 

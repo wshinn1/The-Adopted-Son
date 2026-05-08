@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import AdminDevotionalActions from '@/components/admin/AdminDevotionalActions'
+import GenerateAllAudioButton from '@/components/admin/GenerateAllAudioButton'
 
 export const metadata: Metadata = { title: 'Devotionals — Admin' }
 
@@ -10,19 +11,28 @@ export default async function AdminDevotionalsPage() {
 
   const { data: devotionals } = await supabase
     .from('devotionals')
-    .select('id, title, slug, is_published, is_premium, category, published_at, created_at')
+    .select('id, title, slug, is_published, is_premium, category, published_at, created_at, tts_audio_url')
     .order('created_at', { ascending: false })
+
+  const allDevotionalsForTTS = (devotionals ?? []).map((d) => ({
+    id: d.id,
+    title: d.title,
+    hasAudio: !!d.tts_audio_url,
+  }))
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
         <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Devotionals</h1>
-        <Link
-          href="/admin/devotionals/new"
-          className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors"
-        >
-          + New Devotional
-        </Link>
+        <div className="flex items-center gap-3 flex-wrap justify-end">
+          <GenerateAllAudioButton devotionals={allDevotionalsForTTS} />
+          <Link
+            href="/admin/devotionals/new"
+            className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors"
+          >
+            + New Devotional
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden">
@@ -32,6 +42,7 @@ export default async function AdminDevotionalsPage() {
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Title</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide hidden md:table-cell">Category</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Status</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide hidden lg:table-cell">Audio</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide hidden lg:table-cell">Date</th>
               <th className="px-5 py-3"></th>
             </tr>
@@ -65,6 +76,13 @@ export default async function AdminDevotionalsPage() {
                       </span>
                     )}
                   </div>
+                </td>
+                <td className="px-5 py-3.5 hidden lg:table-cell">
+                  {d.tts_audio_url ? (
+                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">✓ Ready</span>
+                  ) : (
+                    <span className="text-xs text-neutral-400">—</span>
+                  )}
                 </td>
                 <td className="px-5 py-3.5 text-neutral-400 text-xs hidden lg:table-cell">
                   {d.published_at

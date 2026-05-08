@@ -6,7 +6,9 @@ import { useCallback, useRef, useState } from 'react'
 interface Props {
   content?: Record<string, unknown> | null
   title: string
+  devotionalId: string
   voiceId?: string
+  cachedAudioUrl?: string | null
   className?: string
 }
 
@@ -24,7 +26,14 @@ function contentToText(content: Record<string, unknown> | null | undefined, titl
   return text || title
 }
 
-export default function DevotionalTTSButton({ content, title, voiceId, className = '' }: Props) {
+export default function DevotionalTTSButton({
+  content,
+  title,
+  devotionalId,
+  voiceId,
+  cachedAudioUrl,
+  className = '',
+}: Props) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'playing' | 'paused'>('idle')
   const [error, setError] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -44,32 +53,42 @@ export default function DevotionalTTSButton({ content, title, voiceId, className
       return
     }
 
-    const text = contentToText(content, title)
     setStatus('loading')
 
     try {
-      const response = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voiceId }),
-      })
+      let audioUrl: string
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to generate audio')
+      if (cachedAudioUrl) {
+        audioUrl = cachedAudioUrl
+      } else {
+        const text = contentToText(content, title)
+        const response = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, voiceId, devotionalId }),
+        })
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}))
+          throw new Error(data.error || 'Failed to generate audio')
+        }
+
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('application/json')) {
+          const data = await response.json()
+          audioUrl = data.audioUrl
+        } else {
+          // Fallback: raw audio stream
+          const blob = await response.blob()
+          audioUrl = URL.createObjectURL(blob)
+        }
       }
 
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-
-      const audio = new Audio(url)
+      const audio = new Audio(audioUrl)
       audioRef.current = audio
-
       audio.onended = () => setStatus('idle')
-      audio.onpause = () => {
-        if (!audio.ended) setStatus('paused')
-      }
-      audio.onplay = () => setStatus('playing')
+      audio.onpause = () => { if (!audio.ended) setStatus('paused') }
+      audio.onplay  = () => setStatus('playing')
 
       await audio.play()
       setStatus('playing')
@@ -77,7 +96,7 @@ export default function DevotionalTTSButton({ content, title, voiceId, className
       setStatus('idle')
       setError(err instanceof Error ? err.message : 'Failed to generate audio')
     }
-  }, [content, title, voiceId, status])
+  }, [content, title, devotionalId, voiceId, cachedAudioUrl, status])
 
   const label =
     status === 'loading' ? 'Generating audio…' :
