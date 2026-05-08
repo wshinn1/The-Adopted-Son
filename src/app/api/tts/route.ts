@@ -6,7 +6,7 @@ const client = new ElevenLabsClient({
 })
 
 export async function POST(request: NextRequest) {
-  const { text } = await request.json()
+  const { text, voiceId } = await request.json()
 
   if (!text || typeof text !== 'string') {
     return NextResponse.json({ error: 'text is required' }, { status: 400 })
@@ -17,8 +17,12 @@ export async function POST(request: NextRequest) {
   }
 
   const truncatedText = text.slice(0, 5000)
+  const resolvedVoiceId =
+    (typeof voiceId === 'string' && voiceId.trim()) ||
+    process.env.ELEVENLABS_VOICE_ID ||
+    'JBFqnCBsd6RMkjVDRZzb'
 
-  const audioStream = await client.textToSpeech.convert('JBFqnCBsd6RMkjVDRZzb', {
+  const audioStream = await client.textToSpeech.convert(resolvedVoiceId, {
     text: truncatedText,
     model_id: 'eleven_multilingual_v2',
     output_format: 'mp3_44100_128',

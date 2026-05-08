@@ -48,6 +48,7 @@ export interface SiteSettings {
     email: boolean
   }
   popup_settings: PopupSettings
+  elevenlabs_voice_id: string
 }
 
 const defaults: SiteSettings = {
@@ -94,6 +95,7 @@ const defaults: SiteSettings = {
     text_color: '#1a1a1a',
     accent_color: '#8B5A2B',
   },
+  elevenlabs_voice_id: '',
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -131,6 +133,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     newsletter_settings: { ...defaults.newsletter_settings, ...settings.newsletter_settings },
     share_buttons: settings.share_buttons || defaults.share_buttons,
     popup_settings: settings.popup_settings || defaults.popup_settings,
+    elevenlabs_voice_id: settings.elevenlabs_voice_id || defaults.elevenlabs_voice_id,
   }
 }
 

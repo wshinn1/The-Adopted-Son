@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Facebook, Twitter, Linkedin, Mail, ArrowLeft } from 'lucide-react'
+import DevotionalTTSButton from './DevotionalTTSButton'
 
 interface Author {
   id?: string
@@ -43,9 +44,10 @@ interface ShareSettings {
 interface Props {
   post: BlogPost
   shareSettings?: ShareSettings
+  voiceId?: string
 }
 
-export default function BlogPostPage({ post, shareSettings }: Props) {
+export default function BlogPostPage({ post, shareSettings, voiceId }: Props) {
   const defaultShareSettings: ShareSettings = {
     enabled: true,
     facebook: true,
@@ -224,6 +226,14 @@ export default function BlogPostPage({ post, shareSettings }: Props) {
             )}
           </div>
         )}
+
+        {/* Text-to-Speech */}
+        <DevotionalTTSButton
+          content={post.content}
+          title={post.title}
+          voiceId={voiceId}
+          className="mt-8"
+        />
 
         {/* Body Content */}
         <div className="mt-8 font-body">

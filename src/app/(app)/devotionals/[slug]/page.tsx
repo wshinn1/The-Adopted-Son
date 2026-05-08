@@ -170,7 +170,7 @@ export default async function DevotionalPage({ params }: Props) {
       <TrialBanner />
         
       {/* Main Blog Post */}
-        <BlogPostPage post={post} shareSettings={settings.share_buttons} />
+        <BlogPostPage post={post} shareSettings={settings.share_buttons} voiceId={settings.elevenlabs_voice_id || undefined} />
 
         {/* Paywall (if premium and no access) */}
         {!canRead && (
