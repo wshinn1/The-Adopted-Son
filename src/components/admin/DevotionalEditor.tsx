@@ -77,24 +77,57 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   )
   const [ttsGenerating, setTtsGenerating] = useState(false)
   const [ttsError, setTtsError] = useState<string | null>(null)
+  const [ttsChunk, setTtsChunk] = useState(0)
+  const [ttsTotalChunks, setTtsTotalChunks] = useState(0)
 
   const handleGenerateAudio = useCallback(async () => {
     if (!devotional?.id) return
     setTtsGenerating(true)
     setTtsError(null)
+    setTtsChunk(0)
+    setTtsTotalChunks(0)
     try {
       const res = await fetch('/api/admin/tts-generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ devotionalId: devotional.id }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Generation failed')
-      setTtsAudioUrl(data.audioUrl)
+      if (!res.body) throw new Error('No response stream')
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let audioUrl = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          try {
+            const event = JSON.parse(line.slice(6))
+            if (event.type === 'start') setTtsTotalChunks(event.total)
+            if (event.type === 'progress') setTtsChunk(event.chunk)
+            if (event.type === 'done') audioUrl = event.audioUrl
+            if (event.type === 'error') throw new Error(event.message)
+          } catch (e) {
+            if (e instanceof SyntaxError) continue
+            throw e
+          }
+        }
+      }
+
+      if (!audioUrl) throw new Error('Generation failed — no audio returned')
+      setTtsAudioUrl(audioUrl)
     } catch (err) {
       setTtsError(err instanceof Error ? err.message : 'Generation failed')
     } finally {
       setTtsGenerating(false)
+      setTtsChunk(0)
+      setTtsTotalChunks(0)
     }
   }, [devotional?.id])
 
@@ -548,6 +581,21 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
               <p className="text-xs text-neutral-400">No audio generated yet.</p>
             )}
 
+            {ttsGenerating && ttsTotalChunks > 0 && (
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs text-neutral-400">
+                  <span>{ttsChunk === -1 ? 'Uploading…' : `Chunk ${ttsChunk} / ${ttsTotalChunks}`}</span>
+                  <span>{ttsTotalChunks > 0 ? Math.round((ttsChunk / ttsTotalChunks) * 100) : 0}%</span>
+                </div>
+                <div className="h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-600 rounded-full transition-all duration-200"
+                    style={{ width: `${ttsTotalChunks > 0 ? (ttsChunk / ttsTotalChunks) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             {ttsError && (
               <p className="text-xs text-red-500">{ttsError}</p>
             )}
@@ -564,7 +612,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  Generating… (may take a few minutes)
+                  {ttsTotalChunks > 0 ? `Generating ${ttsChunk} / ${ttsTotalChunks}…` : 'Starting…'}
                 </>
               ) : ttsAudioUrl ? 'Regenerate Audio' : 'Generate Audio'}
             </button>

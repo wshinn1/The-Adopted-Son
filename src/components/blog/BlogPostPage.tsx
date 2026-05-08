@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Facebook, Twitter, Linkedin, Mail, ArrowLeft } from 'lucide-react'
-import DevotionalTTSButton from './DevotionalTTSButton'
+import AudioTab from './AudioTab'
 
 interface Author {
   id?: string
@@ -228,16 +228,6 @@ export default function BlogPostPage({ post, shareSettings, voiceId }: Props) {
           </div>
         )}
 
-        {/* Text-to-Speech */}
-        <DevotionalTTSButton
-          content={post.content}
-          title={post.title}
-          devotionalId={post.id}
-          voiceId={voiceId}
-          cachedAudioUrl={post.tts_audio_url}
-          className="mt-8"
-        />
-
         {/* Body Content */}
         <div className="mt-8 font-body">
           <BlogContent content={post.content} />
@@ -304,6 +294,15 @@ export default function BlogPostPage({ post, shareSettings, voiceId }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Sticky audio tab */}
+      <AudioTab
+        content={post.content}
+        title={post.title}
+        devotionalId={post.id}
+        voiceId={voiceId}
+        cachedAudioUrl={post.tts_audio_url}
+      />
     </article>
   )
 }
