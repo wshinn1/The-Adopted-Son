@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 interface Devotional {
   id: string
@@ -26,6 +26,16 @@ export default function GenerateAllAudioButton({ devotionals }: Props) {
   const [items, setItems] = useState<ItemState[]>([])
   const [done, setDone] = useState(false)
   const [mode, setMode] = useState<'missing' | 'all'>('missing')
+
+  useEffect(() => {
+    if (!running) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = 'Audio is still generating. If you leave, progress will be lost for the current devotional.'
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [running])
 
   const missing = devotionals.filter((d) => !d.hasAudio)
   const allCount = devotionals.length
