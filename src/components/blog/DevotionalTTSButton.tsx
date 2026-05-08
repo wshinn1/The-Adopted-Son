@@ -77,8 +77,14 @@ export default function DevotionalTTSButton({
       setCurrentTime(0)
       setStatus('idle')
     }
-    const onPause = () => { if (!audio.ended) setStatus('paused') }
-    const onPlay  = () => setStatus('playing')
+    const onPause = () => {
+      if (!audio.ended) setStatus('paused')
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'
+    }
+    const onPlay  = () => {
+      setStatus('playing')
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'
+    }
     const onError = () => setStatus('idle')
 
     audio.addEventListener('timeupdate', onTimeUpdate)
@@ -153,6 +159,13 @@ export default function DevotionalTTSButton({
 
     const startPlay = async () => {
       if (resume > 0) audio.currentTime = resume
+      // Register with OS media system so mobile browsers don't kill playback
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({ title })
+        navigator.mediaSession.playbackState = 'playing'
+        navigator.mediaSession.setActionHandler('play',  () => audio.play())
+        navigator.mediaSession.setActionHandler('pause', () => audio.pause())
+      }
       try {
         await audio.play()
       } catch (err) {
@@ -189,6 +202,7 @@ export default function DevotionalTTSButton({
         src={audioSrc ?? undefined}
         preload="auto"
         playsInline
+        crossOrigin="anonymous"
         style={{ display: 'none' }}
       />
 
