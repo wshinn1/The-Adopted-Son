@@ -1,7 +1,7 @@
 'use client'
 
 import { PauseIcon, PlayIcon, SpeakerWaveIcon } from '@heroicons/react/24/solid'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface Props {
   content?: Record<string, unknown> | null
@@ -26,6 +26,18 @@ function contentToText(content: Record<string, unknown> | null | undefined, titl
   return text || title
 }
 
+function storageKey(id: string) {
+  return `tts_position_${id}`
+}
+
+function formatTime(seconds: number) {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
 export default function DevotionalTTSButton({
   content,
   title,
@@ -36,7 +48,14 @@ export default function DevotionalTTSButton({
 }: Props) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'playing' | 'paused'>('idle')
   const [error, setError] = useState<string | null>(null)
+  const [savedPosition, setSavedPosition] = useState<number>(0)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  // Load saved position on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey(devotionalId))
+    if (saved) setSavedPosition(parseFloat(saved))
+  }, [devotionalId])
 
   const handleClick = useCallback(async () => {
     setError(null)
@@ -78,7 +97,6 @@ export default function DevotionalTTSButton({
           const data = await response.json()
           audioUrl = data.audioUrl
         } else {
-          // Fallback: raw audio stream
           const blob = await response.blob()
           audioUrl = URL.createObjectURL(blob)
         }
@@ -86,7 +104,24 @@ export default function DevotionalTTSButton({
 
       const audio = new Audio(audioUrl)
       audioRef.current = audio
-      audio.onended = () => setStatus('idle')
+
+      // Resume from saved position
+      const saved = parseFloat(localStorage.getItem(storageKey(devotionalId)) ?? '0')
+      if (saved > 0) audio.currentTime = saved
+
+      // Save position periodically
+      audio.ontimeupdate = () => {
+        if (audio.currentTime > 0) {
+          localStorage.setItem(storageKey(devotionalId), String(audio.currentTime))
+          setSavedPosition(audio.currentTime)
+        }
+      }
+
+      audio.onended = () => {
+        localStorage.removeItem(storageKey(devotionalId))
+        setSavedPosition(0)
+        setStatus('idle')
+      }
       audio.onpause = () => { if (!audio.ended) setStatus('paused') }
       audio.onplay  = () => setStatus('playing')
 
@@ -98,20 +133,26 @@ export default function DevotionalTTSButton({
     }
   }, [content, title, devotionalId, voiceId, cachedAudioUrl, status])
 
-  const label =
-    status === 'loading' ? 'Generating audio…' :
-    status === 'playing' ? 'Pause' :
-    status === 'paused'  ? 'Resume' :
-    'Listen'
+  const handleRestart = useCallback(() => {
+    localStorage.removeItem(storageKey(devotionalId))
+    setSavedPosition(0)
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0
+    }
+  }, [devotionalId])
+
+  const isLoaded = !!audioRef.current
+  const hasResume = savedPosition > 30 && !isLoaded
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
+      {/* Main button */}
       <button
         type="button"
         onClick={handleClick}
         disabled={status === 'loading'}
-        aria-label={label}
-        className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+        aria-label={status === 'playing' ? 'Pause' : status === 'paused' ? 'Resume' : 'Listen'}
+        className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition disabled:opacity-60 bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
       >
         {status === 'loading' && (
           <>
@@ -126,6 +167,21 @@ export default function DevotionalTTSButton({
         {status === 'paused'  && <><PlayIcon  className="size-4 ms-0.5" /><span>Resume</span></>}
         {status === 'idle'    && <><SpeakerWaveIcon className="size-4" /><span>Listen</span></>}
       </button>
+
+      {/* Resume from saved position */}
+      {hasResume && (
+        <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+          <span>Saved at {formatTime(savedPosition)}</span>
+          <button
+            type="button"
+            onClick={handleRestart}
+            className="underline hover:text-neutral-700"
+          >
+            Restart
+          </button>
+        </div>
+      )}
+
       {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
   )
