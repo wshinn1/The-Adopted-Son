@@ -33,6 +33,7 @@ interface Devotional {
   seo_title?: string | null
   seo_description?: string | null
   seo_keywords?: string | null
+  tts_enabled?: boolean | null
 }
 
 interface Props {
@@ -75,10 +76,28 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(
     (devotional as unknown as Record<string, unknown>)?.tts_audio_url as string | null ?? null
   )
+  const [ttsEnabled, setTtsEnabled] = useState<boolean>(
+    !!((devotional as unknown as Record<string, unknown>)?.tts_enabled)
+  )
   const [ttsGenerating, setTtsGenerating] = useState(false)
   const [ttsError, setTtsError] = useState<string | null>(null)
   const [ttsChunk, setTtsChunk] = useState(0)
   const [ttsTotalChunks, setTtsTotalChunks] = useState(0)
+
+  const saveTtsEnabled = useCallback(async (enabled: boolean) => {
+    if (!devotional?.id) return
+    await fetch(`/api/admin/devotionals/${devotional.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tts_enabled: enabled }),
+    })
+  }, [devotional?.id])
+
+  const handleTtsToggle = useCallback(async () => {
+    const next = !ttsEnabled
+    setTtsEnabled(next)
+    await saveTtsEnabled(next)
+  }, [ttsEnabled, saveTtsEnabled])
 
   const handleGenerateAudio = useCallback(async () => {
     if (!devotional?.id) return
@@ -122,6 +141,9 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
 
       if (!audioUrl) throw new Error('Generation failed — no audio returned')
       setTtsAudioUrl(audioUrl)
+      // Auto-enable the listen tab now that audio exists
+      await saveTtsEnabled(true)
+      setTtsEnabled(true)
     } catch (err) {
       setTtsError(err instanceof Error ? err.message : 'Generation failed')
     } finally {
@@ -580,6 +602,25 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
             ) : (
               <p className="text-xs text-neutral-400">No audio generated yet.</p>
             )}
+
+            {/* Show Listen tab toggle */}
+            <div className="flex items-center justify-between pt-1">
+              <div>
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">Show Listen tab</span>
+                {!ttsAudioUrl && (
+                  <p className="text-xs text-neutral-400 mt-0.5">Generate audio first</p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleTtsToggle}
+                disabled={!ttsAudioUrl}
+                aria-label={ttsEnabled ? 'Disable Listen tab' : 'Enable Listen tab'}
+                className={`relative w-10 h-5.5 rounded-full transition-colors disabled:opacity-40 ${ttsEnabled ? 'bg-blue-600' : 'bg-neutral-300 dark:bg-neutral-700'}`}
+              >
+                <span className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${ttsEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </button>
+            </div>
 
             {ttsGenerating && ttsTotalChunks > 0 && (
               <div className="space-y-1">

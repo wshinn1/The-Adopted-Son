@@ -120,6 +120,7 @@ export default async function DevotionalPage({ params }: Props) {
     authors: devotional.authors,
     author_name: devotional.author_name ?? 'The Adopted Son',
     tts_audio_url: (devotional as unknown as Record<string, unknown>).tts_audio_url as string | null ?? null,
+    tts_enabled: (devotional as unknown as Record<string, unknown>).tts_enabled as boolean | null ?? false,
   }
 
   // JSON-LD structured data for SEO

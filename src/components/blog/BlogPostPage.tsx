@@ -32,6 +32,7 @@ interface BlogPost {
   authors?: Author | null  // New field from authors table join
   author_name?: string | null
   tts_audio_url?: string | null
+  tts_enabled?: boolean | null
 }
 
 interface ShareSettings {
@@ -295,14 +296,16 @@ export default function BlogPostPage({ post, shareSettings, voiceId }: Props) {
         </div>
       </div>
 
-      {/* Sticky audio tab */}
-      <AudioTab
-        content={post.content}
-        title={post.title}
-        devotionalId={post.id}
-        voiceId={voiceId}
-        cachedAudioUrl={post.tts_audio_url}
-      />
+      {/* Sticky audio tab — only shown when admin has enabled it */}
+      {post.tts_enabled && (
+        <AudioTab
+          content={post.content}
+          title={post.title}
+          devotionalId={post.id}
+          voiceId={voiceId}
+          cachedAudioUrl={post.tts_audio_url}
+        />
+      )}
     </article>
   )
 }
