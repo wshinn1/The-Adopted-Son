@@ -45,21 +45,61 @@ export default function DevotionalTTSButton({
   cachedAudioUrl,
   className = '',
 }: Props) {
-  const [status, setStatus]           = useState<'idle' | 'loading' | 'playing' | 'paused'>('idle')
-  const [error, setError]             = useState<string | null>(null)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration]       = useState(0)
+  const [status, setStatus]               = useState<'idle' | 'loading' | 'playing' | 'paused'>('idle')
+  const [error, setError]                 = useState<string | null>(null)
+  const [currentTime, setCurrentTime]     = useState(0)
+  const [duration, setDuration]           = useState(0)
   const [savedPosition, setSavedPosition] = useState(0)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [audioSrc, setAudioSrc]           = useState<string | null>(null)
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem(storageKey(devotionalId))
     if (saved) setSavedPosition(parseFloat(saved))
   }, [devotionalId])
 
-  const loadAudio = useCallback(async (): Promise<string> => {
-    if (cachedAudioUrl) return cachedAudioUrl
+  // Wire up event listeners whenever the src is set
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !audioSrc) return
 
+    const onTimeUpdate = () => {
+      setCurrentTime(audio.currentTime)
+      if (audio.currentTime > 0) {
+        localStorage.setItem(storageKey(devotionalId), String(audio.currentTime))
+        setSavedPosition(audio.currentTime)
+      }
+    }
+    const onDurationChange = () => setDuration(audio.duration)
+    const onEnded = () => {
+      localStorage.removeItem(storageKey(devotionalId))
+      setSavedPosition(0)
+      setCurrentTime(0)
+      setStatus('idle')
+    }
+    const onPause = () => { if (!audio.ended) setStatus('paused') }
+    const onPlay  = () => setStatus('playing')
+    const onError = () => setStatus('idle')
+
+    audio.addEventListener('timeupdate', onTimeUpdate)
+    audio.addEventListener('durationchange', onDurationChange)
+    audio.addEventListener('ended', onEnded)
+    audio.addEventListener('pause', onPause)
+    audio.addEventListener('play', onPlay)
+    audio.addEventListener('error', onError)
+
+    return () => {
+      audio.removeEventListener('timeupdate', onTimeUpdate)
+      audio.removeEventListener('durationchange', onDurationChange)
+      audio.removeEventListener('ended', onEnded)
+      audio.removeEventListener('pause', onPause)
+      audio.removeEventListener('play', onPlay)
+      audio.removeEventListener('error', onError)
+    }
+  }, [audioSrc, devotionalId])
+
+  const getAudioUrl = useCallback(async (): Promise<string> => {
+    if (cachedAudioUrl) return cachedAudioUrl
     const text = contentToText(content, title)
     const response = await fetch('/api/tts', {
       method: 'POST',
@@ -79,53 +119,56 @@ export default function DevotionalTTSButton({
     return URL.createObjectURL(blob)
   }, [cachedAudioUrl, content, title, voiceId, devotionalId])
 
-  const initAudio = useCallback(async (startTime?: number) => {
-    setError(null)
-    setStatus('loading')
-    try {
-      const audioUrl = await loadAudio()
-      const audio = new Audio(audioUrl)
-      audioRef.current = audio
-
-      const resume = startTime ?? parseFloat(localStorage.getItem(storageKey(devotionalId)) ?? '0')
-      if (resume > 0) audio.currentTime = resume
-
-      audio.ontimeupdate = () => {
-        setCurrentTime(audio.currentTime)
-        if (audio.currentTime > 0) {
-          localStorage.setItem(storageKey(devotionalId), String(audio.currentTime))
-          setSavedPosition(audio.currentTime)
-        }
-      }
-      audio.ondurationchange = () => setDuration(audio.duration)
-      audio.onended = () => {
-        localStorage.removeItem(storageKey(devotionalId))
-        setSavedPosition(0)
-        setCurrentTime(0)
-        setStatus('idle')
-      }
-      audio.onpause = () => { if (!audio.ended) setStatus('paused') }
-      audio.onplay  = () => setStatus('playing')
-
-      await audio.play()
-      setStatus('playing')
-    } catch (err) {
-      setStatus('idle')
-      setError(err instanceof Error ? err.message : 'Failed to generate audio')
-    }
-  }, [loadAudio, devotionalId])
-
   const handlePlayPause = useCallback(async () => {
-    if (!audioRef.current) {
-      await initAudio()
+    const audio = audioRef.current
+    if (!audio) return
+
+    if (!audioSrc) {
+      setError(null)
+      setStatus('loading')
+      try {
+        const url = await getAudioUrl()
+        setAudioSrc(url)
+        // Play is triggered by the useEffect below once src is set
+      } catch (err) {
+        setStatus('idle')
+        setError(err instanceof Error ? err.message : 'Failed to generate audio')
+      }
       return
     }
+
     if (status === 'playing') {
-      audioRef.current.pause()
+      audio.pause()
     } else {
-      await audioRef.current.play()
+      await audio.play()
     }
-  }, [status, initAudio])
+  }, [audioSrc, status, getAudioUrl])
+
+  // Auto-play once src is set, resuming saved position
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !audioSrc) return
+
+    const resume = parseFloat(localStorage.getItem(storageKey(devotionalId)) ?? '0')
+
+    const startPlay = async () => {
+      if (resume > 0) audio.currentTime = resume
+      try {
+        await audio.play()
+      } catch (err) {
+        setStatus('idle')
+        setError(err instanceof Error ? err.message : 'Playback failed')
+      }
+    }
+
+    // If already loaded enough, play immediately; otherwise wait for canplay
+    if (audio.readyState >= 3) {
+      startPlay()
+    } else {
+      audio.addEventListener('canplay', startPlay, { once: true })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioSrc])
 
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const time = parseFloat(e.target.value)
@@ -134,12 +177,21 @@ export default function DevotionalTTSButton({
     localStorage.setItem(storageKey(devotionalId), String(time))
   }, [devotionalId])
 
-  const isLoaded = !!audioRef.current
+  const isLoaded = !!audioSrc
   const pct = duration > 0 ? (currentTime / duration) * 100 : 0
   const hasResume = savedPosition > 30 && !isLoaded
 
   return (
     <div className={`space-y-3 ${className}`}>
+      {/* Hidden DOM audio element — iOS Safari streams this reliably */}
+      <audio
+        ref={audioRef}
+        src={audioSrc ?? undefined}
+        preload="auto"
+        playsInline
+        style={{ display: 'none' }}
+      />
+
       <div className="flex flex-wrap items-center gap-3">
         {/* Play/Pause button */}
         <button
@@ -155,7 +207,7 @@ export default function DevotionalTTSButton({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
-              <span>Generating…</span>
+              <span>Loading…</span>
             </>
           )}
           {status === 'playing' && <><PauseIcon className="size-4" /><span>Pause</span></>}
@@ -192,7 +244,6 @@ export default function DevotionalTTSButton({
           </span>
 
           <div className="relative flex-1 h-4 flex items-center group">
-            {/* Track fill */}
             <div className="absolute inset-y-0 left-0 flex items-center w-full pointer-events-none">
               <div className="w-full h-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
                 <div
@@ -201,7 +252,6 @@ export default function DevotionalTTSButton({
                 />
               </div>
             </div>
-            {/* Range input */}
             <input
               type="range"
               min={0}
@@ -212,7 +262,6 @@ export default function DevotionalTTSButton({
               className="relative w-full h-4 opacity-0 cursor-pointer"
               aria-label="Seek audio"
             />
-            {/* Thumb dot */}
             <div
               className="absolute size-3.5 rounded-full bg-blue-600 shadow pointer-events-none transition-none"
               style={{ left: `calc(${pct}% - 7px)` }}
