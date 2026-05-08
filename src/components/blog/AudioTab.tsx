@@ -16,7 +16,7 @@ export default function AudioTab({ content, title, devotionalId, voiceId, cached
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="fixed top-24 left-0 z-50 flex flex-col items-start">
+    <div className="fixed top-16 left-0 z-50 flex flex-col items-start">
       {/* Tab button */}
       <button
         type="button"
