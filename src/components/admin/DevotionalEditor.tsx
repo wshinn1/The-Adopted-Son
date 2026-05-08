@@ -72,6 +72,31 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!devotional)
   const [editorContent, setEditorContent] = useState<unknown>(devotional?.content ?? '')
   const [uploading, setUploading] = useState(false)
+  const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(
+    (devotional as unknown as Record<string, unknown>)?.tts_audio_url as string | null ?? null
+  )
+  const [ttsGenerating, setTtsGenerating] = useState(false)
+  const [ttsError, setTtsError] = useState<string | null>(null)
+
+  const handleGenerateAudio = useCallback(async () => {
+    if (!devotional?.id) return
+    setTtsGenerating(true)
+    setTtsError(null)
+    try {
+      const res = await fetch('/api/admin/tts-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ devotionalId: devotional.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Generation failed')
+      setTtsAudioUrl(data.audioUrl)
+    } catch (err) {
+      setTtsError(err instanceof Error ? err.message : 'Generation failed')
+    } finally {
+      setTtsGenerating(false)
+    }
+  }, [devotional?.id])
 
   const handleTitleChange = useCallback(
     (value: string) => {
@@ -508,6 +533,43 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
           </div>
 
         </div>
+
+        {/* Text-to-Speech */}
+        {devotional?.id && (
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5 space-y-3">
+            <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Text-to-Speech</h3>
+
+            {ttsAudioUrl ? (
+              <div className="space-y-2">
+                <p className="text-xs text-green-600 dark:text-green-400 font-medium">✓ Audio ready</p>
+                <audio controls src={ttsAudioUrl} className="w-full h-8" />
+              </div>
+            ) : (
+              <p className="text-xs text-neutral-400">No audio generated yet.</p>
+            )}
+
+            {ttsError && (
+              <p className="text-xs text-red-500">{ttsError}</p>
+            )}
+
+            <button
+              type="button"
+              onClick={handleGenerateAudio}
+              disabled={ttsGenerating}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 disabled:opacity-50 transition-colors"
+            >
+              {ttsGenerating ? (
+                <>
+                  <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  Generating… (may take a few minutes)
+                </>
+              ) : ttsAudioUrl ? 'Regenerate Audio' : 'Generate Audio'}
+            </button>
+          </div>
+        )}
 
         {/* SEO Settings */}
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5 space-y-4">
