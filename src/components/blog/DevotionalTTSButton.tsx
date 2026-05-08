@@ -105,23 +105,36 @@ export default function DevotionalTTSButton({
   }, [audioSrc, devotionalId])
 
   const getAudioUrl = useCallback(async (): Promise<string> => {
-    if (cachedAudioUrl) return cachedAudioUrl
-    const text = contentToText(content, title)
-    const response = await fetch('/api/tts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voiceId, devotionalId }),
-    })
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}))
-      throw new Error(data.error || 'Failed to generate audio')
+    let remoteUrl: string
+
+    if (cachedAudioUrl) {
+      remoteUrl = cachedAudioUrl
+    } else {
+      const text = contentToText(content, title)
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voiceId, devotionalId }),
+      })
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to generate audio')
+      }
+      const ct = response.headers.get('content-type') || ''
+      if (ct.includes('application/json')) {
+        const data = await response.json()
+        remoteUrl = data.audioUrl
+      } else {
+        const blob = await response.blob()
+        return URL.createObjectURL(blob)
+      }
     }
-    const ct = response.headers.get('content-type') || ''
-    if (ct.includes('application/json')) {
-      const data = await response.json()
-      return data.audioUrl
-    }
-    const blob = await response.blob()
+
+    // Download the full file into memory before playing so mobile browsers
+    // can't cut off playback due to streaming/buffering issues
+    const res = await fetch(remoteUrl)
+    if (!res.ok) throw new Error('Failed to download audio')
+    const blob = await res.blob()
     return URL.createObjectURL(blob)
   }, [cachedAudioUrl, content, title, voiceId, devotionalId])
 
@@ -202,7 +215,6 @@ export default function DevotionalTTSButton({
         src={audioSrc ?? undefined}
         preload="auto"
         playsInline
-        crossOrigin="anonymous"
         style={{ display: 'none' }}
       />
 
