@@ -84,7 +84,7 @@ export default function BlogPostPage({ post, shareSettings, voiceId }: Props) {
         {/* Back Button */}
         <Link
           href="/devotionals"
-          className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors mb-8 group"
+          className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 transition-colors mb-8 group pl-28 sm:pl-0"
         >
           <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
           <span>Back to Devotionals</span>
