@@ -8,7 +8,7 @@ const client = new ElevenLabsClient({
 })
 
 export async function POST(request: NextRequest) {
-  const { text, voiceId, devotionalId } = await request.json()
+  const { text, voiceId, devotionalId, forceRegenerate } = await request.json()
 
   if (!text || typeof text !== 'string') {
     return NextResponse.json({ error: 'text is required' }, { status: 400 })
@@ -18,8 +18,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'ElevenLabs API key not configured' }, { status: 500 })
   }
 
-  // Return cached audio URL if available
-  if (devotionalId) {
+  // Return cached audio URL if available and not forcing regeneration
+  if (devotionalId && !forceRegenerate) {
     const { data } = await supabaseAdmin
       .from('devotionals')
       .select('tts_audio_url')

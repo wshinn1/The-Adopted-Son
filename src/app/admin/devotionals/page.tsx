@@ -14,16 +14,18 @@ export default async function AdminDevotionalsPage() {
     .select('id, title, slug, is_published, is_premium, category, published_at, created_at, tts_audio_url')
     .order('created_at', { ascending: false })
 
-  const devotionalsWithoutAudio = (devotionals ?? [])
-    .filter((d) => !d.tts_audio_url)
-    .map((d) => ({ id: d.id, title: d.title }))
+  const allDevotionalsForTTS = (devotionals ?? []).map((d) => ({
+    id: d.id,
+    title: d.title,
+    hasAudio: !!d.tts_audio_url,
+  }))
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
         <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Devotionals</h1>
         <div className="flex items-center gap-3 flex-wrap justify-end">
-          <GenerateAllAudioButton devotionalsWithoutAudio={devotionalsWithoutAudio} />
+          <GenerateAllAudioButton devotionals={allDevotionalsForTTS} />
           <Link
             href="/admin/devotionals/new"
             className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors"

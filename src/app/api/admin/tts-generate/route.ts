@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'ElevenLabs API key not configured' }, { status: 500 })
   }
 
-  const { devotionalId } = await request.json()
+  const { devotionalId, forceRegenerate } = await request.json()
 
   if (!devotionalId) {
     return NextResponse.json({ error: 'devotionalId is required' }, { status: 400 })
