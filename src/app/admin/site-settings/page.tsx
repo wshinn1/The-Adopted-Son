@@ -107,6 +107,7 @@ export default function SiteSettingsPage() {
   const [footerLinks, setFooterLinks] = useState<{ label: string; url: string }[]>([])
   const [faviconUrl, setFaviconUrl] = useState('')
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
+  const [elevenLabsVoiceId, setElevenLabsVoiceId] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [seedingTemplates, setSeedingTemplates] = useState(false)
@@ -146,6 +147,7 @@ export default function SiteSettingsPage() {
       setFooterLinks(settings.footer_links || [])
       setFaviconUrl(settings.favicon_url || '')
       setSocialLinks(settings.social_links || [])
+      setElevenLabsVoiceId(settings.elevenlabs_voice_id || '')
     } catch (err) {
       console.error('Error loading settings:', err)
     } finally {
@@ -172,6 +174,7 @@ export default function SiteSettingsPage() {
       await saveSetting('footer_links', footerLinks)
       await saveSetting('favicon_url', faviconUrl)
       await saveSetting('social_links', socialLinks)
+      await saveSetting('elevenlabs_voice_id', elevenLabsVoiceId)
       alert('Settings saved!')
     } catch (err) {
       console.error('Error saving settings:', err)
@@ -546,6 +549,28 @@ export default function SiteSettingsPage() {
               {seedMessage}
             </p>
           )}
+        </div>
+
+        {/* ElevenLabs */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-1">Text-to-Speech</h2>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
+            Voice used for the Listen button on devotional posts. Find voice IDs at{' '}
+            <span className="font-mono text-xs">elevenlabs.io/app/voice-library</span>.
+          </p>
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              ElevenLabs Voice ID
+            </label>
+            <input
+              type="text"
+              value={elevenLabsVoiceId}
+              onChange={(e) => setElevenLabsVoiceId(e.target.value)}
+              placeholder="e.g. JBFqnCBsd6RMkjVDRZzb"
+              className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 font-mono text-sm"
+            />
+            <p className="text-xs text-neutral-400 mt-1">Leave blank to use the default voice (George).</p>
+          </div>
         </div>
 
         {/* Save Button */}
