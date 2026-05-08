@@ -5,7 +5,8 @@ import { NextRequest } from 'next/server'
 
 export const maxDuration = 300
 
-const CHUNK_SIZE = 4000
+const CHUNK_SIZE = 5000
+const PARALLEL = 5
 
 const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY,
@@ -119,11 +120,20 @@ export async function POST(request: NextRequest) {
 
         send(controller, encoder, { type: 'start', total })
 
-        const audioBuffers: Buffer[] = []
-        for (let i = 0; i < chunks.length; i++) {
-          send(controller, encoder, { type: 'progress', chunk: i + 1, total })
-          const audio = await generateChunk(chunks[i], voiceId)
-          audioBuffers.push(audio)
+        const audioBuffers: Buffer[] = new Array(chunks.length)
+        let completed = 0
+
+        for (let batchStart = 0; batchStart < chunks.length; batchStart += PARALLEL) {
+          const batchEnd = Math.min(batchStart + PARALLEL, chunks.length)
+          const batchIndices = Array.from({ length: batchEnd - batchStart }, (_, k) => batchStart + k)
+
+          await Promise.all(
+            batchIndices.map(async (i) => {
+              audioBuffers[i] = await generateChunk(chunks[i], voiceId)
+              completed++
+              send(controller, encoder, { type: 'progress', chunk: completed, total })
+            })
+          )
         }
 
         const combined = Buffer.concat(audioBuffers)
