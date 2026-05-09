@@ -7,23 +7,23 @@ export const metadata: Metadata = { title: 'Admin Dashboard' }
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
 
-  const [{ count: devotionalCount }, { count: subscriberCount }, { data: recentDevotionals }] =
+  const [{ count: devotionalCount }, { count: newsletterCount }, { data: recentDevotionals }] =
     await Promise.all([
       supabase.from('devotionals').select('*', { count: 'exact', head: true }),
       supabase
-        .from('profiles')
+        .from('newsletter_subscribers')
         .select('*', { count: 'exact', head: true })
-        .eq('subscription_status', 'active'),
+        .eq('is_active', true),
       supabase
         .from('devotionals')
-        .select('id, title, slug, is_published, is_premium, published_at, created_at')
+        .select('id, title, slug, is_published, published_at, created_at')
         .order('created_at', { ascending: false })
         .limit(5),
     ])
 
   const stats = [
     { label: 'Total Devotionals', value: devotionalCount ?? 0, href: '/admin/devotionals' },
-    { label: 'Active Subscribers', value: subscriberCount ?? 0, href: '/admin/subscribers' },
+    { label: 'Newsletter Subscribers', value: newsletterCount ?? 0, href: '/admin/subscribers' },
   ]
 
   return (
@@ -74,13 +74,11 @@ export default async function AdminDashboardPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2 ml-4 shrink-0">
-                <span
-                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    d.is_published
-                      ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
-                      : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
-                  }`}
-                >
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                  d.is_published
+                    ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
+                    : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'
+                }`}>
                   {d.is_published ? 'Published' : 'Draft'}
                 </span>
                 <Link

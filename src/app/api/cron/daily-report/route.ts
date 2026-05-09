@@ -55,8 +55,8 @@ async function performBackup() {
       'section_templates',
       'site_settings',
       'media',
-      'subscription_plans',
-      'visitor_trials',
+      'givings',
+      'newsletter_subscribers',
       'admin_logs',
     ]
 

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     template: '%s — The Adopted Son',
     default: 'The Adopted Son — Daily Devotionals',
   },
-  description: 'Faith-filled daily devotionals to draw you closer to God. A 14-day free trial, then simple subscription pricing.',
+  description: 'Faith-filled daily devotionals to draw you closer to God.',
   keywords: ['devotionals', 'faith', 'Christian', 'adoption', 'daily reading', 'Scripture'],
   metadataBase: new URL(BASE_URL),
   openGraph: {
