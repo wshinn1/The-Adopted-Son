@@ -83,7 +83,7 @@ export default function DevotionalTTSButton({
         setSavedPosition(audio.currentTime)
       }
     }
-    const onDurationChange = () => { if (isFinite(audio.duration)) setDuration(audio.duration) }
+    const onDurationChange = () => { if (audio.duration > 0) setDuration(audio.duration) }
     const onEnded = () => {
       localStorage.removeItem(storageKey(devotionalId))
       setSavedPosition(0)

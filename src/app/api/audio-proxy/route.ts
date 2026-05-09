@@ -86,6 +86,10 @@ export async function GET(request: NextRequest) {
       'Content-Type': 'audio/mpeg',
       'Cache-Control': 'public, max-age=86400',
       'Access-Control-Allow-Origin': '*',
+      // Forward Content-Length so browsers can calculate duration and enable seeking
+      ...(upstream.headers.get('content-length')
+        ? { 'Content-Length': upstream.headers.get('content-length')! }
+        : {}),
     },
   })
 }
