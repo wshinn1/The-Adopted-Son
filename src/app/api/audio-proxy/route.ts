@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server'
 
-// Neutralize Xing/LAME VBR header so mobile browsers scan real frames for duration
 function neutralizeXingHeader(bytes: Uint8Array): void {
   let offset = 0
   if (bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) {
@@ -25,12 +24,32 @@ export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get('url')
   if (!url) return new Response('Missing url param', { status: 400 })
 
-  // Only allow Vercel Blob URLs
   if (!url.startsWith('https://') || !url.includes('blob.vercel-storage.com')) {
     return new Response('Invalid url', { status: 400 })
   }
 
-  const upstream = await fetch(url)
+  const rangeHeader = request.headers.get('range')
+
+  // For range requests that don't start at byte 0, proxy directly — no Xing fix needed
+  if (rangeHeader) {
+    const rangeStart = parseInt(rangeHeader.replace(/bytes=(\d+)-.*/, '$1') || '0', 10)
+    if (rangeStart > 4096) {
+      const upstream = await fetch(url, { headers: { Range: rangeHeader } })
+      return new Response(upstream.body, {
+        status: upstream.status,
+        headers: {
+          'Content-Type': 'audio/mpeg',
+          'Content-Range': upstream.headers.get('content-range') ?? '',
+          'Content-Length': upstream.headers.get('content-length') ?? '',
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': 'public, max-age=86400',
+        },
+      })
+    }
+  }
+
+  // Full file or range starting near byte 0 — fetch and apply Xing fix to first 4KB
+  const upstream = await fetch(url, rangeHeader ? { headers: { Range: rangeHeader } } : {})
   if (!upstream.ok || !upstream.body) {
     return new Response('Failed to fetch audio', { status: 502 })
   }
@@ -47,7 +66,6 @@ export async function GET(request: NextRequest) {
         const { done, value } = await reader.read()
 
         if (done) {
-          // Flush remaining buffered header bytes if file was tiny
           if (!headerFixed && headerChunks.length > 0) {
             const combined = new Uint8Array(headerBytesRead)
             let off = 0
@@ -81,15 +99,21 @@ export async function GET(request: NextRequest) {
     cancel() { reader.cancel() },
   })
 
+  const responseHeaders: Record<string, string> = {
+    'Content-Type': 'audio/mpeg',
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': 'public, max-age=86400',
+    'Access-Control-Allow-Origin': '*',
+  }
+  if (upstream.headers.get('content-length')) {
+    responseHeaders['Content-Length'] = upstream.headers.get('content-length')!
+  }
+  if (upstream.headers.get('content-range')) {
+    responseHeaders['Content-Range'] = upstream.headers.get('content-range')!
+  }
+
   return new Response(stream, {
-    headers: {
-      'Content-Type': 'audio/mpeg',
-      'Cache-Control': 'public, max-age=86400',
-      'Access-Control-Allow-Origin': '*',
-      // Forward Content-Length so browsers can calculate duration and enable seeking
-      ...(upstream.headers.get('content-length')
-        ? { 'Content-Length': upstream.headers.get('content-length')! }
-        : {}),
-    },
+    status: upstream.status,
+    headers: responseHeaders,
   })
 }
