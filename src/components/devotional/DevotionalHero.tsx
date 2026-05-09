@@ -36,10 +36,10 @@ export default function DevotionalHero({ featured }: Props) {
               Browse devotionals
             </Link>
             <Link
-              href="/pricing"
+              href="/give"
               className="px-6 py-3 border border-neutral-200 dark:border-neutral-700 font-medium rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
             >
-              View plans
+              Give
             </Link>
           </div>
         </div>

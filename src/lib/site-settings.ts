@@ -60,7 +60,7 @@ const defaults: SiteSettings = {
     { label: 'Home', url: '/' },
     { label: 'Devotionals', url: '/devotionals' },
     { label: 'About', url: '/about' },
-    { label: 'Pricing', url: '/pricing' },
+    { label: 'Give', url: '/give' },
   ],
   footer_text: '© 2026 The Adopted Son. All rights reserved.',
   social_links: [],

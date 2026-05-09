@@ -35,3 +35,19 @@ CREATE POLICY "Users can view own givings" ON givings
 -- Drop old tables (run only after confirming data is migrated/not needed)
 -- DROP TABLE IF EXISTS visitor_trials;
 -- DROP TABLE IF EXISTS subscription_plans;
+
+-- Update nav_links to replace Pricing with Give
+-- Run this in Supabase SQL editor after running the givings table migration above
+
+UPDATE site_settings
+SET value = REPLACE(
+  REPLACE(
+    value::text,
+    '"label":"Pricing","url":"/pricing"',
+    '"label":"Give","url":"/give"'
+  ),
+  '"label": "Pricing", "url": "/pricing"',
+  '"label": "Give", "url": "/give"'
+)::jsonb
+WHERE key = 'nav_links'
+  AND value::text ILIKE '%pricing%';
