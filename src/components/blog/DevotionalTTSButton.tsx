@@ -37,30 +37,6 @@ function formatTime(seconds: number) {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
-// Neutralize the Xing/LAME VBR header that encodes only the first chunk's
-// duration. Without it, browsers scan all frames for the true duration.
-function neutralizeXingHeader(bytes: Uint8Array): void {
-  // Skip ID3v2 tag if present
-  let offset = 0
-  if (bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) {
-    const size =
-      ((bytes[6] & 0x7f) << 21) | ((bytes[7] & 0x7f) << 14) |
-      ((bytes[8] & 0x7f) << 7)  |  (bytes[9] & 0x7f)
-    offset = 10 + size
-  }
-  // Search up to 2KB past the ID3 tag for "Xing" or "Info"
-  const end = Math.min(offset + 2048, bytes.length - 4)
-  for (let i = offset; i < end; i++) {
-    if (
-      (bytes[i] === 0x58 && bytes[i+1] === 0x69 && bytes[i+2] === 0x6e && bytes[i+3] === 0x67) || // "Xing"
-      (bytes[i] === 0x49 && bytes[i+1] === 0x6e && bytes[i+2] === 0x66 && bytes[i+3] === 0x6f)    // "Info"
-    ) {
-      // Overwrite tag so the browser ignores VBR duration and scans real frames
-      bytes[i] = 0; bytes[i+1] = 0; bytes[i+2] = 0; bytes[i+3] = 0
-      return
-    }
-  }
-}
 
 export default function DevotionalTTSButton({
   content,
@@ -83,31 +59,16 @@ export default function DevotionalTTSButton({
     if (saved) setSavedPosition(parseFloat(saved))
   }, [devotionalId])
 
-  // Fetch audio on mount, neutralize the Xing VBR header, and set src so
-  // play() can be called synchronously on tap (required by mobile Chrome).
+  // Route audio through proxy that strips the Xing VBR header server-side.
+  // This fixes mobile Chrome duration truncation without loading the full
+  // file into memory (which fails for large files on mobile).
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !cachedAudioUrl) return
-
-    let objectUrl: string | null = null
-    fetch(cachedAudioUrl)
-      .then((r) => r.arrayBuffer())
-      .then((buf) => {
-        const bytes = new Uint8Array(buf)
-        neutralizeXingHeader(bytes)
-        objectUrl = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }))
-        audio.src = objectUrl
-        audio.preload = 'none'
-        setSrcReady(true)
-      })
-      .catch(() => {
-        // Fallback: use URL directly if fetch fails
-        audio.src = cachedAudioUrl
-        audio.preload = 'none'
-        setSrcReady(true)
-      })
-
-    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl) }
+    const proxied = `/api/audio-proxy?url=${encodeURIComponent(cachedAudioUrl)}`
+    audio.src = proxied
+    audio.preload = 'none'
+    setSrcReady(true)
   }, [cachedAudioUrl])
 
   // Wire up event listeners once
