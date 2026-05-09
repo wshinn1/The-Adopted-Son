@@ -5,7 +5,6 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react'
-import TrialBanner from '@/components/devotional/TrialBanner'
 import HamburgerHeader from '@/components/HamburgerHeader'
 import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
 import DevotionalsGrid from '@/components/DevotionalsGrid'
@@ -215,8 +214,6 @@ export default async function DevotionalsPage({ searchParams }: Props) {
       />
       {/* Spacer for fixed header */}
       <div className="h-20" />
-      
-      <TrialBanner />
       
       {/* Newsletter Signup */}
       {settings.show_newsletter_on_posts && (

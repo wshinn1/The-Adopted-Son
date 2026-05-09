@@ -1,19 +1,15 @@
 import BlogPostPage from '@/components/blog/BlogPostPage'
-import PaywallGate from '@/components/devotional/PaywallGate'
-import TrialBanner from '@/components/devotional/TrialBanner'
 import HamburgerHeader from '@/components/HamburgerHeader'
 import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
 import ReadingProgress from '@/components/ReadingProgress'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
 import { getSiteSettings } from '@/lib/site-settings'
-import { checkAccess } from '@/lib/trial'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
-// Disable caching to ensure fresh data
 export const revalidate = 0
 export const dynamic = 'force-dynamic'
 
@@ -25,22 +21,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const devotional = await getDevotionalBySlug(supabaseAdmin, slug)
 
-  // Use SEO fields if available, fallback to regular fields
-  const title = devotional?.seo_title || devotional?.title 
-    ? `${devotional?.seo_title || devotional?.title} — The Adopted Son` 
+  const title = devotional?.seo_title || devotional?.title
+    ? `${devotional?.seo_title || devotional?.title} — The Adopted Son`
     : 'Devotional'
   const description = devotional?.seo_description || devotional?.excerpt || 'A daily devotional from The Adopted Son'
   const keywords = devotional?.seo_keywords?.split(',').map(k => k.trim()).filter(Boolean) || []
 
-  // Use the devotional's featured image directly for social sharing
-  // Ensure the URL is absolute for social media platforms
   let ogImageUrl = 'https://www.theadoptedson.com/og-image.jpg'
   if (devotional?.cover_image_url) {
-    // If it's already an absolute URL, use it directly
     if (devotional.cover_image_url.startsWith('http')) {
       ogImageUrl = devotional.cover_image_url
     } else {
-      // If it's a relative path, prepend the domain
       ogImageUrl = `https://www.theadoptedson.com${devotional.cover_image_url.startsWith('/') ? '' : '/'}${devotional.cover_image_url}`
     }
   }
@@ -91,24 +82,18 @@ export default async function DevotionalPage({ params }: Props) {
     notFound()
   }
 
-  // Check access for premium content
-  const access = await checkAccess()
-  const canRead = !devotional.is_premium || access.hasAccess
-
-  // Get related devotionals
   const relatedDevotionals = await getDevotionals(supabaseAdmin, { limit: 4, published: true })
   const relatedPosts = relatedDevotionals
     .filter(d => d.id !== devotional.id)
     .slice(0, 3)
     .map(devotionalToPost)
 
-  // Build the post object for BlogPostPage
   const post = {
     id: devotional.id,
     title: devotional.title,
     slug: devotional.slug,
     excerpt: devotional.excerpt,
-    content: canRead ? (devotional.content as Record<string, unknown> | null) : getTeaserContent(devotional.content),
+    content: devotional.content as Record<string, unknown> | null,
     cover_image_url: devotional.cover_image_url,
     cover_image_caption: devotional.cover_image_caption,
     scripture_reference: devotional.scripture_reference,
@@ -123,7 +108,6 @@ export default async function DevotionalPage({ params }: Props) {
     tts_enabled: (devotional as unknown as Record<string, unknown>).tts_enabled as boolean | null ?? false,
   }
 
-  // JSON-LD structured data for SEO
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -159,30 +143,17 @@ export default async function DevotionalPage({ params }: Props) {
         logoUrl={settings.logo_url || undefined}
         navLinks={settings.nav_links}
       />
-      
-      {/* JSON-LD Structured Data */}
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
-      {/* Spacer for fixed header */}
+
       <div className="h-20" />
-      
-      <TrialBanner />
-        
-      {/* Main Blog Post */}
-        <BlogPostPage post={post} shareSettings={settings.share_buttons} voiceId={settings.elevenlabs_voice_id || undefined} />
 
-        {/* Paywall (if premium and no access) */}
-        {!canRead && (
-          <div className="max-w-4xl mx-auto px-6 lg:px-8 -mt-8 pb-16">
-            <PaywallGate reason={access.reason} />
-          </div>
-        )}
+      <BlogPostPage post={post} shareSettings={settings.share_buttons} voiceId={settings.elevenlabs_voice_id || undefined} />
 
-      {/* Newsletter Signup */}
-      {settings.show_newsletter_on_posts && canRead && (
+      {settings.show_newsletter_on_posts && (
         <NewsletterSignUp
           data={{
             heading: settings.newsletter_settings?.heading || 'Stay Connected',
@@ -200,16 +171,13 @@ export default async function DevotionalPage({ params }: Props) {
         />
       )}
 
-      {/* Related Posts */}
-      {relatedPosts.length > 0 && canRead && (
+      {relatedPosts.length > 0 && (
         <div className="border-t border-neutral-200">
           <div className="max-w-6xl mx-auto px-6 lg:px-8 py-16">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-neutral-900">
-                More Devotionals
-              </h2>
-              <Link 
-                href="/devotionals" 
+              <h2 className="text-2xl font-bold text-neutral-900">More Devotionals</h2>
+              <Link
+                href="/devotionals"
                 className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
               >
                 View all
@@ -221,8 +189,8 @@ export default async function DevotionalPage({ params }: Props) {
                   <article>
                     <div className="aspect-[4/3] relative rounded-lg overflow-hidden mb-4">
                       <Image
-                        src={typeof relatedPost.featuredImage === 'string' 
-                          ? relatedPost.featuredImage 
+                        src={typeof relatedPost.featuredImage === 'string'
+                          ? relatedPost.featuredImage
                           : relatedPost.featuredImage.src}
                         alt={relatedPost.title}
                         fill
@@ -245,19 +213,4 @@ export default async function DevotionalPage({ params }: Props) {
       )}
     </div>
   )
-}
-
-// Extract first 2 paragraphs as teaser content
-function getTeaserContent(content: unknown): Record<string, unknown> | null {
-  if (!content || typeof content !== 'object') return null
-  
-  const doc = content as { type?: string; content?: any[] }
-  if (doc.type === 'doc' && Array.isArray(doc.content)) {
-    return {
-      type: 'doc',
-      content: doc.content.slice(0, 2),
-    }
-  }
-  
-  return null
 }

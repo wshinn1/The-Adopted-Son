@@ -47,6 +47,5 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Track IP-based trial for all public devotional pages (handled in route handler)
   return supabaseResponse
 }
