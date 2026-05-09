@@ -174,6 +174,9 @@ export default function DevotionalTTSButton({
 
     // Call play() synchronously — must stay in user-gesture call stack on mobile
     audio.play().catch((err) => {
+      // Ignore the benign race condition where play() is interrupted by pause()
+      if (err instanceof DOMException && err.name === 'AbortError') return
+      if (typeof err?.message === 'string' && err.message.includes('interrupted')) return
       setStatus('idle')
       setError(err instanceof Error ? err.message : 'Playback failed')
     })
