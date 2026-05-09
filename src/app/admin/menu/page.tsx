@@ -223,6 +223,8 @@ export default function MenuNavigationPage() {
                             updateNavLink(index, 'label', 'Home')
                           } else if (value === '/devotionals') {
                             updateNavLink(index, 'label', 'Devotionals')
+                          } else if (value === '/give') {
+                            updateNavLink(index, 'label', 'Give')
                           }
                         }
                       }}
@@ -231,6 +233,7 @@ export default function MenuNavigationPage() {
                       <option value="">Select a page...</option>
                       <option value="/">Home</option>
                       <option value="/devotionals">Devotionals</option>
+                      <option value="/give">Give</option>
                       {pages.filter(p => p.slug !== 'home').map((page) => (
                         <option key={page.id} value={`/${page.slug}`}>
                           {page.title}
