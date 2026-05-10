@@ -190,17 +190,53 @@ export default function GivingForm() {
   }
 
   if (step === 'success') {
+    const signUpUrl = `/auth/sign-up?email=${encodeURIComponent(email)}`
+
     return (
-      <div className="text-center py-8 space-y-4">
-        <div className="text-5xl">🙏</div>
-        <h2 className="text-2xl font-semibold text-neutral-900">Thank you!</h2>
-        <p className="text-neutral-500 text-sm">
-          Your {isRecurring ? 'monthly ' : ''}gift of ${(amountCents / 100).toFixed(2)} has been received.
-          A confirmation has been sent to {email}.
-        </p>
+      <div className="py-6 space-y-6">
+        {/* Thank you header */}
+        <div className="text-center space-y-2">
+          <div className="text-5xl">🙏</div>
+          <h2 className="text-2xl font-semibold text-neutral-900">Thank you!</h2>
+          <p className="text-neutral-500 text-sm">
+            Your {isRecurring ? 'monthly ' : ''}gift of ${(amountCents / 100).toFixed(2)} has been received.
+            A confirmation has been sent to {email}.
+          </p>
+        </div>
+
+        {/* Monthly donors: account creation prompt */}
+        {isRecurring && (
+          <div className="rounded-2xl border-2 border-blue-100 bg-blue-50 p-5 space-y-3">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🔑</span>
+              <div>
+                <p className="font-semibold text-neutral-900 text-sm">Create a free account to manage your giving</p>
+                <p className="text-neutral-500 text-xs mt-1 leading-relaxed">
+                  Since you're giving monthly, an account lets you view your giving history and cancel at any time. We'll pre-fill your email.
+                </p>
+              </div>
+            </div>
+            <a
+              href={signUpUrl}
+              className="block w-full text-center py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors"
+            >
+              Create your free account →
+            </a>
+            <p className="text-center text-xs text-neutral-400">
+              Already have an account?{' '}
+              <a href="/auth/login" className="text-blue-600 hover:underline">Sign in</a>
+            </p>
+          </div>
+        )}
+
+        {/* Read devotionals link */}
         <a
           href="/devotionals"
-          className="inline-block mt-4 px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
+          className={`block text-center px-6 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+            isRecurring
+              ? 'border border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
         >
           Read devotionals
         </a>
