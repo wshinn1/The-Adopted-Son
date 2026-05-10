@@ -4,6 +4,8 @@ import HomePageClient from '@/components/HomePageClient'
 import PageRenderer from '@/components/PageRenderer'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 const DEFAULT_OG = 'https://www.theadoptedson.com/og-image.jpg'
 const BASE_URL = 'https://www.theadoptedson.com'
 

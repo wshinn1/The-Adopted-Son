@@ -4,6 +4,7 @@
 
 export const AVAILABLE_SECTIONS = [
   'Home1',
+  'HeroTwo',
   'TextSection',
   'BlogGallery1',
   'NewsletterSignUp',

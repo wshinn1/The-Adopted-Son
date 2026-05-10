@@ -7,6 +7,8 @@ import { Plus, Trash2, GripVertical } from 'lucide-react'
 interface NavLink {
   label: string
   url: string
+  bg_color?: string
+  text_color?: string
 }
 
 interface Page {
@@ -80,6 +82,14 @@ export default function MenuNavigationPage() {
         .upsert({ key: 'nav_links', value: JSON.stringify(navLinks) }, { onConflict: 'key' })
 
       if (error) throw error
+
+      // Revalidate all public pages so the new nav order appears immediately
+      await fetch('/api/admin/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paths: ['/', '/devotionals', '/about', '/give', '/contact'] }),
+      })
+
       showNotification('Menu saved successfully!')
     } catch (err) {
       console.error('Error saving menu:', err)
@@ -93,7 +103,7 @@ export default function MenuNavigationPage() {
     setNavLinks([...navLinks, { label: '', url: '' }])
   }
 
-  const updateNavLink = (index: number, field: 'label' | 'url', value: string) => {
+  const updateNavLink = (index: number, field: 'label' | 'url' | 'bg_color' | 'text_color', value: string) => {
     const updated = [...navLinks]
     updated[index][field] = value
     setNavLinks(updated)
@@ -172,84 +182,156 @@ export default function MenuNavigationPage() {
             </div>
           ) : (
             navLinks.map((link, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                <div className="flex flex-col gap-1">
-                  <button
-                    onClick={() => moveLink(index, 'up')}
-                    disabled={index === 0}
-                    className="p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30"
-                    title="Move up"
-                  >
-                    <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => moveLink(index, 'down')}
-                    disabled={index === navLinks.length - 1}
-                    className="p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30"
-                    title="Move down"
-                  >
-                    <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
-                
-                <div className="flex-1 grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-neutral-500 mb-1">Label</label>
-                    <input
-                      type="text"
-                      value={link.label}
-                      onChange={(e) => updateNavLink(index, 'label', e.target.value)}
-                      placeholder="Link text"
-                      className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-neutral-500 mb-1">Link To</label>
-                    <select
-                      value={link.url}
-                      onChange={(e) => {
-                        const value = e.target.value
-                        updateNavLink(index, 'url', value)
-                        // Auto-fill label if empty and a page is selected
-                        if (value && !link.label) {
-                          const page = pages.find(p => `/${p.slug}` === value || (p.slug === 'home' && value === '/'))
-                          if (page) {
-                            updateNavLink(index, 'label', page.title)
-                          } else if (value === '/') {
-                            updateNavLink(index, 'label', 'Home')
-                          } else if (value === '/devotionals') {
-                            updateNavLink(index, 'label', 'Devotionals')
-                          } else if (value === '/give') {
-                            updateNavLink(index, 'label', 'Give')
-                          }
-                        }
-                      }}
-                      className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm"
+              <div key={index} className="p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => moveLink(index, 'up')}
+                      disabled={index === 0}
+                      className="p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30"
+                      title="Move up"
                     >
-                      <option value="">Select a page...</option>
-                      <option value="/">Home</option>
-                      <option value="/devotionals">Devotionals</option>
-                      <option value="/give">Give</option>
-                      {pages.filter(p => p.slug !== 'home').map((page) => (
-                        <option key={page.id} value={`/${page.slug}`}>
-                          {page.title}
-                        </option>
-                      ))}
-                    </select>
+                      <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => moveLink(index, 'down')}
+                      disabled={index === navLinks.length - 1}
+                      className="p-1 text-neutral-400 hover:text-neutral-600 disabled:opacity-30"
+                      title="Move down"
+                    >
+                      <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
                   </div>
+
+                  <div className="flex-1 grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-neutral-500 mb-1">Label</label>
+                      <input
+                        type="text"
+                        value={link.label}
+                        onChange={(e) => updateNavLink(index, 'label', e.target.value)}
+                        placeholder="Link text"
+                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-neutral-500 mb-1">Link To</label>
+                      <select
+                        value={link.url}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          updateNavLink(index, 'url', value)
+                          if (value && !link.label) {
+                            const page = pages.find(p => `/${p.slug}` === value || (p.slug === 'home' && value === '/'))
+                            if (page) {
+                              updateNavLink(index, 'label', page.title)
+                            } else if (value === '/') {
+                              updateNavLink(index, 'label', 'Home')
+                            } else if (value === '/devotionals') {
+                              updateNavLink(index, 'label', 'Devotionals')
+                            } else if (value === '/give') {
+                              updateNavLink(index, 'label', 'Give')
+                            }
+                          }
+                        }}
+                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm"
+                      >
+                        <option value="">Select a page...</option>
+                        <option value="/">Home</option>
+                        <option value="/devotionals">Devotionals</option>
+                        <option value="/give">Give</option>
+                        {pages.filter(p => p.slug !== 'home').map((page) => (
+                          <option key={page.id} value={`/${page.slug}`}>
+                            {page.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => removeNavLink(index)}
+                    className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                    title="Remove link"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
                 </div>
 
-                <button
-                  onClick={() => removeNavLink(index)}
-                  className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-                  title="Remove link"
-                >
-                  <Trash2 className="size-4" />
-                </button>
+                {/* Button styling row */}
+                <div className="flex items-center gap-4 pl-10 border-t border-neutral-200 dark:border-neutral-700 pt-3">
+                  <span className="text-xs text-neutral-500 shrink-0">Button style</span>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-neutral-500">Background</label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="color"
+                        value={link.bg_color || '#ffffff'}
+                        onChange={(e) => updateNavLink(index, 'bg_color', e.target.value)}
+                        className="h-7 w-10 rounded cursor-pointer border border-neutral-200 dark:border-neutral-600"
+                      />
+                      <input
+                        type="text"
+                        value={link.bg_color || ''}
+                        onChange={(e) => updateNavLink(index, 'bg_color', e.target.value)}
+                        placeholder="none"
+                        className="w-20 px-2 py-1 rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-xs"
+                      />
+                      {link.bg_color && (
+                        <button
+                          onClick={() => updateNavLink(index, 'bg_color', '')}
+                          className="text-xs text-neutral-400 hover:text-neutral-600 px-1"
+                          title="Remove background color"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-neutral-500">Text</label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="color"
+                        value={link.text_color || '#000000'}
+                        onChange={(e) => updateNavLink(index, 'text_color', e.target.value)}
+                        className="h-7 w-10 rounded cursor-pointer border border-neutral-200 dark:border-neutral-600"
+                      />
+                      <input
+                        type="text"
+                        value={link.text_color || ''}
+                        onChange={(e) => updateNavLink(index, 'text_color', e.target.value)}
+                        placeholder="none"
+                        className="w-20 px-2 py-1 rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-xs"
+                      />
+                      {link.text_color && (
+                        <button
+                          onClick={() => updateNavLink(index, 'text_color', '')}
+                          className="text-xs text-neutral-400 hover:text-neutral-600 px-1"
+                          title="Remove text color"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {/* Live preview */}
+                  {link.bg_color && (
+                    <span
+                      className="text-xs font-medium px-3 py-1 rounded-full shrink-0"
+                      style={{
+                        backgroundColor: link.bg_color,
+                        color: link.text_color || '#000000',
+                      }}
+                    >
+                      {link.label || 'Preview'}
+                    </span>
+                  )}
+                </div>
               </div>
             ))
           )}
