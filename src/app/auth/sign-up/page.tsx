@@ -10,6 +10,7 @@ function SignUpForm() {
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
   const plan = searchParams.get('plan')
+  const prefillEmail = searchParams.get('email') ?? ''
   const redirectTo = plan ? `/subscribe?plan=${plan}` : null
 
   async function handleSubmit(formData: FormData) {
@@ -35,7 +36,7 @@ function SignUpForm() {
           Create an account
         </h1>
         <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
-          {plan ? 'Create your account to continue with subscription' : 'Join The Adopted Son community'}
+          {plan ? 'Create your account to continue with subscription' : prefillEmail ? 'Create an account to manage your monthly giving' : 'Join The Adopted Son community'}
         </p>
 
         {error && (
@@ -79,6 +80,7 @@ function SignUpForm() {
               type="email"
               name="email"
               required
+              defaultValue={prefillEmail}
               className="w-full px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
               placeholder="you@example.com"
             />
@@ -101,7 +103,7 @@ function SignUpForm() {
             disabled={loading}
             className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50 text-sm"
           >
-            {loading ? 'Creating account...' : plan ? 'Create account & continue' : 'Create account'}
+            {loading ? 'Creating account...' : plan ? 'Create account & continue' : prefillEmail ? 'Create account to manage giving' : 'Create account'}
           </button>
         </form>
 

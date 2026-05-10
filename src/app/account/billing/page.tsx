@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export default async function AccountBillingPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: givings } = await supabase
+  const { data: givings } = await supabaseAdmin
     .from('givings')
     .select('id, amount_cents, is_recurring, status, created_at, note')
     .eq('donor_email', user?.email ?? '')

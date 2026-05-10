@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { signOut } from '@/app/actions/auth'
+import AccountNav from '@/components/account/AccountNav'
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -32,26 +33,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
       <div className="container py-10">
         <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-8">
           {/* Sidebar */}
-          <nav className="space-y-1">
-            <div className="mb-4">
-              <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate">
-                {profile?.full_name ?? profile?.email}
-              </p>
-            </div>
-            {[
-              { label: 'My Devotionals', href: '/account' },
-              { label: 'Giving History', href: '/account/billing' },
-              { label: 'Profile', href: '/account/profile' },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <AccountNav displayName={profile?.full_name ?? profile?.email ?? 'My Account'} />
           {/* Content */}
           <main>{children}</main>
         </div>

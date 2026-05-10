@@ -2,7 +2,7 @@
 
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
@@ -25,6 +25,24 @@ interface CheckoutProps {
   onBack: () => void
 }
 
+// Maps Stripe decline codes to plain-English messages
+function friendlyStripeError(err: { code?: string; decline_code?: string; message?: string }): string {
+  const dc = err.decline_code
+  const code = err.code
+
+  if (dc === 'insufficient_funds') return "Your card was declined due to insufficient funds. Please try a different card."
+  if (dc === 'lost_card' || dc === 'stolen_card') return "This card has been reported and cannot be used. Please try a different card."
+  if (dc === 'expired_card' || code === 'expired_card') return "Your card has expired. Please use a different card."
+  if (dc === 'incorrect_cvc' || code === 'incorrect_cvc') return "The security code (CVV) is incorrect. Please check and try again."
+  if (dc === 'incorrect_number' || code === 'incorrect_number') return "The card number is incorrect. Please check and try again."
+  if (dc === 'card_velocity_exceeded') return "Too many attempts on this card. Please try a different card or try again later."
+  if (dc === 'do_not_honor' || dc === 'generic_decline') return "Your card was declined. Please contact your bank or try a different card."
+  if (code === 'card_declined') return "Your card was declined. Please try a different card or contact your bank."
+  if (code === 'payment_intent_authentication_failure') return "We couldn't verify your card. Please try again or use a different card."
+
+  return err.message ?? 'Something went wrong. Please try again.'
+}
+
 function StripeCheckoutForm({
   clientSecret,
   type,
@@ -41,6 +59,14 @@ function StripeCheckoutForm({
   const elements = useElements()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const errorRef = useRef<HTMLDivElement>(null)
+
+  // Scroll error into view whenever it appears
+  useEffect(() => {
+    if (error && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [error])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,7 +82,7 @@ function StripeCheckoutForm({
         redirect: 'if_required',
       })
       if (stripeError) {
-        setError(stripeError.message ?? 'Payment failed')
+        setError(friendlyStripeError(stripeError))
         setLoading(false)
         return
       }
@@ -68,7 +94,7 @@ function StripeCheckoutForm({
         redirect: 'if_required',
       })
       if (stripeError) {
-        setError(stripeError.message ?? 'Setup failed')
+        setError(friendlyStripeError(stripeError))
         setLoading(false)
         return
       }
@@ -80,7 +106,7 @@ function StripeCheckoutForm({
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        setError(data.error ?? 'Failed to confirm recurring giving')
+        setError(data.error ?? 'Something went wrong confirming your giving. Please try again.')
         setLoading(false)
         return
       }
@@ -109,7 +135,24 @@ function StripeCheckoutForm({
 
       <PaymentElement />
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {/* Error banner — shown above the buttons so it can't be missed */}
+      {error && (
+        <div
+          ref={errorRef}
+          className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3"
+          role="alert"
+        >
+          <span className="mt-0.5 text-red-500 shrink-0">
+            <svg className="size-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.25a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 7a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+            </svg>
+          </span>
+          <div>
+            <p className="text-sm font-medium text-red-700">{error}</p>
+            <p className="mt-0.5 text-xs text-red-500">Please try a different card or contact your bank if the issue persists.</p>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-3">
         <button
@@ -190,17 +233,53 @@ export default function GivingForm() {
   }
 
   if (step === 'success') {
+    const signUpUrl = `/auth/sign-up?email=${encodeURIComponent(email)}`
+
     return (
-      <div className="text-center py-8 space-y-4">
-        <div className="text-5xl">🙏</div>
-        <h2 className="text-2xl font-semibold text-neutral-900">Thank you!</h2>
-        <p className="text-neutral-500 text-sm">
-          Your {isRecurring ? 'monthly ' : ''}gift of ${(amountCents / 100).toFixed(2)} has been received.
-          A confirmation has been sent to {email}.
-        </p>
+      <div className="py-6 space-y-6">
+        {/* Thank you header */}
+        <div className="text-center space-y-2">
+          <div className="text-5xl">🙏</div>
+          <h2 className="text-2xl font-semibold text-neutral-900">Thank you!</h2>
+          <p className="text-neutral-500 text-sm">
+            Your {isRecurring ? 'monthly ' : ''}gift of ${(amountCents / 100).toFixed(2)} has been received.
+            A confirmation has been sent to {email}.
+          </p>
+        </div>
+
+        {/* Monthly donors: account creation prompt */}
+        {isRecurring && (
+          <div className="rounded-2xl border-2 border-blue-100 bg-blue-50 p-5 space-y-3">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🔑</span>
+              <div>
+                <p className="font-semibold text-neutral-900 text-sm">Create a free account to manage your giving</p>
+                <p className="text-neutral-500 text-xs mt-1 leading-relaxed">
+                  Since you're giving monthly, an account lets you view your giving history and cancel at any time. We'll pre-fill your email.
+                </p>
+              </div>
+            </div>
+            <a
+              href={signUpUrl}
+              className="block w-full text-center py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors"
+            >
+              Create your free account →
+            </a>
+            <p className="text-center text-xs text-neutral-400">
+              Already have an account?{' '}
+              <a href="/auth/login" className="text-blue-600 hover:underline">Sign in</a>
+            </p>
+          </div>
+        )}
+
+        {/* Read devotionals link */}
         <a
           href="/devotionals"
-          className="inline-block mt-4 px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
+          className={`block text-center px-6 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+            isRecurring
+              ? 'border border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
         >
           Read devotionals
         </a>
