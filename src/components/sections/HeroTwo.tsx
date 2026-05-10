@@ -138,7 +138,12 @@ export default function HeroTwo({ data }: { data: Partial<HeroTwoData> }) {
             className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight"
             style={{ color: d.text_color }}
           >
-            {d.headline}
+            {d.headline.split('\n').map((line, i, arr) => (
+              <span key={i}>
+                {line}
+                {i < arr.length - 1 && <br />}
+              </span>
+            ))}
           </motion.h1>
 
           {d.show_subheadline && d.subheadline && (
