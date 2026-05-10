@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import AdminDevotionalActions from '@/components/admin/AdminDevotionalActions'
@@ -7,7 +7,7 @@ import GenerateAllAudioButton from '@/components/admin/GenerateAllAudioButton'
 export const metadata: Metadata = { title: 'Devotionals — Admin' }
 
 export default async function AdminDevotionalsPage() {
-  const supabase = await createClient()
+  const supabase = supabaseAdmin
 
   const { data: devotionals } = await supabase
     .from('devotionals')

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import PageEditor from '@/components/admin/PageEditor'
@@ -11,7 +11,7 @@ export default async function EditPagePage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = supabaseAdmin
 
   // Get page data
   const { data: page, error } = await supabase

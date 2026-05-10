@@ -1,9 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import BlogRectangularLayout from '@/components/embed/BlogRectangularLayout'
 import { CopyButton } from '@/components/admin/CopyButton'
 
 export default async function ComponentsPage() {
-  const supabase = await createClient()
+  const supabase = supabaseAdmin
   const { data } = await supabase
     .from('devotionals')
     .select('id, title, slug, excerpt, cover_image_url, published_at, category, authors(name, avatar_url)')

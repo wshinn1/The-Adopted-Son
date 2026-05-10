@@ -1,5 +1,5 @@
 import DevotionalEditor from '@/components/admin/DevotionalEditor'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: 'Edit Devotional — Admin' }
 
 export default async function EditDevotionalPage({ params }: Props) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = supabaseAdmin
 
   const [{ data: devotional }, { data: authors }] = await Promise.all([
     supabase

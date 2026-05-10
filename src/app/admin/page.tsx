@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Admin Dashboard' }
 
 export default async function AdminDashboardPage() {
-  const supabase = await createClient()
+  const supabase = supabaseAdmin
 
   const [{ count: devotionalCount }, { count: newsletterCount }, { data: recentDevotionals }] =
     await Promise.all([
