@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function GivePage() {
   return (
-    <div className="min-h-screen bg-neutral-50 py-16 px-4">
+    <div className="min-h-screen bg-neutral-50 pt-24 pb-16 px-4">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-neutral-900 mb-3">Give</h1>
