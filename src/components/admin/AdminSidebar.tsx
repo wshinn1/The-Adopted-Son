@@ -22,6 +22,7 @@ const navItems = [
   { label: 'Typography', href: '/admin/typography', icon: 'Aa' },
   { label: 'Site Colors', href: '/admin/site-colors', icon: '◉' },
   { label: 'Givings', href: '/admin/givings', icon: '♡' },
+  { label: 'CTA Block', href: '/admin/cta', icon: '◆' },
   { label: 'Newsletter', href: '/admin/newsletter-settings', icon: '✉' },
   { label: 'Blog Settings', href: '/admin/blog-settings', icon: '✎' },
   { label: 'Site Settings', href: '/admin/site-settings', icon: '⚙' },

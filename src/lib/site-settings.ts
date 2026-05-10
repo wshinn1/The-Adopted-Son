@@ -99,6 +99,51 @@ const defaults: SiteSettings = {
   elevenlabs_voice_id: '',
 }
 
+export interface CtaStripSettings {
+  headline: string
+  subtext: string
+  button_text: string
+  button_url: string
+  bg_color: string
+  text_color: string
+  subtext_color: string
+  button_bg_color: string
+  button_text_color: string
+  button_hover_bg_color: string
+  show_icon: boolean
+  icon_color: string
+  enabled_on_devotionals: boolean
+}
+
+const ctaDefaults: CtaStripSettings = {
+  headline: 'Support This Ministry',
+  subtext: 'Your generosity helps us create daily devotionals and reach more people.',
+  button_text: 'Give Today',
+  button_url: '/give',
+  bg_color: '#1a1a2e',
+  text_color: '#ffffff',
+  subtext_color: 'rgba(255,255,255,0.6)',
+  button_bg_color: '#ffffff',
+  button_text_color: '#1a1a2e',
+  button_hover_bg_color: '#f0f0f0',
+  show_icon: true,
+  icon_color: 'rgba(255,255,255,0.7)',
+  enabled_on_devotionals: false,
+}
+
+export async function getCtaSettings(): Promise<CtaStripSettings> {
+  const { data, error } = await supabaseAdmin
+    .from('site_settings')
+    .select('key, value')
+    .eq('key', 'cta_settings')
+    .single()
+
+  if (error || !data) return ctaDefaults
+
+  const parsed = typeof data.value === 'string' ? JSON.parse(data.value) : data.value
+  return { ...ctaDefaults, ...parsed }
+}
+
 export async function getSiteSettings(): Promise<SiteSettings> {
   const supabase = await createClient()
   
