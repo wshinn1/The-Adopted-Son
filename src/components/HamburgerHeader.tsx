@@ -10,6 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 interface NavLink {
   label: string
   url: string
+  bg_color?: string
+  text_color?: string
 }
 
 interface HamburgerHeaderProps {
@@ -137,7 +139,16 @@ export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, 
               key={index}
               href={link.url}
               onClick={() => setIsOpen(false)}
-              className="text-3xl font-medium text-neutral-900 transition-colors hover:text-neutral-500 md:text-4xl lg:text-5xl font-heading"
+              className="text-3xl font-medium transition-colors md:text-4xl lg:text-5xl font-heading"
+              style={link.bg_color ? {
+                backgroundColor: link.bg_color,
+                color: link.text_color || '#000000',
+                paddingLeft: '0.75em',
+                paddingRight: '0.75em',
+                paddingTop: '0.25em',
+                paddingBottom: '0.25em',
+                borderRadius: '9999px',
+              } : { color: 'rgb(23,23,23)' }}
             >
               {link.label}
             </Link>
