@@ -47,7 +47,7 @@ export default async function AccountPage() {
             href="/account/billing"
             className="px-5 py-2.5 border border-neutral-200 dark:border-neutral-700 font-medium rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
           >
-            Manage Subscription
+            Giving History
           </Link>
         </div>
       </div>
