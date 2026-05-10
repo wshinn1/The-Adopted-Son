@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { uploadMedia } from '@/lib/uploadMedia'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Upload, X } from 'lucide-react'
@@ -144,18 +145,8 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   const handleImageUpload = async (file: File) => {
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const response = await fetch('/api/media/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) throw new Error('Upload failed')
-
-      const result = await response.json()
-      setCoverImageUrl(result.url)
+      const url = await uploadMedia(file)
+      setCoverImageUrl(url)
     } catch (err) {
       console.error('Upload error:', err)
       setError('Failed to upload image')
@@ -258,12 +249,8 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
                       if (!file) return
                       setUploading(true)
                       try {
-                        const formData = new FormData()
-                        formData.append('file', file)
-                        const res = await fetch('/api/media/upload', { method: 'POST', body: formData })
-                        if (!res.ok) throw new Error('Upload failed')
-                        const result = await res.json()
-                        setCoverImageUrl(result.url)
+                        const url = await uploadMedia(file)
+                        setCoverImageUrl(url)
                       } catch (err) {
                         console.error('Upload error:', err)
                         setError('Failed to upload image')

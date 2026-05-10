@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
+import { uploadMedia } from '@/lib/uploadMedia'
 
 export default function AdminMediaUpload() {
   const router = useRouter()
@@ -12,14 +13,15 @@ export default function AdminMediaUpload() {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
-
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('altText', file.name)
-
-    await fetch('/api/media/upload', { method: 'POST', body: formData })
-    setUploading(false)
-    router.refresh()
+    try {
+      await uploadMedia(file)
+    } catch (err) {
+      console.error('Upload error:', err)
+      alert('Error uploading file')
+    } finally {
+      setUploading(false)
+      router.refresh()
+    }
   }
 
   return (

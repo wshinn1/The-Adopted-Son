@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Upload, Plus, Trash2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { uploadMedia } from '@/lib/uploadMedia'
 
 // Dynamically import RichTextEditor to avoid SSR issues
 const RichTextEditor = dynamic(() => import('./RichTextEditor'), { ssr: false })
@@ -166,18 +167,8 @@ export default function SectionEditor({
   const handleImageUpload = async (key: string, file: File) => {
     setUploading(true)
     try {
-      const formDataObj = new FormData()
-      formDataObj.append('file', file)
-
-      const response = await fetch('/api/media/upload', {
-        method: 'POST',
-        body: formDataObj,
-      })
-
-      if (!response.ok) throw new Error('Upload failed')
-
-      const result = await response.json()
-      handleChange(key, result.url)
+      const url = await uploadMedia(file)
+      handleChange(key, url)
     } catch (err) {
       console.error('Upload error:', err)
       alert('Error uploading image')
@@ -468,13 +459,9 @@ export default function SectionEditor({
                           if (file) {
                             setUploading(true)
                             try {
-                              const formDataObj = new FormData()
-                              formDataObj.append('file', file)
-                              const response = await fetch('/api/media/upload', { method: 'POST', body: formDataObj })
-                              if (!response.ok) throw new Error('Upload failed')
-                              const result = await response.json()
+                              const url = await uploadMedia(file)
                               const newImages = [...(formData.background_images || [])]
-                              newImages[index] = result.url
+                              newImages[index] = url
                               handleChange('background_images', newImages)
                             } catch (err) {
                               console.error('Upload error:', err)

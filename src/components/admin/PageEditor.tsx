@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X, Globe, FileText } from 'lucide-react'
+import { uploadMedia } from '@/lib/uploadMedia'
 import SectionEditor from './SectionEditor'
 import Image from 'next/image'
 
@@ -88,15 +89,8 @@ export default function PageEditor({ page, sections: initialSections, templates 
 
     setOgImageUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      const res = await fetch('/api/media/upload', { method: 'POST', body: formData })
-      const json = await res.json()
-      if (json.url) {
-        setPageData({ ...pageData, og_image_url: json.url })
-      } else {
-        showNotification('Upload failed', 'error')
-      }
+      const url = await uploadMedia(file)
+      setPageData({ ...pageData, og_image_url: url })
     } catch {
       showNotification('Upload failed', 'error')
     } finally {

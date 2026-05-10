@@ -8,6 +8,7 @@ import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Placeholder from '@tiptap/extension-placeholder'
 import { useCallback, useRef, useEffect } from 'react'
+import { uploadMedia } from '@/lib/uploadMedia'
 
 interface Props {
   content: string // HTML string
@@ -50,18 +51,9 @@ export default function RichTextEditor({ content, onChange, placeholder = 'Start
   const handleImageUpload = useCallback(async (file: File) => {
     if (!editor) return
 
-    const formData = new FormData()
-    formData.append('file', file)
-
     try {
-      const res = await fetch('/api/media/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      const data = await res.json()
-      if (data.url) {
-        editor.chain().focus().setImage({ src: data.url }).run()
-      }
+      const url = await uploadMedia(file)
+      editor.chain().focus().setImage({ src: url }).run()
     } catch (error) {
       console.error('Failed to upload image:', error)
       const reader = new FileReader()

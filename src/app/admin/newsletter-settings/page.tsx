@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Upload } from 'lucide-react'
+import { uploadMedia } from '@/lib/uploadMedia'
 
 interface NewsletterSettings {
   // Text content
@@ -185,18 +186,8 @@ export default function NewsletterSettingsPage() {
   async function handleImageUpload(file: File) {
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const response = await fetch('/api/media/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) throw new Error('Upload failed')
-
-      const result = await response.json()
-      setSettings(prev => ({ ...prev, background_image_url: result.url }))
+      const url = await uploadMedia(file)
+      setSettings(prev => ({ ...prev, background_image_url: url }))
     } catch (err) {
       console.error('Upload error:', err)
       alert('Error uploading image')

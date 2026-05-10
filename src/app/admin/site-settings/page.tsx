@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { Upload, Plus, Trash2 } from 'lucide-react'
 import Head from 'next/head'
+import { uploadMedia } from '@/lib/uploadMedia'
 
 interface SocialLink {
   platform: string
@@ -186,18 +187,8 @@ export default function SiteSettingsPage() {
 
   const handleLogoUpload = async (file: File) => {
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const response = await fetch('/api/media/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) throw new Error('Upload failed')
-
-      const result = await response.json()
-      setLogoUrl(result.url)
+      const url = await uploadMedia(file)
+      setLogoUrl(url)
     } catch (err) {
       console.error('Upload error:', err)
       alert('Error uploading logo')
@@ -374,13 +365,10 @@ export default function SiteSettingsPage() {
                   onChange={async (e) => {
                     const file = e.target.files?.[0]
                     if (!file) return
-                    const formData = new FormData()
-                    formData.append('file', file)
-                    const res = await fetch('/api/media/upload', { method: 'POST', body: formData })
-                    if (res.ok) {
-                      const { url } = await res.json()
+                    try {
+                      const url = await uploadMedia(file)
                       setFaviconUrl(url)
-                    }
+                    } catch { /* ignore */ }
                   }}
                 />
               </label>
