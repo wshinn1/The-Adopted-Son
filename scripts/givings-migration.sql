@@ -1,5 +1,7 @@
--- Givings table
+-- ============================================================
+-- 1. Givings table
 -- Run this in the Supabase SQL editor
+-- ============================================================
 
 CREATE TABLE IF NOT EXISTS givings (
   id                      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -24,9 +26,6 @@ CREATE INDEX IF NOT EXISTS givings_created_at_idx ON givings (created_at DESC);
 -- RLS: no public reads — admin service role only
 ALTER TABLE givings ENABLE ROW LEVEL SECURITY;
 
--- Allow service role (used by admin API routes and webhook) full access
--- No RLS policies needed for service role — it bypasses RLS by default
-
 -- Allow authenticated users to read their own givings (for account/billing page)
 CREATE POLICY "Users can view own givings" ON givings
   FOR SELECT
@@ -36,8 +35,10 @@ CREATE POLICY "Users can view own givings" ON givings
 -- DROP TABLE IF EXISTS visitor_trials;
 -- DROP TABLE IF EXISTS subscription_plans;
 
--- Update nav_links to replace Pricing with Give
--- Run this in Supabase SQL editor after running the givings table migration above
+
+-- ============================================================
+-- 2. Update nav_links: replace Pricing with Give
+-- ============================================================
 
 UPDATE site_settings
 SET value = REPLACE(
@@ -51,3 +52,17 @@ SET value = REPLACE(
 )::jsonb
 WHERE key = 'nav_links'
   AND value::text ILIKE '%pricing%';
+
+
+-- ============================================================
+-- 3. Security: revoke public execute on trigger-only functions
+--
+-- handle_new_user, handle_updated_at, and is_admin are database
+-- trigger functions and should never be callable via the REST API
+-- by anon or authenticated users. Revoking EXECUTE here does NOT
+-- break the triggers — triggers run as the function owner regardless.
+-- ============================================================
+
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.handle_updated_at() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.is_admin() FROM anon, authenticated;
