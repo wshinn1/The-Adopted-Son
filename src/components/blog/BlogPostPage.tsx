@@ -73,7 +73,7 @@ export default function BlogPostPage({ post, shareSettings, voiceId }: Props) {
   const authorWebsite = authorData?.website
   const authorBio = authorData?.bio
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
+  const shareUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''
   const shareTitle = encodeURIComponent(post.title)
 
   return (
