@@ -1,11 +1,11 @@
 import DevotionalEditor from '@/components/admin/DevotionalEditor'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'New Devotional — Admin' }
 
 export default async function NewDevotionalPage() {
-  const supabase = await createClient()
+  const supabase = supabaseAdmin
   
   const { data: authors } = await supabase
     .from('authors')

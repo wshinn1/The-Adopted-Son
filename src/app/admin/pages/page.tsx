@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import PagesTable from '@/components/admin/PagesTable'
@@ -6,7 +6,7 @@ import PagesTable from '@/components/admin/PagesTable'
 export const metadata: Metadata = { title: 'Pages — Admin' }
 
 export default async function AdminPagesPage() {
-  const supabase = await createClient()
+  const supabase = supabaseAdmin
 
   const { data: pages } = await supabase
     .from('pages')
