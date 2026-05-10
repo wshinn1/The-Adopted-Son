@@ -122,6 +122,14 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
 // HeroSlider1 specific fields - these are handled separately with custom UI
 const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur']
 
+// CtaStrip specific fields - handled with custom grouped UI
+const CTASTRIP_CUSTOM_KEYS = [
+  'headline', 'subtext', 'button_text', 'button_url',
+  'bg_color', 'text_color', 'subtext_color',
+  'button_bg_color', 'button_text_color', 'button_hover_bg_color',
+  'show_icon', 'icon_color', 'full_width',
+]
+
 // HeroTwo specific fields - handled with custom grouped UI
 const HEROTWO_CUSTOM_KEYS = [
   'headline', 'subheadline', 'show_subheadline',
@@ -189,6 +197,7 @@ export default function SectionEditor({
   const isNewsletterSection = templateName === 'NewsletterSignUp'
   const isHeroSlider1Section = templateName === 'HeroSlider1'
   const isHeroTwoSection = templateName === 'HeroTwo'
+  const isCtaStripSection = templateName === 'CtaStrip'
 
   let regularProperties = Object.entries(properties)
   if (isNewsletterSection) {
@@ -199,6 +208,9 @@ export default function SectionEditor({
   }
   if (isHeroTwoSection) {
     regularProperties = regularProperties.filter(([key]) => !HEROTWO_CUSTOM_KEYS.includes(key))
+  }
+  if (isCtaStripSection) {
+    regularProperties = regularProperties.filter(([key]) => !CTASTRIP_CUSTOM_KEYS.includes(key))
   }
 
   return (
@@ -1097,6 +1109,93 @@ export default function SectionEditor({
                   <option value="right">Right</option>
                 </select>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CtaStrip Custom Fields */}
+      {isCtaStripSection && (
+        <div className="space-y-6">
+          {/* Content */}
+          <div className="pt-2">
+            <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">Content</h4>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Headline</label>
+                <input
+                  type="text"
+                  value={formData.headline || ''}
+                  onChange={(e) => handleChange('headline', e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Subtext</label>
+                <input
+                  type="text"
+                  value={formData.subtext || ''}
+                  onChange={(e) => handleChange('subtext', e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Button Text</label>
+                  <input
+                    type="text"
+                    value={formData.button_text || ''}
+                    onChange={(e) => handleChange('button_text', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Button URL</label>
+                  <input
+                    type="text"
+                    value={formData.button_url || ''}
+                    onChange={(e) => handleChange('button_url', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Show Sparkle Icon</label>
+                <button
+                  type="button"
+                  onClick={() => handleChange('show_icon', !formData.show_icon)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.show_icon ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.show_icon ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Full Width</label>
+                  <p className="text-xs text-neutral-400 mt-0.5">Stretch to full width instead of max-w-4xl</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleChange('full_width', !formData.full_width)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.full_width ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.full_width ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Colors */}
+          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">Colors</h4>
+            <div className="grid gap-6 md:grid-cols-2">
+              <ColorField label="Background" value={formData.bg_color || '#1a1a2e'} onChange={(v) => handleChange('bg_color', v)} />
+              <ColorField label="Headline Color" value={formData.text_color || '#ffffff'} onChange={(v) => handleChange('text_color', v)} />
+              <ColorField label="Subtext Color" value={formData.subtext_color || 'rgba(255,255,255,0.6)'} onChange={(v) => handleChange('subtext_color', v)} />
+              <ColorField label="Icon Color" value={formData.icon_color || 'rgba(255,255,255,0.7)'} onChange={(v) => handleChange('icon_color', v)} />
+              <ColorField label="Button Background" value={formData.button_bg_color || '#ffffff'} onChange={(v) => handleChange('button_bg_color', v)} />
+              <ColorField label="Button Text" value={formData.button_text_color || '#1a1a2e'} onChange={(v) => handleChange('button_text_color', v)} />
+              <ColorField label="Button Hover Background" value={formData.button_hover_bg_color || '#f0f0f0'} onChange={(v) => handleChange('button_hover_bg_color', v)} />
             </div>
           </div>
         </div>

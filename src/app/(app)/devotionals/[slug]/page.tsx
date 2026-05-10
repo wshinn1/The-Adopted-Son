@@ -1,9 +1,10 @@
 import BlogPostPage from '@/components/blog/BlogPostPage'
 import HamburgerHeader from '@/components/HamburgerHeader'
 import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
+import CtaStrip from '@/components/sections/CtaStrip'
 import ReadingProgress from '@/components/ReadingProgress'
 import { getDevotionalBySlug, getDevotionals, devotionalToPost } from '@/lib/devotional-mapper'
-import { getSiteSettings } from '@/lib/site-settings'
+import { getSiteSettings, getCtaSettings } from '@/lib/site-settings'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -74,7 +75,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function DevotionalPage({ params }: Props) {
   const { slug } = await params
-  const settings = await getSiteSettings()
+  const [settings, ctaSettings] = await Promise.all([
+    getSiteSettings(),
+    getCtaSettings(),
+  ])
 
   const devotional = await getDevotionalBySlug(supabaseAdmin, slug)
 
@@ -151,7 +155,15 @@ export default async function DevotionalPage({ params }: Props) {
 
       <div className="h-20" />
 
+      {ctaSettings.enabled_on_devotionals && (
+        <CtaStrip data={ctaSettings} />
+      )}
+
       <BlogPostPage post={post} shareSettings={settings.share_buttons} voiceId={settings.elevenlabs_voice_id || undefined} />
+
+      {ctaSettings.enabled_on_devotionals && (
+        <CtaStrip data={ctaSettings} />
+      )}
 
       {settings.show_newsletter_on_posts && (
         <NewsletterSignUp
