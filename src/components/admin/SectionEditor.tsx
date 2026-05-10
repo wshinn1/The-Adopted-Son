@@ -128,6 +128,18 @@ const CTASTRIP_CUSTOM_KEYS = [
   'bg_color', 'text_color', 'subtext_color',
   'button_bg_color', 'button_text_color', 'button_hover_bg_color',
   'show_icon', 'icon_color', 'full_width',
+  'headline_size', 'subtext_size',
+]
+
+const CTA_FONT_SIZE_OPTIONS = [
+  { label: 'XS — 12px', value: '12px' },
+  { label: 'SM — 14px', value: '14px' },
+  { label: 'Base — 16px', value: '16px' },
+  { label: 'LG — 18px', value: '18px' },
+  { label: 'XL — 20px', value: '20px' },
+  { label: '2XL — 24px', value: '24px' },
+  { label: '3XL — 30px', value: '30px' },
+  { label: '4XL — 36px', value: '36px' },
 ]
 
 // HeroTwo specific fields - handled with custom grouped UI
@@ -1121,23 +1133,51 @@ export default function SectionEditor({
           <div className="pt-2">
             <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">Content</h4>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Headline</label>
-                <input
-                  type="text"
-                  value={formData.headline || ''}
-                  onChange={(e) => handleChange('headline', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
-                />
+              <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Headline</label>
+                  <input
+                    type="text"
+                    value={formData.headline || ''}
+                    onChange={(e) => handleChange('headline', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Size</label>
+                  <select
+                    value={formData.headline_size || '14px'}
+                    onChange={(e) => handleChange('headline_size', e.target.value)}
+                    className="px-2 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  >
+                    {CTA_FONT_SIZE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Subtext</label>
-                <input
-                  type="text"
-                  value={formData.subtext || ''}
-                  onChange={(e) => handleChange('subtext', e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
-                />
+              <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Subtext</label>
+                  <input
+                    type="text"
+                    value={formData.subtext || ''}
+                    onChange={(e) => handleChange('subtext', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Size</label>
+                  <select
+                    value={formData.subtext_size || '12px'}
+                    onChange={(e) => handleChange('subtext_size', e.target.value)}
+                    className="px-2 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  >
+                    {CTA_FONT_SIZE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

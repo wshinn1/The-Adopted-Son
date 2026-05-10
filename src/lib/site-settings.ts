@@ -113,6 +113,8 @@ export interface CtaStripSettings {
   show_icon: boolean
   icon_color: string
   enabled_on_devotionals: boolean
+  headline_size: string
+  subtext_size: string
 }
 
 const ctaDefaults: CtaStripSettings = {
@@ -129,6 +131,8 @@ const ctaDefaults: CtaStripSettings = {
   show_icon: true,
   icon_color: 'rgba(255,255,255,0.7)',
   enabled_on_devotionals: false,
+  headline_size: '14px',
+  subtext_size: '12px',
 }
 
 export async function getCtaSettings(): Promise<CtaStripSettings> {

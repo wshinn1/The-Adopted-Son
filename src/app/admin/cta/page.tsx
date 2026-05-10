@@ -19,8 +19,21 @@ const DEFAULTS: CtaStripData & { enabled_on_devotionals: boolean } = {
   show_icon: true,
   icon_color: 'rgba(255,255,255,0.7)',
   full_width: false,
+  headline_size: '14px',
+  subtext_size: '12px',
   enabled_on_devotionals: false,
 }
+
+const FONT_SIZE_OPTIONS = [
+  { label: 'XS — 12px', value: '12px' },
+  { label: 'SM — 14px', value: '14px' },
+  { label: 'Base — 16px', value: '16px' },
+  { label: 'LG — 18px', value: '18px' },
+  { label: 'XL — 20px', value: '20px' },
+  { label: '2XL — 24px', value: '24px' },
+  { label: '3XL — 30px', value: '30px' },
+  { label: '4XL — 36px', value: '36px' },
+]
 
 function ColorField({
   label,
@@ -121,24 +134,52 @@ export default function CtaAdminPage() {
       <section className="space-y-4">
         <h2 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide">Content</h2>
 
-        <div className="space-y-1">
-          <label className="block text-xs font-medium text-neutral-600">Headline</label>
-          <input
-            type="text"
-            value={settings.headline}
-            onChange={(e) => update('headline', e.target.value)}
-            className="w-full border border-neutral-300 rounded px-3 py-2 text-sm"
-          />
+        <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-neutral-600">Headline</label>
+            <input
+              type="text"
+              value={settings.headline}
+              onChange={(e) => update('headline', e.target.value)}
+              className="w-full border border-neutral-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-neutral-600">Font size</label>
+            <select
+              value={settings.headline_size}
+              onChange={(e) => update('headline_size', e.target.value)}
+              className="border border-neutral-300 rounded px-2 py-2 text-sm"
+            >
+              {FONT_SIZE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="space-y-1">
-          <label className="block text-xs font-medium text-neutral-600">Subtext</label>
-          <input
-            type="text"
-            value={settings.subtext}
-            onChange={(e) => update('subtext', e.target.value)}
-            className="w-full border border-neutral-300 rounded px-3 py-2 text-sm"
-          />
+        <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-neutral-600">Subtext</label>
+            <input
+              type="text"
+              value={settings.subtext}
+              onChange={(e) => update('subtext', e.target.value)}
+              className="w-full border border-neutral-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-neutral-600">Font size</label>
+            <select
+              value={settings.subtext_size}
+              onChange={(e) => update('subtext_size', e.target.value)}
+              className="border border-neutral-300 rounded px-2 py-2 text-sm"
+            >
+              {FONT_SIZE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

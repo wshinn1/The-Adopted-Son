@@ -19,6 +19,8 @@ export interface CtaStripData {
   show_icon: boolean
   icon_color: string
   full_width: boolean
+  headline_size: string
+  subtext_size: string
 }
 
 const defaultData: CtaStripData = {
@@ -35,6 +37,8 @@ const defaultData: CtaStripData = {
   show_icon: true,
   icon_color: 'rgba(255,255,255,0.7)',
   full_width: false,
+  headline_size: '14px',
+  subtext_size: '12px',
 }
 
 interface Props {
@@ -63,11 +67,11 @@ export default function CtaStrip({ data = {} }: Props) {
           </div>
         )}
         <div>
-          <p className="text-sm font-semibold" style={{ color: d.text_color }}>
+          <p className="font-semibold" style={{ color: d.text_color, fontSize: d.headline_size }}>
             {d.headline}
           </p>
           {d.subtext && (
-            <p className="text-xs mt-0.5" style={{ color: d.subtext_color }}>
+            <p className="mt-0.5" style={{ color: d.subtext_color, fontSize: d.subtext_size }}>
               {d.subtext}
             </p>
           )}
