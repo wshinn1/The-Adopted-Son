@@ -1,5 +1,6 @@
 import 'server-only'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export interface NewsletterSettings {
   heading: string
@@ -138,10 +139,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 }
 
 export async function getPageWithSections(slug: string) {
-  const supabase = await createClient()
-
-  // Get page
-  const { data: page, error: pageError } = await supabase
+  const { data: page, error: pageError } = await supabaseAdmin
     .from('pages')
     .select('*')
     .eq('slug', slug)
@@ -152,8 +150,7 @@ export async function getPageWithSections(slug: string) {
     return null
   }
 
-  // Get page sections with their templates
-  const { data: sections, error: sectionsError } = await supabase
+  const { data: sections, error: sectionsError } = await supabaseAdmin
     .from('page_sections')
     .select(`
       id,
@@ -179,10 +176,7 @@ export async function getPageWithSections(slug: string) {
 }
 
 export async function getHomepage() {
-  const supabase = await createClient()
-
-  // Get homepage
-  const { data: page, error: pageError } = await supabase
+  const { data: page, error: pageError } = await supabaseAdmin
     .from('pages')
     .select('*')
     .eq('is_homepage', true)
@@ -190,12 +184,10 @@ export async function getHomepage() {
     .single()
 
   if (pageError || !page) {
-    // Fallback to slug 'home'
     return getPageWithSections('home')
   }
 
-  // Get page sections with their templates
-  const { data: sections, error: sectionsError } = await supabase
+  const { data: sections, error: sectionsError } = await supabaseAdmin
     .from('page_sections')
     .select(`
       id,
