@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import ThemeProvider from '@/app/theme-provider'
@@ -9,7 +10,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!user) redirect('/auth/login?redirectTo=/admin')
 
-  const { data: profile } = await supabase
+  // Use service-role client to bypass RLS on profiles table
+  const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('is_admin, full_name, email')
     .eq('id', user.id)
