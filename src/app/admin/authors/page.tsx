@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Plus, Pencil, Trash2, Upload, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { uploadMedia } from '@/lib/uploadMedia'
 
 interface Author {
   id: string
@@ -110,18 +111,8 @@ export default function AdminAuthorsPage() {
   const handleImageUpload = async (file: File) => {
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const response = await fetch('/api/media/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) throw new Error('Upload failed')
-
-      const result = await response.json()
-      setAvatarUrl(result.url)
+      const url = await uploadMedia(file)
+      setAvatarUrl(url)
     } catch (err) {
       console.error('Upload error:', err)
       showNotification('Failed to upload image', 'error')
