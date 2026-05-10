@@ -124,7 +124,7 @@ const ctaDefaults: CtaStripSettings = {
   button_url: '/give',
   bg_color: '#1a1a2e',
   text_color: '#ffffff',
-  subtext_color: 'rgba(255,255,255,0.6)',
+  subtext_color: '#a0a8c0',
   button_bg_color: '#ffffff',
   button_text_color: '#1a1a2e',
   button_hover_bg_color: '#f0f0f0',

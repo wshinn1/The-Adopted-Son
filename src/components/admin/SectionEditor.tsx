@@ -1231,8 +1231,8 @@ export default function SectionEditor({
             <div className="grid gap-6 md:grid-cols-2">
               <ColorField label="Background" value={formData.bg_color || '#1a1a2e'} onChange={(v) => handleChange('bg_color', v)} />
               <ColorField label="Headline Color" value={formData.text_color || '#ffffff'} onChange={(v) => handleChange('text_color', v)} />
-              <ColorField label="Subtext Color" value={formData.subtext_color || 'rgba(255,255,255,0.6)'} onChange={(v) => handleChange('subtext_color', v)} />
-              <ColorField label="Icon Color" value={formData.icon_color || 'rgba(255,255,255,0.7)'} onChange={(v) => handleChange('icon_color', v)} />
+              <ColorField label="Subtext Color" value={formData.subtext_color || '#a0a8c0'} onChange={(v) => handleChange('subtext_color', v)} />
+              <ColorField label="Icon Color" value={formData.icon_color || '#a0a8c0'} onChange={(v) => handleChange('icon_color', v)} />
               <ColorField label="Button Background" value={formData.button_bg_color || '#ffffff'} onChange={(v) => handleChange('button_bg_color', v)} />
               <ColorField label="Button Text" value={formData.button_text_color || '#1a1a2e'} onChange={(v) => handleChange('button_text_color', v)} />
               <ColorField label="Button Hover Background" value={formData.button_hover_bg_color || '#f0f0f0'} onChange={(v) => handleChange('button_hover_bg_color', v)} />

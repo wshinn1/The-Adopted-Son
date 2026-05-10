@@ -12,7 +12,7 @@ const DEFAULTS: CtaStripData & { enabled_on_devotionals: boolean } = {
   button_url: '/give',
   bg_color: '#1a1a2e',
   text_color: '#ffffff',
-  subtext_color: 'rgba(255,255,255,0.6)',
+  subtext_color: '#a0a8c0',
   button_bg_color: '#ffffff',
   button_text_color: '#1a1a2e',
   button_hover_bg_color: '#f0f0f0',
@@ -50,7 +50,7 @@ function ColorField({
       <div className="flex items-center gap-2">
         <input
           type="color"
-          value={value.startsWith('#') ? value : '#ffffff'}
+          value={(value || '').startsWith('#') ? value : '#ffffff'}
           onChange={(e) => onChange(e.target.value)}
           className="w-9 h-9 rounded border border-neutral-300 cursor-pointer p-0.5"
         />
