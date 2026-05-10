@@ -15,15 +15,9 @@ export default function HomePageClient({ children }: HomePageClientProps) {
 
   // Check sessionStorage on mount
   useEffect(() => {
-    const seen = sessionStorage.getItem('hasSeenSplash')
-    if (seen === 'true') {
-      // User has already seen splash this session
-      setShowSplash(false)
-      setIsSplashComplete(true)
-    } else {
-      // First visit this session - show splash
-      setShowSplash(true)
-    }
+    // Splash disabled — always skip straight to content
+    setShowSplash(false)
+    setIsSplashComplete(true)
   }, [])
 
   const handleSplashComplete = () => {

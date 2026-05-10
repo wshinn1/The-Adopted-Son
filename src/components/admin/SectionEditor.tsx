@@ -121,6 +121,17 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
 // HeroSlider1 specific fields - these are handled separately with custom UI
 const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur']
 
+// HeroTwo specific fields - handled with custom grouped UI
+const HEROTWO_CUSTOM_KEYS = [
+  'headline', 'subheadline', 'show_subheadline',
+  'button_text', 'button_url', 'show_button',
+  'trust_text', 'show_trust_text',
+  'background_type', 'background_image_url', 'background_color',
+  'gradient_from', 'gradient_to', 'gradient_direction', 'overlay_opacity',
+  'text_color', 'button_bg_color', 'button_text_color',
+  'min_height', 'content_width', 'text_align',
+]
+
 export default function SectionEditor({ 
   data, 
   schema, 
@@ -186,13 +197,17 @@ export default function SectionEditor({
   const newsletterButtonColorKeys = ['button_bg_color', 'button_text_color', 'button_hover_bg_color', 'button_hover_text_color']
   const isNewsletterSection = templateName === 'NewsletterSignUp'
   const isHeroSlider1Section = templateName === 'HeroSlider1'
-  
+  const isHeroTwoSection = templateName === 'HeroTwo'
+
   let regularProperties = Object.entries(properties)
   if (isNewsletterSection) {
     regularProperties = regularProperties.filter(([key]) => !newsletterButtonColorKeys.includes(key))
   }
   if (isHeroSlider1Section) {
     regularProperties = regularProperties.filter(([key]) => !HEROSLIDER1_CUSTOM_KEYS.includes(key))
+  }
+  if (isHeroTwoSection) {
+    regularProperties = regularProperties.filter(([key]) => !HEROTWO_CUSTOM_KEYS.includes(key))
   }
 
   return (
@@ -775,6 +790,298 @@ export default function SectionEditor({
                   />
                   <p className="text-xs text-neutral-400 mt-1">Frosted glass blur</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HeroTwo Custom Fields */}
+      {isHeroTwoSection && (
+        <div className="space-y-6">
+          {/* Content */}
+          <div className="pt-2">
+            <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">Content</h4>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Headline</label>
+                <textarea
+                  value={formData.headline || ''}
+                  onChange={(e) => handleChange('headline', e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Show Subheadline</label>
+                <button
+                  type="button"
+                  onClick={() => handleChange('show_subheadline', !formData.show_subheadline)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.show_subheadline ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.show_subheadline ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+              {formData.show_subheadline && (
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Subheadline</label>
+                  <textarea
+                    value={formData.subheadline || ''}
+                    onChange={(e) => handleChange('subheadline', e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Show Button</label>
+                <button
+                  type="button"
+                  onClick={() => handleChange('show_button', !formData.show_button)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.show_button ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.show_button ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+              {formData.show_button && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Button Text</label>
+                    <input
+                      type="text"
+                      value={formData.button_text || ''}
+                      onChange={(e) => handleChange('button_text', e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Button URL</label>
+                    <input
+                      type="text"
+                      value={formData.button_url || ''}
+                      onChange={(e) => handleChange('button_url', e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Show Trust Text</label>
+                <button
+                  type="button"
+                  onClick={() => handleChange('show_trust_text', !formData.show_trust_text)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.show_trust_text ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.show_trust_text ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+              {formData.show_trust_text && (
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Trust Text</label>
+                  <input
+                    type="text"
+                    value={formData.trust_text || ''}
+                    onChange={(e) => handleChange('trust_text', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Background */}
+          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">Background</h4>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Background Type</label>
+                <select
+                  value={formData.background_type || 'gradient'}
+                  onChange={(e) => handleChange('background_type', e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  <option value="gradient">Gradient</option>
+                  <option value="color">Solid Color</option>
+                  <option value="image">Image</option>
+                </select>
+              </div>
+
+              {formData.background_type === 'image' && (
+                <div className="space-y-2">
+                  {formData.background_image_url && (
+                    <img src={formData.background_image_url} alt="Background preview" className="w-full h-32 object-cover rounded-lg" />
+                  )}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={formData.background_image_url || ''}
+                      onChange={(e) => handleChange('background_image_url', e.target.value)}
+                      placeholder="Image URL"
+                      className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    />
+                    <label className="flex items-center gap-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-700 rounded-lg cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors">
+                      <Upload className="size-4" />
+                      <span className="text-sm">Upload</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) handleImageUpload('background_image_url', file)
+                        }}
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Overlay Opacity</label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range" min={0} max={1} step={0.05}
+                        value={formData.overlay_opacity ?? 0.4}
+                        onChange={(e) => handleChange('overlay_opacity', Number(e.target.value))}
+                        className="flex-1 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                      />
+                      <span className="text-sm text-neutral-600 dark:text-neutral-400 w-12 text-right">
+                        {Math.round((formData.overlay_opacity ?? 0.4) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {formData.background_type === 'color' && (
+                <ColorField
+                  label="Background Color"
+                  value={formData.background_color || '#1a1a2e'}
+                  onChange={(val) => handleChange('background_color', val)}
+                />
+              )}
+
+              {(formData.background_type === 'gradient' || !formData.background_type) && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <ColorField
+                      label="Gradient From"
+                      value={formData.gradient_from || '#1a1a2e'}
+                      onChange={(val) => handleChange('gradient_from', val)}
+                    />
+                    <ColorField
+                      label="Gradient To"
+                      value={formData.gradient_to || '#2B4A6F'}
+                      onChange={(val) => handleChange('gradient_to', val)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Direction</label>
+                    <select
+                      value={formData.gradient_direction || 'to-br'}
+                      onChange={(e) => handleChange('gradient_direction', e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    >
+                      <option value="to-r">Left → Right</option>
+                      <option value="to-br">Top-Left → Bottom-Right</option>
+                      <option value="to-b">Top → Bottom</option>
+                      <option value="to-bl">Top-Right → Bottom-Left</option>
+                      <option value="to-tr">Bottom-Left → Top-Right</option>
+                    </select>
+                  </div>
+                  {/* Live gradient preview */}
+                  <div
+                    className="w-full h-12 rounded-lg border border-neutral-200 dark:border-neutral-700"
+                    style={{
+                      background: `linear-gradient(${
+                        formData.gradient_direction === 'to-r'  ? '90deg'  :
+                        formData.gradient_direction === 'to-br' ? '135deg' :
+                        formData.gradient_direction === 'to-b'  ? '180deg' :
+                        formData.gradient_direction === 'to-bl' ? '225deg' :
+                        '45deg'
+                      }, ${formData.gradient_from || '#1a1a2e'}, ${formData.gradient_to || '#2B4A6F'})`
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Colors */}
+          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">Text & Button Colors</h4>
+            <div className="grid gap-6 md:grid-cols-3">
+              <ColorField
+                label="Text Color"
+                value={formData.text_color || '#ffffff'}
+                onChange={(val) => handleChange('text_color', val)}
+              />
+              <ColorField
+                label="Button Background"
+                value={formData.button_bg_color || '#ffffff'}
+                onChange={(val) => handleChange('button_bg_color', val)}
+              />
+              <ColorField
+                label="Button Text"
+                value={formData.button_text_color || '#1a1a1a'}
+                onChange={(val) => handleChange('button_text_color', val)}
+              />
+            </div>
+          </div>
+
+          {/* Layout */}
+          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700">
+            <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-4">Layout</h4>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Min Height</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={parseInt(formData.min_height) || 70}
+                    onChange={(e) => {
+                      const unit = formData.min_height?.includes('px') ? 'px' : formData.min_height?.includes('%') ? '%' : 'vh'
+                      handleChange('min_height', `${e.target.value}${unit}`)
+                    }}
+                    min={0}
+                    className="w-20 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                  <select
+                    value={formData.min_height?.includes('px') ? 'px' : formData.min_height?.includes('%') ? '%' : 'vh'}
+                    onChange={(e) => {
+                      const value = parseInt(formData.min_height) || 70
+                      handleChange('min_height', `${value}${e.target.value}`)
+                    }}
+                    className="px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  >
+                    <option value="vh">vh</option>
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Content Width</label>
+                <select
+                  value={formData.content_width || 'medium'}
+                  onChange={(e) => handleChange('content_width', e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  <option value="narrow">Narrow</option>
+                  <option value="medium">Medium</option>
+                  <option value="wide">Wide</option>
+                  <option value="full">Full</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Text Align</label>
+                <select
+                  value={formData.text_align || 'center'}
+                  onChange={(e) => handleChange('text_align', e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  <option value="left">Left</option>
+                  <option value="center">Center</option>
+                  <option value="right">Right</option>
+                </select>
               </div>
             </div>
           </div>

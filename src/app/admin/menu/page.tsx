@@ -80,6 +80,14 @@ export default function MenuNavigationPage() {
         .upsert({ key: 'nav_links', value: JSON.stringify(navLinks) }, { onConflict: 'key' })
 
       if (error) throw error
+
+      // Revalidate all public pages so the new nav order appears immediately
+      await fetch('/api/admin/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paths: ['/', '/devotionals', '/about', '/give', '/contact'] }),
+      })
+
       showNotification('Menu saved successfully!')
     } catch (err) {
       console.error('Error saving menu:', err)

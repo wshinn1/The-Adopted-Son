@@ -9,8 +9,17 @@ export async function signIn(formData: FormData) {
   const password = formData.get('password') as string
   const redirectTo = formData.get('redirectTo') as string | null
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { error, data } = await supabase.auth.signInWithPassword({ email, password })
   if (error) return { error: error.message }
+
+  if (!redirectTo || redirectTo === '/account') {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', data.user.id)
+      .single()
+    if (profile?.is_admin) redirect('/admin')
+  }
 
   redirect(redirectTo ?? '/account')
 }
