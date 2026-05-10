@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRef } from 'react'
 
 export interface HeroTwoData {
   // Content
@@ -14,6 +15,10 @@ export interface HeroTwoData {
   show_button: boolean
   trust_text: string
   show_trust_text: boolean
+
+  // Secondary scroll button
+  show_secondary_button: boolean
+  secondary_button_text: string
 
   // Background
   background_type: 'image' | 'color' | 'gradient'
@@ -44,6 +49,8 @@ const defaultData: HeroTwoData = {
   show_button: true,
   trust_text: 'Free to read · No account required',
   show_trust_text: true,
+  show_secondary_button: false,
+  secondary_button_text: 'Learn More',
   background_type: 'gradient',
   background_image_url: '',
   background_color: '#1a1a2e',
@@ -57,14 +64,6 @@ const defaultData: HeroTwoData = {
   min_height: '70vh',
   content_width: 'medium',
   text_align: 'center',
-}
-
-const GRADIENT_CLASSES: Record<string, string> = {
-  'to-r':  'bg-gradient-to-r',
-  'to-br': 'bg-gradient-to-br',
-  'to-b':  'bg-gradient-to-b',
-  'to-bl': 'bg-gradient-to-bl',
-  'to-tr': 'bg-gradient-to-tr',
 }
 
 const WIDTH_CLASSES: Record<string, string> = {
@@ -82,9 +81,17 @@ const ALIGN_CLASSES: Record<string, string> = {
 
 export default function HeroTwo({ data }: { data: Partial<HeroTwoData> }) {
   const d: HeroTwoData = { ...defaultData, ...data }
+  const sectionRef = useRef<HTMLElement>(null)
 
-  const widthClass  = WIDTH_CLASSES[d.content_width]  ?? WIDTH_CLASSES.medium
-  const alignClass  = ALIGN_CLASSES[d.text_align]      ?? ALIGN_CLASSES.center
+  const widthClass = WIDTH_CLASSES[d.content_width] ?? WIDTH_CLASSES.medium
+  const alignClass = ALIGN_CLASSES[d.text_align]    ?? ALIGN_CLASSES.center
+
+  function scrollToNext() {
+    const next = sectionRef.current?.nextElementSibling as HTMLElement | null
+    if (next) {
+      next.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
   // Build background style
   let backgroundStyle: React.CSSProperties = {}
@@ -93,7 +100,6 @@ export default function HeroTwo({ data }: { data: Partial<HeroTwoData> }) {
   } else if (d.background_type === 'color') {
     backgroundStyle = { backgroundColor: d.background_color }
   } else {
-    // gradient — inline style since colors are dynamic
     backgroundStyle = {
       background: `linear-gradient(${
         d.gradient_direction === 'to-r'  ? '90deg'  :
@@ -107,6 +113,7 @@ export default function HeroTwo({ data }: { data: Partial<HeroTwoData> }) {
 
   return (
     <section
+      ref={sectionRef}
       className="relative w-full flex items-center justify-center overflow-hidden"
       style={{ minHeight: d.min_height, ...backgroundStyle }}
     >
@@ -185,6 +192,31 @@ export default function HeroTwo({ data }: { data: Partial<HeroTwoData> }) {
             >
               {d.trust_text}
             </motion.p>
+          )}
+
+          {d.show_secondary_button && d.secondary_button_text && (
+            <motion.button
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.55 }}
+              onClick={scrollToNext}
+              className="mt-6 flex flex-col items-center gap-1.5 group"
+              style={{ color: d.text_color, opacity: 0.7 }}
+              aria-label="Scroll to next section"
+            >
+              <span className="text-sm font-medium group-hover:opacity-100 transition-opacity" style={{ opacity: 0.85 }}>
+                {d.secondary_button_text}
+              </span>
+              <svg
+                className="size-5 animate-bounce"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </motion.button>
           )}
         </div>
       </div>

@@ -873,6 +873,33 @@ export default function SectionEditor({
                   />
                 </div>
               )}
+
+              {/* Secondary scroll button */}
+              <div className="flex items-center justify-between pt-2 border-t border-neutral-200 dark:border-neutral-700">
+                <div>
+                  <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Show Scroll Button</label>
+                  <p className="text-xs text-neutral-400 mt-0.5">Scrolls to the next section when clicked</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleChange('show_secondary_button', !formData.show_secondary_button)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.show_secondary_button ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.show_secondary_button ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+              {formData.show_secondary_button && (
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Scroll Button Label</label>
+                  <input
+                    type="text"
+                    value={formData.secondary_button_text || ''}
+                    onChange={(e) => handleChange('secondary_button_text', e.target.value)}
+                    placeholder="Learn More"
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
