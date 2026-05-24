@@ -96,11 +96,18 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
   }
 
   // Resolved heading style — avoids CSS variable dependency in this Server Component
-  const headingCardStyle: React.CSSProperties = {
+  const headingBaseStyle = {
     fontFamily: FONT_FAMILY_MAP[typo.heading_font] || "'Be Vietnam Pro', sans-serif",
+    fontSize: typo.heading_size ? `${typo.heading_size}pt` : '28pt',
     fontWeight: typo.heading_weight || '700',
     fontStyle: typo.heading_style || 'normal',
-    color: '#111827',
+    lineHeight: '1.3',
+  }
+  const headingCardStyle: React.CSSProperties = { ...headingBaseStyle, color: '#111827' }
+  const headingFeaturedStyle: React.CSSProperties = {
+    ...headingBaseStyle,
+    color: '#ffffff',
+    textShadow: '0 2px 8px rgba(0,0,0,0.7)',
   }
 
   const featured = showBanner && devotionals.length > count ? devotionals[0] : null
@@ -170,10 +177,7 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                   {featured.category}
                 </span>
               )}
-              <h3
-                className="text-white text-xl md:text-2xl lg:text-3xl font-bold leading-snug mb-3"
-                style={{ fontFamily: 'var(--font-heading)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}
-              >
+              <h3 className="mb-3" style={headingFeaturedStyle}>
                 {featured.title}
               </h3>
               {featured.excerpt && (
