@@ -106,10 +106,15 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                 {featured.category}
               </span>
             )}
-            <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold font-heading leading-snug mb-4">
+            <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold font-heading leading-snug mb-3">
               {featured.title}
             </h3>
-            <span 
+            {featured.excerpt && (
+              <p className="text-white/75 text-sm md:text-base font-body leading-relaxed mb-4 line-clamp-2">
+                {featured.excerpt}
+              </p>
+            )}
+            <span
               className="inline-block text-xs font-bold uppercase tracking-widest px-4 py-2 w-fit hover:opacity-90 transition-opacity"
               style={{ backgroundColor: 'var(--color-button-primary)', color: 'var(--color-button-primary-text)' }}
             >
@@ -163,6 +168,11 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                     {post.title}
                   </h3>
                   {date && <p className="text-sm text-neutral-400 font-body mt-2">{date}</p>}
+                  {post.excerpt && (
+                    <p className="text-sm text-neutral-500 font-body mt-2 leading-relaxed line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                  )}
                 </div>
               </article>
             </Link>
