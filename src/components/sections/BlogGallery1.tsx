@@ -135,10 +135,11 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
         </div>
       )}
 
-      {/* Featured banner */}
+      {/* Featured banner — card layout on mobile, overlay on md+ */}
       {featured && showBanner && (
-        <Link href={`/devotionals/${featured.slug}`} className="group block mb-8 relative overflow-hidden rounded-2xl">
-          <div className="relative w-full aspect-[3/1] min-h-[200px]">
+        <Link href={`/devotionals/${featured.slug}`} className="group block mb-8 rounded-2xl overflow-hidden">
+          {/* Image — full on desktop (aspect-[3/1]), taller on mobile */}
+          <div className="relative w-full aspect-[4/3] md:aspect-[3/1] md:min-h-[200px]">
             {featured.cover_image_url ? (
               <Image
                 src={featured.cover_image_url}
@@ -150,9 +151,39 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
             ) : (
               <div className="w-full h-full bg-neutral-800" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+            {/* Overlay + text — desktop only */}
+            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+            <div className="hidden md:flex absolute inset-0 flex-col justify-center px-8 md:px-12 max-w-2xl">
+              {featured.category && (
+                <span
+                  className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded mb-3 w-fit"
+                  style={{ backgroundColor: 'var(--color-category-badge-bg)', color: 'var(--color-category-badge-text)' }}
+                >
+                  {featured.category}
+                </span>
+              )}
+              <h3
+                className="text-white text-xl md:text-2xl lg:text-3xl font-bold leading-snug mb-3"
+                style={{ fontFamily: 'var(--font-heading)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}
+              >
+                {featured.title}
+              </h3>
+              {featured.excerpt && (
+                <p className="leading-relaxed mb-4" style={excerptFeaturedStyle}>
+                  {featured.excerpt}
+                </p>
+              )}
+              <span
+                className="inline-block text-xs font-bold uppercase tracking-widest px-4 py-2 w-fit hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: 'var(--color-button-primary)', color: 'var(--color-button-primary-text)' }}
+              >
+                Read More
+              </span>
+            </div>
           </div>
-          <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-12 max-w-2xl">
+
+          {/* Content below image — mobile only */}
+          <div className="md:hidden px-5 pt-5 pb-6" style={{ backgroundColor: data.background_color || '#ffffff' }}>
             {featured.category && (
               <span
                 className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded mb-3 w-fit"
@@ -161,11 +192,11 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                 {featured.category}
               </span>
             )}
-            <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold font-heading leading-snug mb-3">
+            <h3 className="text-xl font-bold font-heading leading-snug mb-3 text-neutral-900">
               {featured.title}
             </h3>
             {featured.excerpt && (
-              <p className="leading-relaxed mb-4" style={excerptFeaturedStyle}>
+              <p className="leading-relaxed mb-4" style={{ ...excerptFeaturedStyle, color: excerptCardStyle.color }}>
                 {featured.excerpt}
               </p>
             )}
