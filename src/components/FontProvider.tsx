@@ -98,6 +98,13 @@ interface TypographySettings {
   excerpt_style?: string
   excerpt_color?: string
   excerpt_featured_color?: string
+  // Mobile size overrides (< 768px)
+  heading_size_mobile?: string
+  body_size_mobile?: string
+  accent_size_mobile?: string
+  caption_size_mobile?: string
+  hero_size_mobile?: string
+  excerpt_size_mobile?: string
 }
 
 interface FontProviderProps {
@@ -138,6 +145,13 @@ export default function FontProvider({
   const [excerptStyle, setExcerptStyle] = useState(initialTypography?.excerpt_style || 'normal')
   const [excerptColor, setExcerptColor] = useState(initialTypography?.excerpt_color || '#6b7280')
   const [excerptFeaturedColor, setExcerptFeaturedColor] = useState(initialTypography?.excerpt_featured_color || 'rgba(255,255,255,0.75)')
+  // Mobile size overrides
+  const [headingSizeMobile, setHeadingSizeMobile] = useState(initialTypography?.heading_size_mobile || '')
+  const [bodySizeMobile, setBodySizeMobile] = useState(initialTypography?.body_size_mobile || '')
+  const [accentSizeMobile, setAccentSizeMobile] = useState(initialTypography?.accent_size_mobile || '')
+  const [captionSizeMobile, setCaptionSizeMobile] = useState(initialTypography?.caption_size_mobile || '')
+  const [heroSizeMobile, setHeroSizeMobile] = useState(initialTypography?.hero_size_mobile || '')
+  const [excerptSizeMobile, setExcerptSizeMobile] = useState(initialTypography?.excerpt_size_mobile || '')
   const [hasFetched, setHasFetched] = useState(!!initialTypography)
 
   useEffect(() => {
@@ -185,6 +199,13 @@ export default function FontProvider({
           if (typography.excerpt_style) setExcerptStyle(typography.excerpt_style)
           if (typography.excerpt_color) setExcerptColor(typography.excerpt_color)
           if (typography.excerpt_featured_color) setExcerptFeaturedColor(typography.excerpt_featured_color)
+          // Mobile sizes (allow empty string to mean "use desktop")
+          setHeadingSizeMobile(typography.heading_size_mobile ?? '')
+          setBodySizeMobile(typography.body_size_mobile ?? '')
+          setAccentSizeMobile(typography.accent_size_mobile ?? '')
+          setCaptionSizeMobile(typography.caption_size_mobile ?? '')
+          setHeroSizeMobile(typography.hero_size_mobile ?? '')
+          setExcerptSizeMobile(typography.excerpt_size_mobile ?? '')
         }
       } catch (err) {
         console.error('Error loading typography settings:', err)
@@ -327,7 +348,25 @@ export default function FontProvider({
     document.documentElement.style.setProperty('--font-style-excerpt', excerptStyle || 'normal')
     document.documentElement.style.setProperty('--color-excerpt', excerptColor || '#6b7280')
     document.documentElement.style.setProperty('--color-excerpt-featured', excerptFeaturedColor || 'rgba(255,255,255,0.75)')
-  }, [headingFont, bodyFont, accentFont, captionFont, heroFont, excerptFont, headingSize, bodySize, accentSize, captionSize, heroSize, excerptSize, headingWeight, bodyWeight, accentWeight, captionWeight, heroWeight, excerptWeight, headingStyle, bodyStyle, accentStyle, captionStyle, heroStyle, excerptStyle, excerptColor, excerptFeaturedColor])
+
+    // Inject mobile size overrides via a <style> tag with a media query
+    let mobileStyle = document.getElementById('font-vars-mobile') as HTMLStyleElement | null
+    if (!mobileStyle) {
+      mobileStyle = document.createElement('style')
+      mobileStyle.id = 'font-vars-mobile'
+      document.head.appendChild(mobileStyle)
+    }
+    const mobileVars: string[] = []
+    if (headingSizeMobile) mobileVars.push(`--font-size-heading: ${headingSizeMobile}pt;`)
+    if (bodySizeMobile) mobileVars.push(`--font-size-body: ${bodySizeMobile}pt;`)
+    if (accentSizeMobile) mobileVars.push(`--font-size-accent: ${accentSizeMobile}pt;`)
+    if (captionSizeMobile) mobileVars.push(`--font-size-caption: ${captionSizeMobile}pt;`)
+    if (heroSizeMobile) mobileVars.push(`--font-size-hero: ${heroSizeMobile}pt;`)
+    if (excerptSizeMobile) mobileVars.push(`--font-size-excerpt: ${excerptSizeMobile}pt;`)
+    mobileStyle.textContent = mobileVars.length > 0
+      ? `@media (max-width: 767px) { :root { ${mobileVars.join(' ')} } }`
+      : ''
+  }, [headingFont, bodyFont, accentFont, captionFont, heroFont, excerptFont, headingSize, bodySize, accentSize, captionSize, heroSize, excerptSize, headingWeight, bodyWeight, accentWeight, captionWeight, heroWeight, excerptWeight, headingStyle, bodyStyle, accentStyle, captionStyle, heroStyle, excerptStyle, excerptColor, excerptFeaturedColor, headingSizeMobile, bodySizeMobile, accentSizeMobile, captionSizeMobile, heroSizeMobile, excerptSizeMobile])
 
   return <>{children}</>
 }

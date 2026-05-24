@@ -118,6 +118,13 @@ export default function TypographyPage() {
   const [excerptStyle, setExcerptStyle] = useState('normal')
   const [excerptColor, setExcerptColor] = useState('#6b7280')
   const [excerptFeaturedColor, setExcerptFeaturedColor] = useState('#c0c8d8')
+  // Mobile size overrides
+  const [headingSizeMobile, setHeadingSizeMobile] = useState('')
+  const [bodySizeMobile, setBodySizeMobile] = useState('')
+  const [accentSizeMobile, setAccentSizeMobile] = useState('')
+  const [captionSizeMobile, setCaptionSizeMobile] = useState('')
+  const [heroSizeMobile, setHeroSizeMobile] = useState('')
+  const [excerptSizeMobile, setExcerptSizeMobile] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -221,6 +228,12 @@ export default function TypographyPage() {
         setExcerptStyle(typography.excerpt_style || 'normal')
         setExcerptColor(typography.excerpt_color || '#6b7280')
         setExcerptFeaturedColor(typography.excerpt_featured_color || '#c0c8d8')
+        setHeadingSizeMobile(typography.heading_size_mobile ?? '')
+        setBodySizeMobile(typography.body_size_mobile ?? '')
+        setAccentSizeMobile(typography.accent_size_mobile ?? '')
+        setCaptionSizeMobile(typography.caption_size_mobile ?? '')
+        setHeroSizeMobile(typography.hero_size_mobile ?? '')
+        setExcerptSizeMobile(typography.excerpt_size_mobile ?? '')
       }
     } catch (err) {
       console.error('Error loading typography settings:', err)
@@ -263,6 +276,12 @@ export default function TypographyPage() {
             excerpt_style: excerptStyle,
             excerpt_color: excerptColor,
             excerpt_featured_color: excerptFeaturedColor,
+            heading_size_mobile: headingSizeMobile,
+            body_size_mobile: bodySizeMobile,
+            accent_size_mobile: accentSizeMobile,
+            caption_size_mobile: captionSizeMobile,
+            hero_size_mobile: heroSizeMobile,
+            excerpt_size_mobile: excerptSizeMobile,
           })
         }, { onConflict: 'key' })
 
@@ -822,6 +841,116 @@ export default function TypographyPage() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Mobile Size Overrides */}
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-1">Mobile Size Overrides</h2>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">
+            These sizes apply on screens narrower than 768 px. Leave blank to use the desktop size.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Heading <span className="text-neutral-400 font-normal">(mobile)</span>
+              </label>
+              <select
+                value={headingSizeMobile}
+                onChange={(e) => setHeadingSizeMobile(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+              >
+                <option value="">Use desktop</option>
+                {HEADING_SIZE_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Body <span className="text-neutral-400 font-normal">(mobile)</span>
+              </label>
+              <select
+                value={bodySizeMobile}
+                onChange={(e) => setBodySizeMobile(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+              >
+                <option value="">Use desktop</option>
+                {FONT_SIZE_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Hero <span className="text-neutral-400 font-normal">(mobile)</span>
+              </label>
+              <select
+                value={heroSizeMobile}
+                onChange={(e) => setHeroSizeMobile(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+              >
+                <option value="">Use desktop</option>
+                {HEADING_SIZE_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Excerpt <span className="text-neutral-400 font-normal">(mobile)</span>
+              </label>
+              <select
+                value={excerptSizeMobile}
+                onChange={(e) => setExcerptSizeMobile(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+              >
+                <option value="">Use desktop</option>
+                {FONT_SIZE_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Caption <span className="text-neutral-400 font-normal">(mobile)</span>
+              </label>
+              <select
+                value={captionSizeMobile}
+                onChange={(e) => setCaptionSizeMobile(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+              >
+                <option value="">Use desktop</option>
+                {FONT_SIZE_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Accent <span className="text-neutral-400 font-normal">(mobile)</span>
+              </label>
+              <select
+                value={accentSizeMobile}
+                onChange={(e) => setAccentSizeMobile(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+              >
+                <option value="">Use desktop</option>
+                {FONT_SIZE_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <p className="text-xs text-neutral-400 mt-4">
+            Font family, weight, and style remain the same on mobile. Only size is overridden here.
+          </p>
         </div>
 
         {/* Save Button */}
