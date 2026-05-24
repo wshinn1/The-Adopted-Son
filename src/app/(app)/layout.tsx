@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { AudioProvider } from '@/components/AudioProvider'
 import Aside from '@/components/aside'
 import { AudioPlayer } from '@/components/audio-player/AudioPlayer'
@@ -8,13 +10,11 @@ import PostHogProvider from '@/components/PostHogProvider'
 import CookieConsent from '@/components/CookieConsent'
 import NewsletterPopupController from '@/components/NewsletterPopupController'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
-  const supabase = await createClient()
-
-  // Fetch colors and typography together
-  const { data: settings } = await supabase
+  // Use admin client so Next.js fetch caching doesn't serve stale settings
+  const { data: settings } = await supabaseAdmin
     .from('site_settings')
     .select('key, value')
     .in('key', ['site_colors', 'typography'])
