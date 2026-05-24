@@ -25,20 +25,75 @@ interface BlogGallery1Props {
   data: BlogGallery1Data
 }
 
+const FONT_FAMILY_MAP: Record<string, string> = {
+  Be_Vietnam_Pro: "'Be Vietnam Pro', sans-serif",
+  'system-ui': 'system-ui, sans-serif',
+  Inter: "'Inter', sans-serif",
+  Poppins: "'Poppins', sans-serif",
+  Open_Sans: "'Open Sans', sans-serif",
+  Montserrat: "'Montserrat', sans-serif",
+  Lato: "'Lato', sans-serif",
+  Nunito: "'Nunito', sans-serif",
+  Raleway: "'Raleway', sans-serif",
+  Work_Sans: "'Work Sans', sans-serif",
+  DM_Sans: "'DM Sans', sans-serif",
+  Outfit: "'Outfit', sans-serif",
+  Playfair_Display: "'Playfair Display', serif",
+  Merriweather: "'Merriweather', serif",
+  Lora: "'Lora', serif",
+  Source_Serif_4: "'Source Serif 4', serif",
+  Crimson_Text: "'Crimson Text', serif",
+  EB_Garamond: "'EB Garamond', serif",
+  Libre_Baskerville: "'Libre Baskerville', serif",
+  Cormorant_Garamond: "'Cormorant Garamond', serif",
+  Bitter: "'Bitter', serif",
+  Spectral: "'Spectral', serif",
+  JetBrains_Mono: "'JetBrains Mono', monospace",
+  Fira_Code: "'Fira Code', monospace",
+  Source_Code_Pro: "'Source Code Pro', monospace",
+  IBM_Plex_Mono: "'IBM Plex Mono', monospace",
+  Space_Mono: "'Space Mono', monospace",
+  Roboto_Mono: "'Roboto Mono', monospace",
+  Courier_Prime: "'Courier Prime', monospace",
+  Anonymous_Pro: "'Anonymous Pro', monospace",
+}
+
 export default async function BlogGallery1({ data }: BlogGallery1Props) {
   const count = data.post_count || 3
   const showBanner = data.show_featured_banner !== false
   const fetchLimit = showBanner ? count + 1 : count
 
-  // Use admin client to bypass RLS — same as the devotionals listing page
-  const { data: rows } = await supabaseAdmin
-    .from('devotionals')
-    .select('id, title, slug, excerpt, cover_image_url, published_at, category')
-    .eq('is_published', true)
-    .order('published_at', { ascending: false })
-    .limit(fetchLimit)
+  const [{ data: rows }, { data: typographyRow }] = await Promise.all([
+    supabaseAdmin
+      .from('devotionals')
+      .select('id, title, slug, excerpt, cover_image_url, published_at, category')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .limit(fetchLimit),
+    supabaseAdmin
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'typography')
+      .single(),
+  ])
 
   const devotionals: Devotional[] = rows ?? []
+  const typo = typographyRow?.value
+    ? (typeof typographyRow.value === 'string' ? JSON.parse(typographyRow.value) : typographyRow.value)
+    : {}
+
+  const excerptCardStyle: React.CSSProperties = {
+    fontFamily: FONT_FAMILY_MAP[typo.excerpt_font] || "'Merriweather', serif",
+    fontSize: typo.excerpt_size ? `${typo.excerpt_size}pt` : '12pt',
+    fontWeight: typo.excerpt_weight || '400',
+    fontStyle: typo.excerpt_style || 'normal',
+    color: typo.excerpt_color || '#6b7280',
+  }
+
+  const excerptFeaturedStyle: React.CSSProperties = {
+    ...excerptCardStyle,
+    color: typo.excerpt_featured_color || 'rgba(255,255,255,0.75)',
+  }
 
   const featured = showBanner && devotionals.length > count ? devotionals[0] : null
   const grid = featured ? devotionals.slice(1, count + 1) : devotionals.slice(0, count)
@@ -99,7 +154,7 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
           </div>
           <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-12 max-w-2xl">
             {featured.category && (
-              <span 
+              <span
                 className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded mb-3 w-fit"
                 style={{ backgroundColor: 'var(--color-category-badge-bg)', color: 'var(--color-category-badge-text)' }}
               >
@@ -110,16 +165,7 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
               {featured.title}
             </h3>
             {featured.excerpt && (
-              <p
-                className="leading-relaxed mb-4 line-clamp-2"
-                style={{
-                  fontFamily: 'var(--font-excerpt)',
-                  fontSize: 'var(--font-size-excerpt)',
-                  fontWeight: 'var(--font-weight-excerpt)',
-                  fontStyle: 'var(--font-style-excerpt)',
-                  color: 'var(--color-excerpt-featured)',
-                }}
-              >
+              <p className="leading-relaxed mb-4 line-clamp-2" style={excerptFeaturedStyle}>
                 {featured.excerpt}
               </p>
             )}
@@ -163,7 +209,7 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                   </div>
                   {post.category && (
                     <div className="absolute bottom-0 left-0 right-0 flex justify-center translate-y-1/2 z-10">
-                      <span 
+                      <span
                         className="text-xs font-bold uppercase tracking-widest px-4 py-1.5"
                         style={{ backgroundColor: 'var(--color-category-badge-bg)', color: 'var(--color-category-badge-text)' }}
                       >
@@ -178,16 +224,7 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                   </h3>
                   {date && <p className="text-sm text-neutral-400 font-body mt-2">{date}</p>}
                   {post.excerpt && (
-                    <p
-                      className="mt-2 leading-relaxed line-clamp-2"
-                      style={{
-                        fontFamily: 'var(--font-excerpt)',
-                        fontSize: 'var(--font-size-excerpt)',
-                        fontWeight: 'var(--font-weight-excerpt)',
-                        fontStyle: 'var(--font-style-excerpt)',
-                        color: 'var(--color-excerpt)',
-                      }}
-                    >
+                    <p className="mt-2 leading-relaxed line-clamp-2" style={excerptCardStyle}>
                       {post.excerpt}
                     </p>
                   )}
