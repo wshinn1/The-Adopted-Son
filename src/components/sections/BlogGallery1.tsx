@@ -177,9 +177,14 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                   {featured.category}
                 </span>
               )}
-              <h3 className="mb-3" style={headingFeaturedStyle}>
-                {featured.title}
-              </h3>
+              <div
+                role="heading"
+                aria-level={3}
+                className="mb-3"
+                style={{ ...headingFeaturedStyle, display: 'block' }}
+              >
+                {String(featured.title ?? '')}
+              </div>
               {featured.excerpt && (
                 <p className="leading-relaxed mb-4" style={excerptFeaturedStyle}>
                   {featured.excerpt}
@@ -204,12 +209,14 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                 {featured.category}
               </span>
             )}
-            <h3
-              className="text-xl leading-snug mb-3"
-              style={headingCardStyle}
+            <div
+              role="heading"
+              aria-level={3}
+              className="mb-3"
+              style={{ ...headingCardStyle, display: 'block' }}
             >
-              {featured.title}
-            </h3>
+              {String(featured.title ?? '')}
+            </div>
             {featured.excerpt && (
               <p className="leading-relaxed mb-4" style={{ ...excerptFeaturedStyle, color: excerptCardStyle.color }}>
                 {featured.excerpt}
