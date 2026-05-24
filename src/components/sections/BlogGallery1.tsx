@@ -95,6 +95,14 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
     color: typo.excerpt_featured_color || 'rgba(255,255,255,0.75)',
   }
 
+  // Resolved heading style — avoids CSS variable dependency in this Server Component
+  const headingCardStyle: React.CSSProperties = {
+    fontFamily: FONT_FAMILY_MAP[typo.heading_font] || "'Be Vietnam Pro', sans-serif",
+    fontWeight: typo.heading_weight || '700',
+    fontStyle: typo.heading_style || 'normal',
+    color: '#111827',
+  }
+
   const featured = showBanner && devotionals.length > count ? devotionals[0] : null
   const grid = featured ? devotionals.slice(1, count + 1) : devotionals.slice(0, count)
 
@@ -193,8 +201,8 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
               </span>
             )}
             <h3
-              className="text-xl font-bold leading-snug mb-3"
-              style={{ fontFamily: 'var(--font-heading)', color: '#111827' }}
+              className="text-xl leading-snug mb-3"
+              style={headingCardStyle}
             >
               {featured.title}
             </h3>
