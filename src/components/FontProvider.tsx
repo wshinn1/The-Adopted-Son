@@ -92,6 +92,12 @@ interface TypographySettings {
   hero_size?: string
   hero_weight?: string
   hero_style?: string
+  excerpt_font?: string
+  excerpt_size?: string
+  excerpt_weight?: string
+  excerpt_style?: string
+  excerpt_color?: string
+  excerpt_featured_color?: string
 }
 
 interface FontProviderProps {
@@ -126,6 +132,12 @@ export default function FontProvider({
   const [heroSize, setHeroSize] = useState(initialTypography?.hero_size || '48')
   const [heroWeight, setHeroWeight] = useState(initialTypography?.hero_weight || '700')
   const [heroStyle, setHeroStyle] = useState(initialTypography?.hero_style || 'italic')
+  const [excerptFont, setExcerptFont] = useState(initialTypography?.excerpt_font || 'Merriweather')
+  const [excerptSize, setExcerptSize] = useState(initialTypography?.excerpt_size || '12')
+  const [excerptWeight, setExcerptWeight] = useState(initialTypography?.excerpt_weight || '400')
+  const [excerptStyle, setExcerptStyle] = useState(initialTypography?.excerpt_style || 'normal')
+  const [excerptColor, setExcerptColor] = useState(initialTypography?.excerpt_color || '#6b7280')
+  const [excerptFeaturedColor, setExcerptFeaturedColor] = useState(initialTypography?.excerpt_featured_color || 'rgba(255,255,255,0.75)')
   const [hasFetched, setHasFetched] = useState(!!initialTypography)
 
   useEffect(() => {
@@ -167,6 +179,12 @@ export default function FontProvider({
           if (typography.hero_size) setHeroSize(typography.hero_size)
           if (typography.hero_weight) setHeroWeight(typography.hero_weight)
           if (typography.hero_style) setHeroStyle(typography.hero_style)
+          if (typography.excerpt_font) setExcerptFont(typography.excerpt_font)
+          if (typography.excerpt_size) setExcerptSize(typography.excerpt_size)
+          if (typography.excerpt_weight) setExcerptWeight(typography.excerpt_weight)
+          if (typography.excerpt_style) setExcerptStyle(typography.excerpt_style)
+          if (typography.excerpt_color) setExcerptColor(typography.excerpt_color)
+          if (typography.excerpt_featured_color) setExcerptFeaturedColor(typography.excerpt_featured_color)
         }
       } catch (err) {
         console.error('Error loading typography settings:', err)
@@ -299,7 +317,17 @@ export default function FontProvider({
       '--font-style-hero',
       heroStyle || 'italic'
     )
-  }, [headingFont, bodyFont, accentFont, captionFont, heroFont, headingSize, bodySize, accentSize, captionSize, heroSize, headingWeight, bodyWeight, accentWeight, captionWeight, heroWeight, headingStyle, bodyStyle, accentStyle, captionStyle, heroStyle])
+    // Excerpt font
+    document.documentElement.style.setProperty(
+      '--font-excerpt',
+      FONT_FAMILY_MAP[excerptFont] || FONT_FAMILY_MAP['Merriweather']
+    )
+    document.documentElement.style.setProperty('--font-size-excerpt', `${excerptSize || '12'}pt`)
+    document.documentElement.style.setProperty('--font-weight-excerpt', excerptWeight || '400')
+    document.documentElement.style.setProperty('--font-style-excerpt', excerptStyle || 'normal')
+    document.documentElement.style.setProperty('--color-excerpt', excerptColor || '#6b7280')
+    document.documentElement.style.setProperty('--color-excerpt-featured', excerptFeaturedColor || 'rgba(255,255,255,0.75)')
+  }, [headingFont, bodyFont, accentFont, captionFont, heroFont, excerptFont, headingSize, bodySize, accentSize, captionSize, heroSize, excerptSize, headingWeight, bodyWeight, accentWeight, captionWeight, heroWeight, excerptWeight, headingStyle, bodyStyle, accentStyle, captionStyle, heroStyle, excerptStyle, excerptColor, excerptFeaturedColor])
 
   return <>{children}</>
 }

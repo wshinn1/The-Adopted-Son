@@ -112,6 +112,12 @@ export default function TypographyPage() {
   const [heroSize, setHeroSize] = useState('48')
   const [heroWeight, setHeroWeight] = useState('700')
   const [heroStyle, setHeroStyle] = useState('italic')
+  const [excerptFont, setExcerptFont] = useState('Merriweather')
+  const [excerptSize, setExcerptSize] = useState('12')
+  const [excerptWeight, setExcerptWeight] = useState('400')
+  const [excerptStyle, setExcerptStyle] = useState('normal')
+  const [excerptColor, setExcerptColor] = useState('#6b7280')
+  const [excerptFeaturedColor, setExcerptFeaturedColor] = useState('#c0c8d8')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -209,6 +215,12 @@ export default function TypographyPage() {
         setHeroSize(typography.hero_size || '48')
         setHeroWeight(typography.hero_weight || '700')
         setHeroStyle(typography.hero_style || 'italic')
+        setExcerptFont(typography.excerpt_font || 'Merriweather')
+        setExcerptSize(typography.excerpt_size || '12')
+        setExcerptWeight(typography.excerpt_weight || '400')
+        setExcerptStyle(typography.excerpt_style || 'normal')
+        setExcerptColor(typography.excerpt_color || '#6b7280')
+        setExcerptFeaturedColor(typography.excerpt_featured_color || '#c0c8d8')
       }
     } catch (err) {
       console.error('Error loading typography settings:', err)
@@ -245,6 +257,12 @@ export default function TypographyPage() {
             hero_size: heroSize,
             hero_weight: heroWeight,
             hero_style: heroStyle,
+            excerpt_font: excerptFont,
+            excerpt_size: excerptSize,
+            excerpt_weight: excerptWeight,
+            excerpt_style: excerptStyle,
+            excerpt_color: excerptColor,
+            excerpt_featured_color: excerptFeaturedColor,
           })
         }, { onConflict: 'key' })
 
@@ -640,6 +658,109 @@ export default function TypographyPage() {
               </div>
             </div>
 
+            {/* Excerpt Font */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Excerpt Font
+                </label>
+                <select
+                  value={excerptFont}
+                  onChange={(e) => setExcerptFont(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {Object.entries(groupedFonts).map(([category, fonts]) => (
+                    <optgroup key={category} label={category}>
+                      {fonts.map((font) => (
+                        <option key={font.value} value={font.value}>{font.label}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                <p className="text-xs text-neutral-500 mt-1">Used for devotional excerpts on the homepage and devotionals list</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Size</label>
+                <select
+                  value={excerptSize}
+                  onChange={(e) => setExcerptSize(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                >
+                  {FONT_SIZE_OPTIONS.map((size) => (
+                    <option key={size.value} value={size.value}>{size.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Weight</label>
+                <select
+                  value={excerptWeight}
+                  onChange={(e) => setExcerptWeight(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  {FONT_WEIGHT_OPTIONS.map((w) => (
+                    <option key={w.value} value={w.value}>{w.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Style</label>
+                <select
+                  value={excerptStyle}
+                  onChange={(e) => setExcerptStyle(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                >
+                  {FONT_STYLE_OPTIONS.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Excerpt Colors */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Excerpt Color <span className="text-neutral-400 font-normal">(cards)</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={excerptColor}
+                    onChange={(e) => setExcerptColor(e.target.value)}
+                    className="w-10 h-9 rounded border border-neutral-200 cursor-pointer p-0.5"
+                  />
+                  <input
+                    type="text"
+                    value={excerptColor}
+                    onChange={(e) => setExcerptColor(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm font-mono"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  Excerpt Color <span className="text-neutral-400 font-normal">(featured banner)</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={(excerptFeaturedColor || '').startsWith('#') ? excerptFeaturedColor : '#c0c8d8'}
+                    onChange={(e) => setExcerptFeaturedColor(e.target.value)}
+                    className="w-10 h-9 rounded border border-neutral-200 cursor-pointer p-0.5"
+                  />
+                  <input
+                    type="text"
+                    value={excerptFeaturedColor}
+                    onChange={(e) => setExcerptFeaturedColor(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm font-mono"
+                    placeholder="rgba(255,255,255,0.75)"
+                  />
+                </div>
+                <p className="text-xs text-neutral-400 mt-1">Supports hex or rgba() for transparency</p>
+              </div>
+            </div>
+
             {/* Font Preview */}
             <div className="mt-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
               <p className="text-xs text-neutral-500 mb-3">Preview (save to see changes on your site):</p>
@@ -676,9 +797,9 @@ export default function TypographyPage() {
               >
                 This is how your body text will appear in blog posts. The quick brown fox jumps over the lazy dog.
               </p>
-              <p 
+              <p
                 className="text-neutral-500 mt-3"
-                style={{ 
+                style={{
                   fontFamily: `'${captionFont.replace(/_/g, ' ')}', serif`,
                   fontSize: `${captionSize}pt`,
                   fontWeight: captionWeight,
@@ -686,6 +807,18 @@ export default function TypographyPage() {
                 }}
               >
                 Photo caption example - Image credit or description
+              </p>
+              <p
+                className="mt-3"
+                style={{
+                  fontFamily: `'${excerptFont.replace(/_/g, ' ')}', serif`,
+                  fontSize: `${excerptSize}pt`,
+                  fontWeight: excerptWeight,
+                  fontStyle: excerptStyle,
+                  color: excerptColor,
+                }}
+              >
+                Excerpt preview — The blessing was never meant to stop with Abraham. It was meant to move through him outward, to the nations.
               </p>
             </div>
           </div>

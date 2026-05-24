@@ -110,7 +110,16 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
               {featured.title}
             </h3>
             {featured.excerpt && (
-              <p className="text-white/75 text-sm md:text-base font-body leading-relaxed mb-4 line-clamp-2">
+              <p
+                className="leading-relaxed mb-4 line-clamp-2"
+                style={{
+                  fontFamily: 'var(--font-excerpt)',
+                  fontSize: 'var(--font-size-excerpt)',
+                  fontWeight: 'var(--font-weight-excerpt)',
+                  fontStyle: 'var(--font-style-excerpt)',
+                  color: 'var(--color-excerpt-featured)',
+                }}
+              >
                 {featured.excerpt}
               </p>
             )}
@@ -169,7 +178,16 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                   </h3>
                   {date && <p className="text-sm text-neutral-400 font-body mt-2">{date}</p>}
                   {post.excerpt && (
-                    <p className="text-sm text-neutral-500 font-body mt-2 leading-relaxed line-clamp-2">
+                    <p
+                      className="mt-2 leading-relaxed line-clamp-2"
+                      style={{
+                        fontFamily: 'var(--font-excerpt)',
+                        fontSize: 'var(--font-size-excerpt)',
+                        fontWeight: 'var(--font-weight-excerpt)',
+                        fontStyle: 'var(--font-style-excerpt)',
+                        color: 'var(--color-excerpt)',
+                      }}
+                    >
                       {post.excerpt}
                     </p>
                   )}

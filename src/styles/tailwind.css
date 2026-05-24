@@ -27,7 +27,13 @@
   --font-size-hero: 48pt;
   --font-weight-hero: 700;
   --font-style-hero: italic;
-  
+  --font-excerpt: 'Merriweather', serif;
+  --font-size-excerpt: 12pt;
+  --font-weight-excerpt: 400;
+  --font-style-excerpt: normal;
+  --color-excerpt: #6b7280;
+  --color-excerpt-featured: rgba(255,255,255,0.75);
+
   /* Dynamic site colors - set by ColorProvider */
   --color-button-primary: #2B4A6F;
   --color-button-primary-hover: #1e3a5f;
