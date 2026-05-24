@@ -165,7 +165,7 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
               {featured.title}
             </h3>
             {featured.excerpt && (
-              <p className="leading-relaxed mb-4 line-clamp-2" style={excerptFeaturedStyle}>
+              <p className="leading-relaxed mb-4" style={excerptFeaturedStyle}>
                 {featured.excerpt}
               </p>
             )}
