@@ -152,7 +152,7 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
               <div className="w-full h-full bg-neutral-800" />
             )}
             {/* Overlay + text — desktop only */}
-            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
             <div className="hidden md:flex absolute inset-0 flex-col justify-center px-8 md:px-12 max-w-2xl">
               {featured.category && (
                 <span
@@ -162,7 +162,10 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                   {featured.category}
                 </span>
               )}
-              <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold font-heading leading-snug mb-3">
+              <h3
+                className="text-white text-xl md:text-2xl lg:text-3xl font-bold leading-snug mb-3"
+                style={{ fontFamily: 'var(--font-heading)', textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}
+              >
                 {featured.title}
               </h3>
               {featured.excerpt && (
