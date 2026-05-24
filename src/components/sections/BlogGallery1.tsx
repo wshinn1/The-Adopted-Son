@@ -192,7 +192,10 @@ export default async function BlogGallery1({ data }: BlogGallery1Props) {
                 {featured.category}
               </span>
             )}
-            <h3 className="text-xl font-bold font-heading leading-snug mb-3 text-neutral-900">
+            <h3
+              className="text-xl font-bold leading-snug mb-3"
+              style={{ fontFamily: 'var(--font-heading)', color: '#111827' }}
+            >
               {featured.title}
             </h3>
             {featured.excerpt && (
