@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { uploadMedia } from '@/lib/uploadMedia'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -80,6 +80,16 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   const [ttsError, setTtsError] = useState<string | null>(null)
   const [ttsChunk, setTtsChunk] = useState(0)
   const [ttsTotalChunks, setTtsTotalChunks] = useState(0)
+
+  useEffect(() => {
+    if (!ttsGenerating) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = 'Audio is still generating. If you leave this page, the generation will be lost.'
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [ttsGenerating])
 
   const handleGenerateAudio = useCallback(async () => {
     if (!devotional?.id) return
@@ -566,6 +576,12 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
               </div>
             ) : (
               <p className="text-xs text-neutral-400">No audio generated yet. Generate audio to show the Listen tab on this post.</p>
+            )}
+
+            {ttsGenerating && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                ⚠ Generating audio — please don&apos;t leave this page until it finishes.
+              </p>
             )}
 
             {ttsGenerating && ttsTotalChunks > 0 && (
