@@ -6,7 +6,8 @@ import { NextRequest } from 'next/server'
 export const maxDuration = 300
 
 const CHUNK_SIZE = 5000
-const PARALLEL = 5
+const PARALLEL = 2
+const MAX_RETRIES = 4
 
 const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY,
@@ -50,15 +51,34 @@ function chunkText(text: string, size: number): string[] {
   return chunks.filter(Boolean)
 }
 
+function isRateLimitError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err)
+  return /status code:?\s*429/i.test(message)
+}
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 async function generateChunk(text: string, voiceId: string): Promise<Buffer> {
-  const stream = await elevenlabs.textToSpeech.convert(voiceId, {
-    text,
-    model_id: 'eleven_multilingual_v2',
-    output_format: 'mp3_44100_128',
-  })
-  const chunks: Buffer[] = []
-  for await (const chunk of stream) chunks.push(Buffer.from(chunk))
-  return Buffer.concat(chunks)
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const stream = await elevenlabs.textToSpeech.convert(voiceId, {
+        text,
+        model_id: 'eleven_multilingual_v2',
+        output_format: 'mp3_44100_128',
+      })
+      const chunks: Buffer[] = []
+      for await (const chunk of stream) chunks.push(Buffer.from(chunk))
+      return Buffer.concat(chunks)
+    } catch (err) {
+      const isLastAttempt = attempt === MAX_RETRIES
+      if (!isRateLimitError(err) || isLastAttempt) throw err
+      // Rate-limited by ElevenLabs (e.g. concurrent-request cap for the account's plan) — back off and retry
+      await sleep(2000 * Math.pow(2, attempt))
+    }
+  }
+  throw new Error('Unreachable')
 }
 
 function send(controller: ReadableStreamDefaultController, encoder: TextEncoder, data: object) {
