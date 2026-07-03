@@ -89,7 +89,7 @@ export default function DevotionalsSearch() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search devotionals by title, category, tag, or phrase…"
           aria-label="Search devotionals"
-          className="w-full pl-12 pr-12 py-3.5 rounded-full border-2 border-neutral-300 bg-white shadow-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-600 focus:ring-0 font-body text-sm transition-colors"
+          className="w-full pl-12 pr-12 py-3.5 rounded-full border-2 border-neutral-300 bg-white shadow-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-600 focus:ring-0 font-body text-sm font-medium transition-colors"
         />
         {hasQuery && (
           <button
