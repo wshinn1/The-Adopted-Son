@@ -1,13 +1,14 @@
-import { devotionalToPost, getDevotionals, Devotional } from '@/lib/devotional-mapper'
+import { devotionalToPost, Devotional } from '@/lib/devotional-mapper'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getSiteSettings } from '@/lib/site-settings'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import HamburgerHeader from '@/components/HamburgerHeader'
 import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
 import DevotionalsGrid from '@/components/DevotionalsGrid'
+import DevotionalsSearch from '@/components/DevotionalsSearch'
 
 export const metadata: Metadata = {
   title: 'Devotionals',
@@ -39,13 +40,13 @@ export const metadata: Metadata = {
 }
 
 interface Props {
-  searchParams: Promise<{ page?: string; search?: string }>
+  searchParams: Promise<{ page?: string }>
 }
 
 const POSTS_PER_PAGE = 6
 
 export default async function DevotionalsPage({ searchParams }: Props) {
-  const { page, search } = await searchParams
+  const { page } = await searchParams
   const currentPage = parseInt(page ?? '1', 10)
   const offset = (currentPage - 1) * POSTS_PER_PAGE
 
@@ -77,55 +78,12 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     return devotionals
   }
 
-  // --- SEARCH MODE: bypass featured/sidebar layout entirely ---
   let featuredPost = null
   let sidebarPosts: ReturnType<typeof devotionalToPost>[] = []
   let gridPosts: ReturnType<typeof devotionalToPost>[] = []
   let totalPages = 1
 
-  if (search && search.trim().length > 0) {
-    // Search across title, excerpt, content, and categories
-    // First get matching devotional IDs from categories
-    const { data: categoryMatches } = await supabase
-      .from('devotional_categories')
-      .select('devotional_id, categories(name)')
-      .ilike('categories.name', `%${search}%`)
-
-    const categoryMatchIds = (categoryMatches || [])
-      .filter((m: any) => m.categories)
-      .map((m: any) => m.devotional_id)
-
-    // Build search query across title, excerpt, content
-    let searchQuery = supabase
-      .from('devotionals')
-      .select('*', { count: 'exact' })
-      .eq('is_published', true)
-      .or(`title.ilike.%${search}%,excerpt.ilike.%${search}%,content.ilike.%${search}%`)
-      .order('published_at', { ascending: false })
-      .range(offset, offset + POSTS_PER_PAGE - 1)
-
-    const { data: searchData, count: searchCount } = await searchQuery
-    let results = searchData || []
-
-    // Also fetch category matches not already included
-    if (categoryMatchIds.length > 0) {
-      const existingIds = new Set(results.map((r: any) => r.id))
-      const newIds = categoryMatchIds.filter((id: string) => !existingIds.has(id))
-      if (newIds.length > 0) {
-        const { data: catResults } = await supabase
-          .from('devotionals')
-          .select('*')
-          .eq('is_published', true)
-          .in('id', newIds)
-        results = [...results, ...(catResults || [])]
-      }
-    }
-
-    const withAuthors = await attachAuthors(results)
-    gridPosts = withAuthors.map((d: Devotional) => devotionalToPost(d))
-    totalPages = Math.ceil(((searchCount ?? 0) + categoryMatchIds.length) / POSTS_PER_PAGE)
-
-  } else {
+  {
     // --- NORMAL MODE: featured + sidebar + grid ---
 
     // Fetch featured post (prioritize is_featured, fallback to most recent)
@@ -236,112 +194,10 @@ export default async function DevotionalsPage({ searchParams }: Props) {
       
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         
-        {/* Search Bar */}
-        <div className="mb-12">
-          <form action="/devotionals" method="get" className="relative max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
-            <input
-              type="text"
-              name="search"
-              defaultValue={search || ''}
-              placeholder="Search devotionals..."
-              className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-button-primary)] focus:border-transparent font-body"
-            />
-          </form>
-        </div>
+        {/* Live Search */}
+        <DevotionalsSearch />
 
-        {/* Search Results or Normal Layout */}
-        {search && search.trim().length > 0 ? (
-          <section className="mb-16">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-1 h-8 bg-button-primary rounded-full" />
-              <h2 className="text-2xl font-bold text-gray-900 font-heading">
-                {gridPosts.length > 0 ? `Results for "${search}"` : `No results for "${search}"`}
-              </h2>
-            </div>
-
-            {gridPosts.length > 0 ? (
-              <>
-                <div className="grid md:grid-cols-2 gap-8">
-                  {gridPosts.map((post, index) => {
-                    const postDate = new Date(post.date)
-                    const day = postDate.getDate()
-                    const month = postDate.toLocaleDateString('en-US', { month: 'short' })
-                    return (
-                      <Link key={post.id} href={`/devotionals/${post.handle}`} className="group block">
-                        <article>
-                          <div className="relative aspect-[4/3] overflow-hidden rounded-xl mb-4">
-                            <Image
-                              src={typeof post.featuredImage === 'string' ? post.featuredImage : post.featuredImage.src}
-                              alt={post.title}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-300"
-                              priority={index < 2}
-                              unoptimized
-                            />
-                            <div 
-                              className="absolute top-4 left-4 px-4 py-2 rounded-lg text-center"
-                              style={{
-                                backgroundColor: 'var(--color-date-badge-bg)',
-                                color: 'var(--color-date-badge-text)',
-                              }}
-                            >
-                              <div className="text-2xl font-bold leading-none">{day}</div>
-                              <div className="text-xs uppercase">{month}</div>
-                            </div>
-                          </div>
-                          {post.categories && post.categories.length > 0 && (
-                            <div className="flex flex-wrap gap-3 mb-3">
-                              {post.categories.slice(0, 3).map((cat, i) => (
-                                <span key={i} className="text-sm font-medium text-rose-500">
-                                  #{cat.name.toLowerCase().replace(/\s+/g, '')}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-title-hover transition-colors font-heading">
-                            {post.title}
-                          </h3>
-                          {post.excerpt && (
-                            <p className="text-gray-600 line-clamp-3 font-body leading-relaxed">{post.excerpt}</p>
-                          )}
-                        </article>
-                      </Link>
-                    )
-                  })}
-                </div>
-
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-12">
-                    {currentPage > 1 && (
-                      <Link href={`/devotionals?page=${currentPage - 1}&search=${search}`} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors font-body">
-                        <ChevronLeft className="size-4" /> Previous
-                      </Link>
-                    )}
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                      <Link key={pageNum} href={`/devotionals?page=${pageNum}&search=${search}`}
-                        className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors font-body ${pageNum === currentPage ? 'bg-pagination-active text-pagination-active' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
-                        {pageNum}
-                      </Link>
-                    ))}
-                    {currentPage < totalPages && (
-                      <Link href={`/devotionals?page=${currentPage + 1}&search=${search}`} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors font-body">
-                        Next <ChevronRight className="size-4" />
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="py-20 text-center bg-white rounded-2xl">
-                <p className="text-gray-600 font-body">Try a different search term.</p>
-                <Link href="/devotionals" className="mt-6 inline-block px-6 py-3 rounded-full bg-button-primary text-button-primary font-medium hover:opacity-90 transition-opacity">
-                  View all devotionals
-                </Link>
-              </div>
-            )}
-          </section>
-        ) : (
+        {/* Normal Layout — always shown beneath the search component when no query is active */}
         <>
 
         {/* Devotionals Section */}
@@ -489,10 +345,8 @@ export default async function DevotionalsPage({ searchParams }: Props) {
           }))}
           currentPage={currentPage}
           totalPages={totalPages}
-          search={search}
         />
         </>
-        )}
 
       </div>
     </div>
