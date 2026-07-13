@@ -79,6 +79,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   }
 
   let featuredPost = null
+  let featuredBlurb: string | null = null
   let sidebarPosts: ReturnType<typeof devotionalToPost>[] = []
   let gridPosts: ReturnType<typeof devotionalToPost>[] = []
   let totalPages = 1
@@ -117,6 +118,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
     }
 
     featuredPost = featuredData ? devotionalToPost(featuredData as Devotional) : null
+    featuredBlurb = (featuredData as any)?.featured_blurb ?? null
     const featuredId = featuredData?.id
 
     let sidebarQuery = supabase
@@ -249,7 +251,13 @@ export default async function DevotionalsPage({ searchParams }: Props) {
                           {featuredPost.excerpt}
                         </p>
                       )}
-                      
+
+                      {featuredBlurb && (
+                        <p className="hidden md:block text-gray-600 mb-6 text-base leading-relaxed font-body">
+                          {featuredBlurb}
+                        </p>
+                      )}
+
                       {/* Author */}
                       <div className="flex items-center gap-3 mt-auto">
                         <Image

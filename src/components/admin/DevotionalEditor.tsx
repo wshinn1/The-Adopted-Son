@@ -29,6 +29,7 @@ interface Devotional {
   is_premium?: boolean
   is_published?: boolean
   is_featured?: boolean
+  featured_blurb?: string | null
   author_name?: string | null
   author_id?: string | null
   seo_title?: string | null
@@ -65,6 +66,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   const [isPremium, setIsPremium] = useState(devotional?.is_premium ?? true)
   const [isPublished, setIsPublished] = useState(devotional?.is_published ?? false)
   const [isFeatured, setIsFeatured] = useState(devotional?.is_featured ?? false)
+  const [featuredBlurb, setFeaturedBlurb] = useState(devotional?.featured_blurb ?? '')
   const [authorId, setAuthorId] = useState(devotional?.author_id ?? '')
   const [authorName, setAuthorName] = useState(devotional?.author_name ?? '')
   const [seoTitle, setSeoTitle] = useState(devotional?.seo_title ?? '')
@@ -202,6 +204,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
       is_premium: isPremium,
       is_published: publish,
       is_featured: isFeatured,
+      featured_blurb: featuredBlurb || null,
       author_id: authorId || null,
       author_name: finalAuthorName,
       seo_title: seoTitle || null,
@@ -493,6 +496,22 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
               <span className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${isFeatured ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </button>
           </div>
+
+          {isFeatured && (
+            <div>
+              <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">
+                Featured blurb
+                <span className="ml-1.5 text-xs text-neutral-400">(desktop only — fills white space in the featured card)</span>
+              </label>
+              <textarea
+                value={featuredBlurb}
+                onChange={(e) => setFeaturedBlurb(e.target.value)}
+                rows={4}
+                placeholder="Add a paragraph that appears in the featured post card on the devotionals page…"
+                className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+              />
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <label className="text-sm text-neutral-600 dark:text-neutral-400">Premium content</label>
