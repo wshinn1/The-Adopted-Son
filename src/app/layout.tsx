@@ -2,6 +2,8 @@ import '@/styles/tailwind.css'
 import { Metadata } from 'next'
 import { Be_Vietnam_Pro } from 'next/font/google'
 import { createClient } from '@/lib/supabase/server'
+import { Suspense } from 'react'
+import PHProvider from '@/components/PostHogProvider'
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ['latin'],
@@ -56,7 +58,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {faviconUrl && <link rel="icon" href={faviconUrl} />}
       </head>
       <body className="bg-white text-base text-neutral-900">
-        {children}
+        <Suspense>
+          <PHProvider>
+            {children}
+          </PHProvider>
+        </Suspense>
       </body>
     </html>
   )

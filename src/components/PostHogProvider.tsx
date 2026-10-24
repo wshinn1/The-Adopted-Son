@@ -1,64 +1,42 @@
 'use client'
 
 import posthog from 'posthog-js'
-import { PostHogProvider as PHProvider } from 'posthog-js/react'
+import { PostHogProvider } from 'posthog-js/react'
 import { useEffect, useRef } from 'react'
-import { getConsentStatus, type ConsentStatus } from './CookieConsent'
+import { usePathname, useSearchParams } from 'next/navigation'
 
-// Check if PostHog is already initialized using its internal state
-const isPostHogInitialized = () => {
-  try {
-    // PostHog sets __loaded when initialized
-    return !!(posthog as unknown as { __loaded?: boolean }).__loaded
-  } catch {
-    return false
-  }
-}
-
-export default function PostHogProvider({ children }: { children: React.ReactNode }) {
-  const hasSetupListener = useRef(false)
+function PageViewTracker() {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    if (hasSetupListener.current) return
-    hasSetupListener.current = true
+    if (typeof window === 'undefined') return
+    posthog.capture('$pageview', { $current_url: window.location.href })
+  }, [pathname, searchParams])
 
-    const initPostHog = () => {
-      // Check PostHog's internal state to prevent re-init
-      if (isPostHogInitialized()) return
-      
-      const key = process.env.NEXT_PUBLIC_POSTHOG_KEY
-      const host = process.env.NEXT_PUBLIC_POSTHOG_HOST
+  return null
+}
 
-      if (!key) return
+export default function PHProvider({ children }: { children: React.ReactNode }) {
+  const initialized = useRef(false)
 
-      posthog.init(key, {
-        api_host: host ?? 'https://us.i.posthog.com',
-        capture_pageview: true,
-        capture_pageleave: true,
-        persistence: 'localStorage+cookie',
-      })
-    }
-
-    // Check initial consent status
-    const status = getConsentStatus()
-    if (status === 'accepted') {
-      initPostHog()
-    }
-
-    // Listen for consent changes
-    const handleConsentChange = (e: CustomEvent<ConsentStatus>) => {
-      if (e.detail === 'accepted') {
-        initPostHog()
-      } else if (e.detail === 'declined' && isPostHogInitialized()) {
-        posthog.opt_out_capturing()
-      }
-    }
-
-    window.addEventListener('cookie-consent-change', handleConsentChange as EventListener)
-    return () => {
-      window.removeEventListener('cookie-consent-change', handleConsentChange as EventListener)
-    }
+  useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_POSTHOG_KEY
+    if (!key || initialized.current) return
+    initialized.current = true
+    posthog.init(key, {
+      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
+      capture_pageview: false, // manual via PageViewTracker so we get SPA navigations
+      capture_pageleave: true,
+      persistence: 'localStorage+cookie',
+      respect_dnt: false,
+    })
   }, [])
 
-  return <PHProvider client={posthog}>{children}</PHProvider>
+  return (
+    <PostHogProvider client={posthog}>
+      <PageViewTracker />
+      {children}
+    </PostHogProvider>
+  )
 }
