@@ -5,8 +5,8 @@ import { NextRequest } from 'next/server'
 
 export const maxDuration = 300
 
-const CHUNK_SIZE = 5000
-const PARALLEL = 2
+const CHUNK_SIZE = 2500
+const PARALLEL = 1
 const MAX_RETRIES = 4
 
 const elevenlabs = new ElevenLabsClient({
@@ -56,6 +56,13 @@ function isRateLimitError(err: unknown): boolean {
   return /status code:?\s*429/i.test(message)
 }
 
+function isRetryableError(err: unknown): boolean {
+  if (isRateLimitError(err)) return true
+  // ElevenLabs SDK throws reason:"timeout" when its 60s per-request limit is hit
+  const message = err instanceof Error ? err.message : String(err)
+  return /timeout/i.test(message)
+}
+
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -67,15 +74,15 @@ async function generateChunk(text: string, voiceId: string): Promise<Buffer> {
         text,
         model_id: 'eleven_multilingual_v2',
         output_format: 'mp3_44100_128',
-      })
+      }, { timeoutInSeconds: 120 })
       const chunks: Buffer[] = []
       for await (const chunk of stream) chunks.push(Buffer.from(chunk))
       return Buffer.concat(chunks)
     } catch (err) {
       const isLastAttempt = attempt === MAX_RETRIES
-      if (!isRateLimitError(err) || isLastAttempt) throw err
-      // Rate-limited by ElevenLabs (e.g. concurrent-request cap for the account's plan) — back off and retry
-      await sleep(2000 * Math.pow(2, attempt))
+      if (!isRetryableError(err) || isLastAttempt) throw err
+      // Back off on rate limit (429) or timeout — ElevenLabs SDK defaults to 60s per request
+      await sleep(isRateLimitError(err) ? 2000 * Math.pow(2, attempt) : 5000)
     }
   }
   throw new Error('Unreachable')
