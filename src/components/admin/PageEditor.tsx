@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useMemo, useCallback } from 'react'
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X, Globe, FileText } from 'lucide-react'
@@ -79,6 +79,32 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const [seo, setSeo] = useState<Seo>(() => normalizeSeo(page.seo ?? {}))
   const pageContent = useMemo(() => contentFromSections(sections.map(s => ({ data: s.data }))), [sections])
   const seoKey = `pages:${page.id}`
+
+  // Silently persist the live SEO score so the pages list stays accurate
+  useEffect(() => {
+    const score = scoreSeo({
+      seo,
+      noun: 'page',
+      title: pageData.title,
+      path: pageData.is_homepage ? '/' : `/${pageData.slug}`,
+      siteTitle: 'The Adopted Son',
+      siteUrl: 'https://www.theadoptedson.com',
+      shareImage: seo.ogImage || pageData.og_image_url || '',
+      content: pageContent,
+      slugEditable: !pageData.is_homepage,
+    }).score
+    const timer = setTimeout(async () => {
+      const client = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+      await client.from('pages').update({
+        seo: { ...cleanSeo(seo), _score: score },
+      }).eq('id', page.id)
+    }, 2000)
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageContent, seo])
   const handleSeoChange = useCallback((patch: Partial<Seo>) => setSeo(prev => ({ ...prev, ...patch })), [])
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
