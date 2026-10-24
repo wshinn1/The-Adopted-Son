@@ -4,6 +4,19 @@ import { Metadata } from 'next'
 import AdminDevotionalActions from '@/components/admin/AdminDevotionalActions'
 import GenerateAllAudioButton from '@/components/admin/GenerateAllAudioButton'
 
+function SeoIndicator({ seo }: { seo: unknown }) {
+  const s = seo && typeof seo === 'object' ? (seo as Record<string, unknown>) : {}
+  const score = (s.title ? 35 : 0) + (s.description ? 35 : 0) + (s.keyword ? 30 : 0)
+  const color = score >= 80 ? 'bg-green-500' : score >= 50 ? 'bg-amber-400' : score > 0 ? 'bg-red-400' : 'bg-neutral-300 dark:bg-neutral-600'
+  const label = score >= 80 ? 'Good' : score >= 50 ? 'OK' : score > 0 ? 'Needs work' : 'Not set'
+  return (
+    <span className="flex items-center gap-1.5" title={`SEO: ${label}`}>
+      <span className={`inline-block w-2 h-2 rounded-full ${color}`} />
+      <span className="text-xs text-neutral-500">{score > 0 ? score : '—'}</span>
+    </span>
+  )
+}
+
 export const metadata: Metadata = { title: 'Devotionals — Admin' }
 
 export default async function AdminDevotionalsPage() {
@@ -11,7 +24,7 @@ export default async function AdminDevotionalsPage() {
 
   const { data: devotionals } = await supabase
     .from('devotionals')
-    .select('id, title, slug, is_published, is_premium, category, published_at, created_at, tts_audio_url')
+    .select('id, title, slug, is_published, is_premium, category, published_at, created_at, tts_audio_url, seo')
     .order('created_at', { ascending: false })
 
   const allDevotionalsForTTS = (devotionals ?? []).map((d) => ({
@@ -42,6 +55,7 @@ export default async function AdminDevotionalsPage() {
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Title</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide hidden md:table-cell">Category</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Status</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide hidden lg:table-cell">SEO</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide hidden lg:table-cell">Audio</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide hidden lg:table-cell">Date</th>
               <th className="px-5 py-3"></th>
@@ -76,6 +90,9 @@ export default async function AdminDevotionalsPage() {
                       </span>
                     )}
                   </div>
+                </td>
+                <td className="px-5 py-3.5 hidden lg:table-cell">
+                  <SeoIndicator seo={d.seo} />
                 </td>
                 <td className="px-5 py-3.5 hidden lg:table-cell">
                   {d.tts_audio_url ? (

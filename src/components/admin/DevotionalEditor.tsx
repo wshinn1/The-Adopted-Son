@@ -412,6 +412,21 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
             </span>
           </div>
         </div>
+
+        <SeoPanel
+          seo={seo}
+          onChange={(patch) => setSeo((prev) => ({ ...prev, ...patch }))}
+          noun="post"
+          title={title}
+          path={`/devotionals/${slug}`}
+          settings={{ siteTitle: 'The Adopted Son', siteUrl: 'https://www.theadoptedson.com' }}
+          content={pageContent}
+          fallbackDescription={excerpt}
+          fallbackImage={coverImageUrl}
+          onSlugChange={(s) => { setSlug(s); setSlugManuallyEdited(true) }}
+          addToHtml={addToHtml}
+          seoKey={seoKey}
+        />
       </div>
 
       {/* Sidebar */}
@@ -672,20 +687,6 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
           </div>
         )}
 
-        <SeoPanel
-          seo={seo}
-          onChange={(patch) => setSeo((prev) => ({ ...prev, ...patch }))}
-          noun="post"
-          title={title}
-          path={`/devotionals/${slug}`}
-          settings={{ siteTitle: 'The Adopted Son', siteUrl: 'https://www.theadoptedson.com' }}
-          content={pageContent}
-          fallbackDescription={excerpt}
-          fallbackImage={coverImageUrl}
-          onSlugChange={(s) => { setSlug(s); setSlugManuallyEdited(true) }}
-          addToHtml={addToHtml}
-          seoKey={seoKey}
-        />
       </div>
     </div>
   )
