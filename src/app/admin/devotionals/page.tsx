@@ -3,11 +3,10 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import AdminDevotionalActions from '@/components/admin/AdminDevotionalActions'
 import GenerateAllAudioButton from '@/components/admin/GenerateAllAudioButton'
+import { scoreSeo, contentFromProseMirror } from '@/lib/seo-check'
+import { normalizeSeo } from '@/lib/seo'
 
-function SeoIndicator({ seo }: { seo: unknown }) {
-  const s = seo && typeof seo === 'object' ? (seo as Record<string, unknown>) : {}
-  const score = typeof s._score === 'number' ? s._score
-    : (s.title ? 35 : 0) + (s.description ? 35 : 0) + (s.keyword ? 30 : 0)
+function SeoIndicator({ score }: { score: number }) {
   const color = score >= 80 ? 'bg-green-500' : score >= 50 ? 'bg-amber-400' : score > 0 ? 'bg-red-400' : 'bg-neutral-300 dark:bg-neutral-600'
   const label = score >= 80 ? 'Good' : score >= 50 ? 'OK' : score > 0 ? 'Needs work' : 'Not set'
   return (
@@ -26,7 +25,7 @@ export default async function AdminDevotionalsPage() {
 
   const { data: devotionals } = await supabase
     .from('devotionals')
-    .select('id, title, slug, is_published, is_premium, category, published_at, created_at, tts_audio_url, seo')
+    .select('id, title, slug, is_published, is_premium, category, published_at, created_at, tts_audio_url, seo, content')
     .order('created_at', { ascending: false })
 
   const allDevotionalsForTTS = (devotionals ?? []).map((d) => ({
@@ -64,7 +63,18 @@ export default async function AdminDevotionalsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
-            {devotionals?.map((d) => (
+            {devotionals?.map((d) => {
+              const seoScore = scoreSeo({
+                seo: normalizeSeo(d.seo ?? {}),
+                noun: 'post',
+                title: d.title,
+                path: `/devotionals/${d.slug}`,
+                siteTitle: 'The Adopted Son',
+                siteUrl: 'https://www.theadoptedson.com',
+                content: contentFromProseMirror(d.content),
+                slugEditable: false,
+              }).score
+              return (
               <tr key={d.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/30 transition-colors">
                 <td className="px-5 py-3.5">
                   <p className="font-medium text-neutral-900 dark:text-neutral-100 truncate max-w-[220px]">
@@ -94,7 +104,7 @@ export default async function AdminDevotionalsPage() {
                   </div>
                 </td>
                 <td className="px-5 py-3.5 hidden lg:table-cell">
-                  <SeoIndicator seo={d.seo} />
+                  <SeoIndicator score={seoScore} />
                 </td>
                 <td className="px-5 py-3.5 hidden lg:table-cell">
                   {d.tts_audio_url ? (
@@ -127,7 +137,8 @@ export default async function AdminDevotionalsPage() {
                   </div>
                 </td>
               </tr>
-            ))}
+              )
+            })}
             {(!devotionals || devotionals.length === 0) && (
               <tr>
                 <td colSpan={5} className="px-5 py-10 text-center text-sm text-neutral-400">
