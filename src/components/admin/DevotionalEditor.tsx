@@ -8,7 +8,7 @@ import { Upload, X } from 'lucide-react'
 import BlockEditor from './BlockEditor'
 import { SeoPanel } from '@/components/admin/SeoPanel'
 import { normalizeSeo, cleanSeo, emptySeo, type Seo } from '@/lib/seo'
-import { contentFromProseMirror } from '@/lib/seo-check'
+import { contentFromProseMirror, scoreSeo } from '@/lib/seo-check'
 
 interface Author {
   id: string
@@ -219,6 +219,19 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
     const selectedAuthor = authors.find(a => a.id === authorId)
     const finalAuthorName = selectedAuthor?.name || authorName || 'The Adopted Son'
 
+    const scoreResult = scoreSeo({
+      seo,
+      noun: 'post',
+      title,
+      path: `/devotionals/${safeSlug}`,
+      siteTitle: 'The Adopted Son',
+      siteUrl: 'https://www.theadoptedson.com',
+      fallbackDescription: excerpt,
+      shareImage: coverImageUrl,
+      content: pageContent,
+      slugEditable: true,
+    })
+
     const body = {
       title,
       slug: safeSlug,
@@ -237,7 +250,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
       featured_blurb: featuredBlurb || null,
       author_id: authorId || null,
       author_name: finalAuthorName,
-      seo: cleanSeo(seo),
+      seo: { ...cleanSeo(seo), _score: scoreResult.score },
       seo_title: seo.title || null,
       seo_description: seo.description || null,
       seo_keywords: seo.keyword || null,

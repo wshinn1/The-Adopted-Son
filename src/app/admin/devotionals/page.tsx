@@ -6,7 +6,8 @@ import GenerateAllAudioButton from '@/components/admin/GenerateAllAudioButton'
 
 function SeoIndicator({ seo }: { seo: unknown }) {
   const s = seo && typeof seo === 'object' ? (seo as Record<string, unknown>) : {}
-  const score = (s.title ? 35 : 0) + (s.description ? 35 : 0) + (s.keyword ? 30 : 0)
+  const score = typeof s._score === 'number' ? s._score
+    : (s.title ? 35 : 0) + (s.description ? 35 : 0) + (s.keyword ? 30 : 0)
   const color = score >= 80 ? 'bg-green-500' : score >= 50 ? 'bg-amber-400' : score > 0 ? 'bg-red-400' : 'bg-neutral-300 dark:bg-neutral-600'
   const label = score >= 80 ? 'Good' : score >= 50 ? 'OK' : score > 0 ? 'Needs work' : 'Not set'
   return (
