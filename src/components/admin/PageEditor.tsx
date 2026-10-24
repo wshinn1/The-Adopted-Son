@@ -447,6 +447,7 @@ export default function PageEditor({ page, sections: initialSections, templates 
           path={pageData.is_homepage ? '/' : `/${pageData.slug}`}
           settings={{ siteTitle: 'The Adopted Son', siteUrl: 'https://www.theadoptedson.com' }}
           content={pageContent}
+          fallbackImage={pageData.og_image_url ?? ''}
           onSlugChange={pageData.is_homepage ? undefined : (s) => setPageData(p => ({ ...p, slug: s }))}
           seoKey={seoKey}
         />

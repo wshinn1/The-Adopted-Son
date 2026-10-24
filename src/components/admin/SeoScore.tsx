@@ -401,6 +401,21 @@ export function SeoScore({ input, onChange, addToHtml, saveKey = '' }: SeoScoreP
               onAdded={setAdded}
             />
           )}
+          {ai.imageAlts && ai.imageAlts.length > 0 && (
+            <div>
+              <span className="seo-field-label">Image alt text</span>
+              <p className="seo-hint">Copy each alt text and paste it into the image settings in your content.</p>
+              {ai.imageAlts.map(({ src, alt }) => (
+                <div className="seo-option" key={src}>
+                  <span>
+                    <small className="seo-alt-note" style={{ wordBreak: 'break-all' }}>{src.split('/').pop()}</small>
+                    {alt}
+                  </span>
+                  <CopyButton text={alt} />
+                </div>
+              ))}
+            </div>
+          )}
           {ai.advice.length > 0 && (
             <div>
               <span className="seo-field-label">Ideas for the content</span>
