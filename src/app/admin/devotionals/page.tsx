@@ -64,18 +64,21 @@ export default async function AdminDevotionalsPage() {
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
             {devotionals?.map((d) => {
-              const seoScore = scoreSeo({
-                seo: normalizeSeo(d.seo ?? {}),
-                noun: 'post',
-                title: d.title,
-                path: `/devotionals/${d.slug}`,
-                siteTitle: 'The Adopted Son',
-                siteUrl: 'https://www.theadoptedson.com',
-                fallbackDescription: d.excerpt ?? '',
-                shareImage: d.cover_image_url ?? '',
-                content: contentFromProseMirror(d.content),
-                slugEditable: true,
-              }).score
+              const stored = d.seo && typeof d.seo === 'object' ? (d.seo as Record<string, unknown>) : {}
+              const seoScore = typeof stored._score === 'number'
+                ? stored._score
+                : scoreSeo({
+                    seo: normalizeSeo(d.seo ?? {}),
+                    noun: 'post',
+                    title: d.title,
+                    path: `/devotionals/${d.slug}`,
+                    siteTitle: 'The Adopted Son',
+                    siteUrl: 'https://www.theadoptedson.com',
+                    fallbackDescription: d.excerpt ?? '',
+                    shareImage: d.cover_image_url ?? '',
+                    content: contentFromProseMirror(d.content),
+                    slugEditable: true,
+                  }).score
               return (
               <tr key={d.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/30 transition-colors">
                 <td className="px-5 py-3.5">
