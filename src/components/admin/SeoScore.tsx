@@ -138,10 +138,12 @@ export type SeoScoreProps = {
   onChange: (patch: SeoPatch) => void
   /** For devotionals: appends drafted HTML to the post content. */
   addToHtml?: (html: string) => void
+  /** Injects suggested alt text directly into the content by matching src URLs. */
+  applyImageAlts?: (alts: { src: string; alt: string }[]) => void
   saveKey?: string
 }
 
-export function SeoScore({ input, onChange, addToHtml, saveKey = '' }: SeoScoreProps) {
+export function SeoScore({ input, onChange, addToHtml, applyImageAlts, saveKey = '' }: SeoScoreProps) {
   const content = input.content
   const report = scoreSeo(input)
   const currentSlug = input.path.split('/').filter(Boolean).pop() ?? ''
@@ -189,6 +191,8 @@ export function SeoScore({ input, onChange, addToHtml, saveKey = '' }: SeoScoreP
 
   const [added, setAdded] = useState<Record<number, boolean>>({})
   useEffect(() => setAdded({}), [ai])
+  const [appliedAlts, setAppliedAlts] = useState<Record<string, boolean>>({})
+  useEffect(() => setAppliedAlts({}), [ai])
   const drafts = useMemo(() => (ai?.buildOut ?? []).map(toSeoDraft), [ai])
 
   const planKeyword = input.seo.keyword.trim() || ai?.keyword || ''
@@ -403,15 +407,44 @@ export function SeoScore({ input, onChange, addToHtml, saveKey = '' }: SeoScoreP
           )}
           {ai.imageAlts && ai.imageAlts.length > 0 && (
             <div>
-              <span className="seo-field-label">Image alt text</span>
-              <p className="seo-hint">Copy each alt text and paste it into the image settings in your content.</p>
+              <div className="seo-alt-head">
+                <span className="seo-field-label">Image alt text</span>
+                <span className="seo-use">
+                  {applyImageAlts && ai.imageAlts.some(({ src }) => !appliedAlts[src]) && (
+                    <button type="button" className="seo-secondary-button" onClick={() => {
+                      const pending = ai.imageAlts.filter(({ src }) => !appliedAlts[src])
+                      applyImageAlts(pending)
+                      setAppliedAlts(prev => ({ ...prev, ...Object.fromEntries(pending.map(a => [a.src, true])) }))
+                    }}>
+                      <Plus />Apply all
+                    </button>
+                  )}
+                  {!applyImageAlts && <CopyButton text={ai.imageAlts.map(({ alt }) => alt).join('\n')} />}
+                </span>
+              </div>
+              <p className="seo-hint">
+                {applyImageAlts
+                  ? `These alt texts are matched to your images by URL. Applying updates the content — save the ${input.noun} to keep the changes.`
+                  : 'Copy each alt text and paste it into the image settings in your content.'}
+              </p>
               {ai.imageAlts.map(({ src, alt }) => (
                 <div className="seo-option" key={src}>
                   <span>
                     <small className="seo-alt-note" style={{ wordBreak: 'break-all' }}>{src.split('/').pop()}</small>
                     {alt}
                   </span>
-                  <CopyButton text={alt} />
+                  <span className="seo-alt-actions">
+                    {appliedAlts[src]
+                      ? <span className="seo-alt-saved"><Check />Applied</span>
+                      : applyImageAlts
+                        ? <button type="button" className="text-button" onClick={() => {
+                            applyImageAlts([{ src, alt }])
+                            setAppliedAlts(prev => ({ ...prev, [src]: true }))
+                          }}>Apply</button>
+                        : null
+                    }
+                    <CopyButton text={alt} />
+                  </span>
                 </div>
               ))}
             </div>

@@ -105,6 +105,22 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
     })
   }, [])
 
+  const applyImageAlts = useCallback((alts: { src: string; alt: string }[]) => {
+    const altMap = new Map(alts.map(a => [a.src, a.alt]))
+    function walk(node: unknown): unknown {
+      if (!node || typeof node !== 'object') return node
+      const n = node as Record<string, unknown>
+      if (n.type === 'image' && n.attrs && typeof n.attrs === 'object') {
+        const attrs = n.attrs as Record<string, unknown>
+        const src = typeof attrs.src === 'string' ? attrs.src : ''
+        if (src && altMap.has(src)) return { ...n, attrs: { ...attrs, alt: altMap.get(src) } }
+      }
+      if (Array.isArray(n.content)) return { ...n, content: n.content.map(walk) }
+      return node
+    }
+    setEditorContent((prev: unknown) => walk(prev))
+  }, [])
+
   const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(
     (devotional as unknown as Record<string, unknown>)?.tts_audio_url as string | null ?? null
   )
@@ -438,6 +454,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
           fallbackImage={coverImageUrl}
           onSlugChange={(s) => { setSlug(s); setSlugManuallyEdited(true) }}
           addToHtml={addToHtml}
+          applyImageAlts={applyImageAlts}
           seoKey={seoKey}
         />
       </div>

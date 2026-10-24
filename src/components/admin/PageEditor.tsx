@@ -235,6 +235,31 @@ export default function PageEditor({ page, sections: initialSections, templates 
     }
   }
 
+  const applyImageAlts = useCallback(async (alts: { src: string; alt: string }[]) => {
+    const altMap = new Map(alts.map(a => [a.src, a.alt]))
+    function applyToData(data: Record<string, unknown>): { data: Record<string, unknown>; changed: boolean } {
+      let changed = false
+      const newData = { ...data }
+      for (const [key, value] of Object.entries(data)) {
+        if (typeof value === 'string' && altMap.has(value)) {
+          const altKey = key.endsWith('_url') ? key.replace(/_url$/, '_alt')
+            : (key === 'image' || key === 'src' || key === 'url') ? 'image_alt'
+            : key + '_alt'
+          const newAlt = altMap.get(value)!
+          if (newData[altKey] !== newAlt) { newData[altKey] = newAlt; changed = true }
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+          const result = applyToData(value as Record<string, unknown>)
+          if (result.changed) { newData[key] = result.data; changed = true }
+        }
+      }
+      return { data: newData, changed }
+    }
+    for (const section of sections) {
+      const result = applyToData(section.data)
+      if (result.changed) await updateSectionData(section.id, result.data)
+    }
+  }, [sections, updateSectionData])
+
   const toggleSectionVisibility = async (sectionId: string) => {
     const section = sections.find(s => s.id === sectionId)
     if (!section) return
@@ -449,6 +474,7 @@ export default function PageEditor({ page, sections: initialSections, templates 
           content={pageContent}
           fallbackImage={pageData.og_image_url ?? ''}
           onSlugChange={pageData.is_homepage ? undefined : (s) => setPageData(p => ({ ...p, slug: s }))}
+          applyImageAlts={applyImageAlts}
           seoKey={seoKey}
         />
         <button

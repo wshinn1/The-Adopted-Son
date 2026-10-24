@@ -26,6 +26,8 @@ type Props = {
   onSlugChange?: (slug: string) => void
   /** For devotionals: appends drafted HTML to the post content. */
   addToHtml?: (html: string) => void
+  /** Injects suggested alt text directly into the content by matching src URLs. */
+  applyImageAlts?: (alts: { src: string; alt: string }[]) => void
   seoKey?: string
 }
 
@@ -74,7 +76,7 @@ function SharePreview({ host, title, description, image }: { host: string; title
   )
 }
 
-export function SeoPanel({ seo, onChange, noun, title, path, settings, fallbackDescription = '', fallbackImage = '', content, onSlugChange, addToHtml, seoKey }: Props) {
+export function SeoPanel({ seo, onChange, noun, title, path, settings, fallbackDescription = '', fallbackImage = '', content, onSlugChange, addToHtml, applyImageAlts, seoKey }: Props) {
   const shownTitle = effectiveTitle(seo, title, settings.siteTitle)
   const shareTitle = seo.ogTitle || seo.title || title || settings.siteTitle
   const shownDescription = seo.description || fallbackDescription || settings.seoDescription || ''
@@ -109,6 +111,7 @@ export function SeoPanel({ seo, onChange, noun, title, path, settings, fallbackD
           input={scoreInput}
           onChange={handleScoreChange}
           addToHtml={addToHtml}
+          applyImageAlts={applyImageAlts}
           saveKey={seoKey}
         />
       )}
