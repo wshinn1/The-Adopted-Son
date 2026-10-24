@@ -17,6 +17,7 @@ function SeoIndicator({ seo }: { seo: unknown }) {
   )
 }
 
+export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Devotionals — Admin' }
 
 export default async function AdminDevotionalsPage() {

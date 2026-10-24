@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -25,6 +26,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     .single()
 
   if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
+  revalidatePath('/admin/devotionals')
   return NextResponse.json({ devotional: data })
 }
 
