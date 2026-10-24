@@ -36,7 +36,14 @@ function walk(value: unknown, key: string, out: PageContent, parent?: Record<str
     if (!v || SKIP_KEYS.test(key)) return
     if (/<[a-z][\s\S]*>/i.test(v)) return addHtml(v, out)
     if (isImageUrl(v) && !/^(href|buttonUrl|ctaUrl)$/i.test(key)) {
-      const alt = typeof parent?.alt === 'string' ? parent.alt : typeof parent?.imageAlt === 'string' ? parent.imageAlt : ''
+      // Mirror the altKey convention in applyImageAlts (PageEditor) so the score reflects applied alts.
+      const derivedAltKey = key.endsWith('_url') ? key.replace(/_url$/, '_alt')
+        : (key === 'image' || key === 'src' || key === 'url') ? 'image_alt'
+        : `${key}_alt`
+      const alt = typeof parent?.alt === 'string' ? parent.alt
+        : typeof parent?.imageAlt === 'string' ? parent.imageAlt
+        : typeof parent?.[derivedAltKey] === 'string' ? (parent[derivedAltKey] as string)
+        : ''
       out.images.push({ src: v, alt: alt.trim() })
       return
     }
