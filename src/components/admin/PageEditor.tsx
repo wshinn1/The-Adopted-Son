@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X, Globe, FileText } from 'lucide-react'
 import { uploadMedia } from '@/lib/uploadMedia'
 import SectionEditor from './SectionEditor'
 import Image from 'next/image'
+import { SeoPanel } from '@/components/admin/SeoPanel'
+import { normalizeSeo, cleanSeo, type Seo } from '@/lib/seo'
+import { contentFromSections, scoreSeo } from '@/lib/seo-check'
 
 interface SchemaProperty {
   type: string
@@ -54,6 +57,7 @@ interface Page {
   og_title: string | null
   og_description: string | null
   og_image_url: string | null
+  seo?: unknown
 }
 
 interface PageEditorProps {
@@ -72,6 +76,10 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [ogImageUploading, setOgImageUploading] = useState(false)
   const ogImageInputRef = useRef<HTMLInputElement>(null)
+  const [seo, setSeo] = useState<Seo>(() => normalizeSeo(page.seo ?? {}))
+  const pageContent = useMemo(() => contentFromSections(sections.map(s => ({ data: s.data }))), [sections])
+  const seoKey = `pages:${page.id}`
+  const handleSeoChange = useCallback((patch: Partial<Seo>) => setSeo(prev => ({ ...prev, ...patch })), [])
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
     setNotification({ message, type })
@@ -120,17 +128,29 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const savePageSettings = async () => {
     setSaving(true)
     try {
+      const scoreResult = scoreSeo({
+        seo,
+        noun: 'page',
+        title: pageData.title,
+        path: pageData.is_homepage ? '/' : `/${pageData.slug}`,
+        siteTitle: 'The Adopted Son',
+        siteUrl: 'https://www.theadoptedson.com',
+        shareImage: seo.ogImage || pageData.og_image_url || '',
+        content: pageContent,
+        slugEditable: !pageData.is_homepage,
+      })
       const { error } = await supabase
         .from('pages')
         .update({
           title: pageData.title,
           slug: pageData.slug,
-          meta_description: pageData.meta_description,
+          meta_description: seo.description || pageData.meta_description,
           is_published: pageData.is_published,
           is_homepage: pageData.is_homepage,
-          og_title: pageData.og_title || null,
-          og_description: pageData.og_description || null,
-          og_image_url: pageData.og_image_url || null,
+          og_title: seo.ogTitle || pageData.og_title || null,
+          og_description: seo.ogDescription || pageData.og_description || null,
+          og_image_url: seo.ogImage || pageData.og_image_url || null,
+          seo: { ...cleanSeo(seo), _score: scoreResult.score },
         })
         .eq('id', page.id)
 
@@ -417,7 +437,29 @@ export default function PageEditor({ page, sections: initialSections, templates 
         </button>
       </div>
 
-      {/* Social Sharing */}
+      {/* SEO & sharing */}
+      <div className="mb-8">
+        <SeoPanel
+          seo={seo}
+          onChange={handleSeoChange}
+          noun="page"
+          title={pageData.title}
+          path={pageData.is_homepage ? '/' : `/${pageData.slug}`}
+          settings={{ siteTitle: 'The Adopted Son', siteUrl: 'https://www.theadoptedson.com' }}
+          content={pageContent}
+          onSlugChange={pageData.is_homepage ? undefined : (s) => setPageData(p => ({ ...p, slug: s }))}
+          seoKey={seoKey}
+        />
+        <button
+          onClick={savePageSettings}
+          disabled={saving}
+          className="mt-4 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50"
+        >
+          {saving ? 'Saving...' : 'Save SEO Settings'}
+        </button>
+      </div>
+
+      {/* Social Sharing (legacy — keep for og_image upload) */}
       <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6 mb-8">
         <div className="flex items-center gap-2 mb-1">
           <Share2 className="size-4 text-neutral-500" />

@@ -12,6 +12,20 @@ interface Page {
   slug: string
   is_published: boolean
   is_homepage: boolean
+  seo?: unknown
+}
+
+function SeoIndicator({ seo }: { seo: unknown }) {
+  const s = seo && typeof seo === 'object' ? (seo as Record<string, unknown>) : {}
+  const score = typeof s._score === 'number' ? s._score : 0
+  const color = score >= 80 ? 'bg-green-500' : score >= 50 ? 'bg-amber-400' : score > 0 ? 'bg-red-400' : 'bg-neutral-300 dark:bg-neutral-600'
+  const label = score >= 80 ? 'Good' : score >= 50 ? 'OK' : score > 0 ? 'Needs work' : 'Not set'
+  return (
+    <span className="flex items-center gap-1.5" title={`SEO: ${label}`}>
+      <span className={`inline-block w-2 h-2 rounded-full ${color}`} />
+      <span className="text-xs text-neutral-500">{score > 0 ? score : '—'}</span>
+    </span>
+  )
 }
 
 interface Props {
@@ -77,6 +91,7 @@ export default function PagesTable({ initialPages }: Props) {
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Title</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Slug</th>
               <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">Status</th>
+              <th className="text-left px-5 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide">SEO</th>
               <th className="px-5 py-3"></th>
             </tr>
           </thead>
@@ -102,6 +117,9 @@ export default function PagesTable({ initialPages }: Props) {
                     {page.is_published ? <Globe className="size-3" /> : <FileText className="size-3" />}
                     {page.is_published ? 'Published' : 'Draft'}
                   </button>
+                </td>
+                <td className="px-5 py-3.5">
+                  <SeoIndicator seo={page.seo} />
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center justify-end gap-3">
