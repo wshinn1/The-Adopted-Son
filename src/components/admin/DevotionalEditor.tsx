@@ -1,11 +1,14 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { uploadMedia } from '@/lib/uploadMedia'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Upload, X } from 'lucide-react'
 import BlockEditor from './BlockEditor'
+import { SeoPanel } from '@/components/admin/SeoPanel'
+import { normalizeSeo, cleanSeo, emptySeo, type Seo } from '@/lib/seo'
+import { contentFromProseMirror } from '@/lib/seo-check'
 
 interface Author {
   id: string
@@ -35,6 +38,7 @@ interface Devotional {
   seo_title?: string | null
   seo_description?: string | null
   seo_keywords?: string | null
+  seo?: unknown
 }
 
 interface Props {
@@ -69,12 +73,38 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   const [featuredBlurb, setFeaturedBlurb] = useState(devotional?.featured_blurb ?? '')
   const [authorId, setAuthorId] = useState(devotional?.author_id ?? '')
   const [authorName, setAuthorName] = useState(devotional?.author_name ?? '')
-  const [seoTitle, setSeoTitle] = useState(devotional?.seo_title ?? '')
-  const [seoDescription, setSeoDescription] = useState(devotional?.seo_description ?? '')
-  const [seoKeywords, setSeoKeywords] = useState(devotional?.seo_keywords ?? '')
+  const [seo, setSeo] = useState<Seo>(() => normalizeSeo(devotional?.seo ?? {}))
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!devotional)
   const [editorContent, setEditorContent] = useState<unknown>(devotional?.content ?? '')
   const [uploading, setUploading] = useState(false)
+
+  const pageContent = useMemo(() => contentFromProseMirror(editorContent), [editorContent])
+  const seoKey = devotional?.id ? `devotionals:${devotional.id}` : ''
+
+  const addToHtml = useCallback((html: string) => {
+    const parser = new DOMParser()
+    const parsed = parser.parseFromString(html, 'text/html')
+    const newNodes: unknown[] = []
+    for (const el of Array.from(parsed.body.children)) {
+      const tag = el.tagName.toLowerCase()
+      const text = el.textContent || ''
+      if (!text.trim()) continue
+      if (tag === 'h2' || tag === 'h3') {
+        newNodes.push({ type: 'heading', attrs: { level: parseInt(tag[1], 10) }, content: [{ type: 'text', text }] })
+      } else if (tag === 'p') {
+        newNodes.push({ type: 'paragraph', content: [{ type: 'text', text }] })
+      }
+    }
+    if (!newNodes.length) return
+    setEditorContent((prev: unknown) => {
+      if (prev && typeof prev === 'object' && (prev as Record<string, unknown>).type === 'doc') {
+        const d = prev as { type: string; content: unknown[] }
+        return { ...d, content: [...(d.content || []), ...newNodes] }
+      }
+      return { type: 'doc', content: newNodes }
+    })
+  }, [])
+
   const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(
     (devotional as unknown as Record<string, unknown>)?.tts_audio_url as string | null ?? null
   )
@@ -207,9 +237,10 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
       featured_blurb: featuredBlurb || null,
       author_id: authorId || null,
       author_name: finalAuthorName,
-      seo_title: seoTitle || null,
-      seo_description: seoDescription || null,
-      seo_keywords: seoKeywords || null,
+      seo: cleanSeo(seo),
+      seo_title: seo.title || null,
+      seo_description: seo.description || null,
+      seo_keywords: seo.keyword || null,
       ...(publish && !devotional?.is_published ? { published_at: new Date().toISOString() } : {}),
     }
 
@@ -641,56 +672,20 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
           </div>
         )}
 
-        {/* SEO Settings */}
-        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-5 space-y-4">
-          <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">SEO Settings</h3>
-          <p className="text-xs text-neutral-400">Optimize your post for search engines</p>
-
-          <div>
-            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">SEO Title</label>
-            <input
-              type="text"
-              value={seoTitle}
-              onChange={(e) => setSeoTitle(e.target.value)}
-              placeholder={title || 'Custom title for search engines'}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            <p className="text-xs text-neutral-400 mt-1">Leave empty to use post title</p>
-          </div>
-
-          <div>
-            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Meta Description</label>
-            <textarea
-              value={seoDescription}
-              onChange={(e) => {
-                if (e.target.value.length <= 160) {
-                  setSeoDescription(e.target.value)
-                }
-              }}
-              placeholder={excerpt || 'Description shown in search results'}
-              rows={3}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-            />
-            <div className="flex justify-between items-center mt-1">
-              <p className="text-xs text-neutral-400">Leave empty to use short description</p>
-              <span className={`text-xs ${seoDescription.length > 140 ? 'text-amber-500' : 'text-neutral-400'}`}>
-                {seoDescription.length}/160
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-neutral-600 dark:text-neutral-400 mb-1.5">Keywords</label>
-            <input
-              type="text"
-              value={seoKeywords}
-              onChange={(e) => setSeoKeywords(e.target.value)}
-              placeholder="faith, devotional, Christian, prayer"
-              className="w-full text-sm px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            <p className="text-xs text-neutral-400 mt-1">Comma-separated keywords for search</p>
-          </div>
-        </div>
+        <SeoPanel
+          seo={seo}
+          onChange={(patch) => setSeo((prev) => ({ ...prev, ...patch }))}
+          noun="post"
+          title={title}
+          path={`/devotionals/${slug}`}
+          settings={{ siteTitle: 'The Adopted Son', siteUrl: 'https://www.theadoptedson.com' }}
+          content={pageContent}
+          fallbackDescription={excerpt}
+          fallbackImage={coverImageUrl}
+          onSlugChange={(s) => { setSlug(s); setSlugManuallyEdited(true) }}
+          addToHtml={addToHtml}
+          seoKey={seoKey}
+        />
       </div>
     </div>
   )
