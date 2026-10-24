@@ -20,7 +20,7 @@ const isImageUrl = (v: string) => /\.(jpe?g|png|webp|gif|avif|svg)(\?|$)/i.test(
 const isLink = (v: string) => /^(\/|#|https?:\/\/|mailto:|tel:)/i.test(v.trim())
 // Section field names used in The Adopted Son
 const HEADING_KEYS = /^(heading|title|titleLine1|titleLine2|subheading|eyebrow|name)$/i
-const SKIP_KEYS = /^(id|type|anchor|layout|width|align|style|color|colors|font|size|height|mode|variant|kind|code|embed|status|slug|newsletter|labels|buttonStyle|buttonUrl|ctaUrl|background_color|text_color|button_bg_color)$/i
+const SKIP_KEYS = /^(id|type|anchor|layout|width|align|style|color|colors|font|size|height|mode|variant|kind|code|embed|status|slug|newsletter|labels|buttonStyle|buttonUrl|ctaUrl|background_color|text_color|button_bg_color|_image_alt_lookup)$/i
 
 function addHtml(html: string, out: PageContent) {
   for (const m of html.matchAll(/<h[2-6][^>]*>([\s\S]*?)<\/h[2-6]>/gi)) out.headings.push(clean(m[1]))
@@ -40,9 +40,11 @@ function walk(value: unknown, key: string, out: PageContent, parent?: Record<str
       const derivedAltKey = key.endsWith('_url') ? key.replace(/_url$/, '_alt')
         : (key === 'image' || key === 'src' || key === 'url') ? 'image_alt'
         : `${key}_alt`
+      const lookup = parent?._image_alt_lookup as Record<string, string> | undefined
       const alt = typeof parent?.alt === 'string' ? parent.alt
         : typeof parent?.imageAlt === 'string' ? parent.imageAlt
         : typeof parent?.[derivedAltKey] === 'string' ? (parent[derivedAltKey] as string)
+        : typeof lookup?.[v] === 'string' ? lookup[v]
         : ''
       out.images.push({ src: v, alt: alt.trim() })
       return

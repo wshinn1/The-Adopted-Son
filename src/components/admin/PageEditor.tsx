@@ -241,12 +241,31 @@ export default function PageEditor({ page, sections: initialSections, templates 
       let changed = false
       const newData = { ...data }
       for (const [key, value] of Object.entries(data)) {
+        if (key === '_image_alt_lookup') continue
         if (typeof value === 'string' && altMap.has(value)) {
           const altKey = key.endsWith('_url') ? key.replace(/_url$/, '_alt')
             : (key === 'image' || key === 'src' || key === 'url') ? 'image_alt'
             : key + '_alt'
           const newAlt = altMap.get(value)!
           if (newData[altKey] !== newAlt) { newData[altKey] = newAlt; changed = true }
+        } else if (Array.isArray(value)) {
+          // Handle arrays of image URLs (e.g. background_images in HeroSlider1)
+          const lookup = { ...(newData._image_alt_lookup as Record<string, string> | undefined ?? {}) }
+          let lookupChanged = false
+          const newArr = value.map((item: unknown) => {
+            if (typeof item === 'string' && altMap.has(item)) {
+              const newAlt = altMap.get(item)!
+              if (lookup[item] !== newAlt) { lookup[item] = newAlt; lookupChanged = true }
+              return item
+            }
+            if (item && typeof item === 'object' && !Array.isArray(item)) {
+              const result = applyToData(item as Record<string, unknown>)
+              if (result.changed) { changed = true; return result.data }
+            }
+            return item
+          })
+          if (lookupChanged) { newData._image_alt_lookup = lookup; changed = true }
+          if (newArr.some((item, i) => item !== value[i])) { newData[key] = newArr }
         } else if (value && typeof value === 'object' && !Array.isArray(value)) {
           const result = applyToData(value as Record<string, unknown>)
           if (result.changed) { newData[key] = result.data; changed = true }
