@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { uploadMedia } from '@/lib/uploadMedia'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Upload, X } from 'lucide-react'
-import BlockEditor from './BlockEditor'
+import BlockEditor, { type BlockEditorHandle } from './BlockEditor'
 import { SeoPanel } from '@/components/admin/SeoPanel'
 import { normalizeSeo, cleanSeo, emptySeo, type Seo } from '@/lib/seo'
 import { contentFromProseMirror, scoreSeo } from '@/lib/seo-check'
@@ -78,6 +78,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   const [editorContent, setEditorContent] = useState<unknown>(devotional?.content ?? '')
   const [uploading, setUploading] = useState(false)
 
+  const blockEditorRef = useRef<BlockEditorHandle>(null)
   const pageContent = useMemo(() => contentFromProseMirror(editorContent), [editorContent])
   const seoKey = devotional?.id ? `devotionals:${devotional.id}` : ''
 
@@ -106,19 +107,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
   }, [])
 
   const applyImageAlts = useCallback((alts: { src: string; alt: string }[]) => {
-    const altMap = new Map(alts.map(a => [a.src, a.alt]))
-    function walk(node: unknown): unknown {
-      if (!node || typeof node !== 'object') return node
-      const n = node as Record<string, unknown>
-      if (n.type === 'image' && n.attrs && typeof n.attrs === 'object') {
-        const attrs = n.attrs as Record<string, unknown>
-        const src = typeof attrs.src === 'string' ? attrs.src : ''
-        if (src && altMap.has(src)) return { ...n, attrs: { ...attrs, alt: altMap.get(src) } }
-      }
-      if (Array.isArray(n.content)) return { ...n, content: n.content.map(walk) }
-      return node
-    }
-    setEditorContent((prev: unknown) => walk(prev))
+    blockEditorRef.current?.applyImageAlts(alts)
   }, [])
 
   const [ttsAudioUrl, setTtsAudioUrl] = useState<string | null>(
@@ -414,6 +403,7 @@ export default function DevotionalEditor({ devotional, authors = [] }: Props) {
 
         {/* Body editor */}
         <BlockEditor
+          ref={blockEditorRef}
           content={editorContent}
           onChange={setEditorContent}
           placeholder="Write your devotional here... Use the toolbar to add headings, images, videos, columns, and more."

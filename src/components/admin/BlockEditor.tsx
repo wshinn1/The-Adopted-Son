@@ -10,7 +10,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Highlight from '@tiptap/extension-highlight'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, forwardRef, useImperativeHandle } from 'react'
 import { VideoEmbed } from '@/components/tiptap-extension/video-embed-extension'
 import { Columns, Column } from '@/components/tiptap-extension/columns-extension'
 import { Callout } from '@/components/tiptap-extension/callout-extension'
@@ -21,7 +21,11 @@ interface Props {
   placeholder?: string
 }
 
-export default function BlockEditor({ content, onChange, placeholder = 'Start writing...' }: Props) {
+export interface BlockEditorHandle {
+  applyImageAlts: (alts: { src: string; alt: string }[]) => void
+}
+
+const BlockEditor = forwardRef<BlockEditorHandle, Props>(function BlockEditor({ content, onChange, placeholder = 'Start writing...' }, ref) {
   const [showBlockMenu, setShowBlockMenu] = useState(false)
   const [showVideoModal, setShowVideoModal] = useState(false)
   const [videoUrl, setVideoUrl] = useState('')
@@ -55,6 +59,21 @@ export default function BlockEditor({ content, onChange, placeholder = 'Start wr
       onChange(editor.getJSON())
     },
   })
+
+  useImperativeHandle(ref, () => ({
+    applyImageAlts(alts) {
+      if (!editor) return
+      const altMap = new Map(alts.map(a => [a.src, a.alt]))
+      editor.commands.command(({ tr, state }) => {
+        state.doc.descendants((node, pos) => {
+          if (node.type.name === 'image' && altMap.has(node.attrs.src as string)) {
+            tr.setNodeMarkup(pos, undefined, { ...node.attrs, alt: altMap.get(node.attrs.src as string) })
+          }
+        })
+        return true
+      })
+    },
+  }), [editor])
 
   const handleImageUpload = useCallback(async (file: File) => {
     if (!editor) return
@@ -473,4 +492,6 @@ export default function BlockEditor({ content, onChange, placeholder = 'Start wr
       `}</style>
     </div>
   )
-}
+})
+
+export default BlockEditor
