@@ -80,7 +80,9 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const pageContent = useMemo(() => contentFromSections(sections.map(s => ({ data: s.data }))), [sections])
   const seoKey = `pages:${page.id}`
 
-  // Silently persist the live SEO score so the pages list stays accurate
+  // Silently persist the live SEO score so the pages list stays accurate.
+  // Uses a ref to skip redundant writes when the score value hasn't changed.
+  const lastSavedScore = useRef<number | null>(null)
   useEffect(() => {
     const score = scoreSeo({
       seo,
@@ -93,16 +95,15 @@ export default function PageEditor({ page, sections: initialSections, templates 
       content: pageContent,
       slugEditable: !pageData.is_homepage,
     }).score
-    const timer = setTimeout(async () => {
-      const client = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      await client.from('pages').update({
-        seo: { ...cleanSeo(seo), _score: score },
-      }).eq('id', page.id)
-    }, 2000)
-    return () => clearTimeout(timer)
+    if (lastSavedScore.current === score) return
+    lastSavedScore.current = score
+    // Capture seo snapshot synchronously so a fast navigation doesn't use stale data
+    const seoSnapshot = { ...cleanSeo(seo), _score: score }
+    const client = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    client.from('pages').update({ seo: seoSnapshot }).eq('id', page.id)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageContent, seo])
   const handleSeoChange = useCallback((patch: Partial<Seo>) => setSeo(prev => ({ ...prev, ...patch })), [])
