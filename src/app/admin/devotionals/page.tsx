@@ -25,7 +25,7 @@ export default async function AdminDevotionalsPage() {
 
   const { data: devotionals } = await supabase
     .from('devotionals')
-    .select('id, title, slug, is_published, is_premium, category, published_at, created_at, tts_audio_url, seo, content')
+    .select('id, title, slug, is_published, is_premium, category, published_at, created_at, tts_audio_url, seo, content, cover_image_url, excerpt')
     .order('created_at', { ascending: false })
 
   const allDevotionalsForTTS = (devotionals ?? []).map((d) => ({
@@ -71,8 +71,10 @@ export default async function AdminDevotionalsPage() {
                 path: `/devotionals/${d.slug}`,
                 siteTitle: 'The Adopted Son',
                 siteUrl: 'https://www.theadoptedson.com',
+                fallbackDescription: d.excerpt ?? '',
+                shareImage: d.cover_image_url ?? '',
                 content: contentFromProseMirror(d.content),
-                slugEditable: false,
+                slugEditable: true,
               }).score
               return (
               <tr key={d.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/30 transition-colors">
