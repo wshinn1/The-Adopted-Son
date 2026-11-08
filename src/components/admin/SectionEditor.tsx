@@ -120,7 +120,7 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
 }
 
 // HeroSlider1 specific fields - these are handled separately with custom UI
-const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur']
+const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur', 'selected_slider_devotional_ids', 'selected_grid_devotional_ids']
 
 // CtaStrip specific fields - handled with custom grouped UI
 const CTASTRIP_CUSTOM_KEYS = [
@@ -187,7 +187,7 @@ export default function SectionEditor({
   }, [data, defaultData, templateName])
 
   useEffect(() => {
-    if (templateName !== 'DevotionalSlider') return
+    if (templateName !== 'DevotionalSlider' && templateName !== 'HeroSlider1') return
     import('@supabase/supabase-js').then(({ createClient }) => {
       const client = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -830,6 +830,103 @@ export default function SectionEditor({
                   <p className="text-xs text-neutral-400 mt-1">Frosted glass blur</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Devotional Picker */}
+          <div className="pt-2 border-t border-neutral-200 dark:border-neutral-700 space-y-6">
+            <div>
+              <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-1">Slider Devotionals</h4>
+              <p className="text-xs text-neutral-500 mb-3">
+                Select devotionals to rotate as slides. Their cover images become the slider backgrounds and their titles replace the daily headline. If none selected, the static background images and headlines above are used.
+              </p>
+              {devotionalsList.length === 0 ? (
+                <p className="text-sm text-neutral-400 italic">Loading devotionals…</p>
+              ) : (
+                <div className="space-y-1 max-h-56 overflow-y-auto rounded-lg border border-neutral-200 dark:border-neutral-700 p-2">
+                  {devotionalsList.map((d) => {
+                    const selectedIds: string[] = formData.selected_slider_devotional_ids ?? []
+                    const isSelected = selectedIds.includes(d.id)
+                    const idx = selectedIds.indexOf(d.id)
+                    return (
+                      <label
+                        key={d.id}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                          isSelected
+                            ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700'
+                            : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const prev: string[] = formData.selected_slider_devotional_ids ?? []
+                            handleChange('selected_slider_devotional_ids', e.target.checked ? [...prev, d.id] : prev.filter(id => id !== d.id))
+                          }}
+                          className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
+                        />
+                        <span className="flex-1 text-sm text-neutral-800 dark:text-neutral-200 leading-snug">{d.title}</span>
+                        {isSelected && (
+                          <span className="text-xs font-medium text-primary-600 dark:text-primary-400 shrink-0">#{idx + 1}</span>
+                        )}
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
+              {((formData.selected_slider_devotional_ids as string[] | undefined)?.length ?? 0) > 0 && (
+                <button type="button" onClick={() => handleChange('selected_slider_devotional_ids', [])} className="mt-2 text-xs text-neutral-500 hover:text-red-500 transition-colors">
+                  Clear (use static images + headlines)
+                </button>
+              )}
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-1">Grid Devotionals (below hero)</h4>
+              <p className="text-xs text-neutral-500 mb-3">
+                Select devotionals to show in a grid beneath the hero section.
+              </p>
+              {devotionalsList.length === 0 ? (
+                <p className="text-sm text-neutral-400 italic">Loading devotionals…</p>
+              ) : (
+                <div className="space-y-1 max-h-56 overflow-y-auto rounded-lg border border-neutral-200 dark:border-neutral-700 p-2">
+                  {devotionalsList.map((d) => {
+                    const selectedIds: string[] = formData.selected_grid_devotional_ids ?? []
+                    const isSelected = selectedIds.includes(d.id)
+                    const idx = selectedIds.indexOf(d.id)
+                    return (
+                      <label
+                        key={d.id}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                          isSelected
+                            ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700'
+                            : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const prev: string[] = formData.selected_grid_devotional_ids ?? []
+                            handleChange('selected_grid_devotional_ids', e.target.checked ? [...prev, d.id] : prev.filter(id => id !== d.id))
+                          }}
+                          className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
+                        />
+                        <span className="flex-1 text-sm text-neutral-800 dark:text-neutral-200 leading-snug">{d.title}</span>
+                        {isSelected && (
+                          <span className="text-xs font-medium text-primary-600 dark:text-primary-400 shrink-0">#{idx + 1}</span>
+                        )}
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
+              {((formData.selected_grid_devotional_ids as string[] | undefined)?.length ?? 0) > 0 && (
+                <button type="button" onClick={() => handleChange('selected_grid_devotional_ids', [])} className="mt-2 text-xs text-neutral-500 hover:text-red-500 transition-colors">
+                  Clear grid
+                </button>
+              )}
             </div>
           </div>
         </div>
