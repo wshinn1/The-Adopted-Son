@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { Plus, Trash2, GripVertical } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 
 interface NavLink {
   label: string
@@ -15,6 +15,7 @@ interface Page {
   id: string
   title: string
   slug: string
+  is_homepage: boolean
 }
 
 export default function MenuNavigationPage() {
@@ -63,7 +64,7 @@ export default function MenuNavigationPage() {
       // Load pages for dropdown
       const { data: pagesData } = await supabase
         .from('pages')
-        .select('id, title, slug')
+        .select('id, title, slug, is_homepage')
         .order('title')
 
       setPages(pagesData || [])
@@ -207,49 +208,68 @@ export default function MenuNavigationPage() {
                     </button>
                   </div>
 
-                  <div className="flex-1 grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs text-neutral-500 mb-1">Label</label>
-                      <input
-                        type="text"
-                        value={link.label}
-                        onChange={(e) => updateNavLink(index, 'label', e.target.value)}
-                        placeholder="Link text"
-                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm"
-                      />
+                  <div className="flex-1 space-y-2">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-neutral-500 mb-1">Label</label>
+                        <input
+                          type="text"
+                          value={link.label}
+                          onChange={(e) => updateNavLink(index, 'label', e.target.value)}
+                          placeholder="Link text"
+                          className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-neutral-500 mb-1">Quick pick a page</label>
+                        <select
+                          value=""
+                          onChange={(e) => {
+                            const value = e.target.value
+                            if (!value) return
+                            updateNavLink(index, 'url', value)
+                            if (!link.label) {
+                              const builtIn: Record<string, string> = { '/': 'Home', '/devotionals': 'Devotionals', '/give': 'Give' }
+                              if (builtIn[value]) {
+                                updateNavLink(index, 'label', builtIn[value])
+                              } else {
+                                const page = pages.find(p => p.is_homepage ? value === '/' : `/${p.slug}` === value)
+                                if (page) updateNavLink(index, 'label', page.title)
+                              }
+                            }
+                          }}
+                          className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm"
+                        >
+                          <option value="">— choose to fill URL —</option>
+                          <optgroup label="Built-in routes">
+                            <option value="/">Home ( / )</option>
+                            <option value="/devotionals">Devotionals ( /devotionals )</option>
+                            <option value="/give">Give ( /give )</option>
+                          </optgroup>
+                          {pages.length > 0 && (
+                            <optgroup label="Your pages">
+                              {pages.map((page) => {
+                                const path = page.is_homepage ? '/' : `/${page.slug}`
+                                return (
+                                  <option key={page.id} value={path}>
+                                    {page.title} ( {path} )
+                                  </option>
+                                )
+                              })}
+                            </optgroup>
+                          )}
+                        </select>
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-xs text-neutral-500 mb-1">Link To</label>
-                      <select
+                      <label className="block text-xs text-neutral-500 mb-1">URL</label>
+                      <input
+                        type="text"
                         value={link.url}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          updateNavLink(index, 'url', value)
-                          if (value && !link.label) {
-                            const page = pages.find(p => `/${p.slug}` === value || (p.slug === 'home' && value === '/'))
-                            if (page) {
-                              updateNavLink(index, 'label', page.title)
-                            } else if (value === '/') {
-                              updateNavLink(index, 'label', 'Home')
-                            } else if (value === '/devotionals') {
-                              updateNavLink(index, 'label', 'Devotionals')
-                            } else if (value === '/give') {
-                              updateNavLink(index, 'label', 'Give')
-                            }
-                          }
-                        }}
-                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm"
-                      >
-                        <option value="">Select a page...</option>
-                        <option value="/">Home</option>
-                        <option value="/devotionals">Devotionals</option>
-                        <option value="/give">Give</option>
-                        {pages.filter(p => p.slug !== 'home').map((page) => (
-                          <option key={page.id} value={`/${page.slug}`}>
-                            {page.title}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(e) => updateNavLink(index, 'url', e.target.value)}
+                        placeholder="/your-page or https://external.com"
+                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm font-mono"
+                      />
                     </div>
                   </div>
 
