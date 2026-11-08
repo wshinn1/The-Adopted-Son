@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Upload, Plus, Trash2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { uploadMedia } from '@/lib/uploadMedia'
+import { createBrowserClient } from '@supabase/ssr'
 
 // Dynamically import RichTextEditor to avoid SSR issues
 const RichTextEditor = dynamic(() => import('./RichTextEditor'), { ssr: false })
@@ -188,20 +189,19 @@ export default function SectionEditor({
 
   useEffect(() => {
     if (templateName !== 'DevotionalSlider' && templateName !== 'HeroSlider1') return
-    import('@supabase/supabase-js').then(({ createClient }) => {
-      const client = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      client
-        .from('devotionals')
-        .select('id, title, published_at')
-        .eq('is_published', true)
-        .order('published_at', { ascending: false })
-        .then(({ data: rows }) => {
-          if (rows) setDevotionalsList(rows)
-        })
-    })
+    const client = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    client
+      .from('devotionals')
+      .select('id, title, published_at')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .then(({ data: rows, error }) => {
+        if (error) console.error('[SectionEditor] devotionals fetch error:', error)
+        if (rows) setDevotionalsList(rows)
+      })
   }, [templateName])
 
   const handleChange = (key: string, value: any) => {
