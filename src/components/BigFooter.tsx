@@ -137,7 +137,7 @@ export default function BigFooter({ config, siteName, logoType, logoUrl }: BigFo
                 </span>
               )}
               <nav className="flex flex-col gap-2">
-                {col.links.map((link, li) => (
+                {col.links.filter(l => l.label && l.url).map((link, li) => (
                   <Link
                     key={li}
                     href={link.url}
@@ -183,9 +183,9 @@ export default function BigFooter({ config, siteName, logoType, logoUrl }: BigFo
           <p className="text-sm" style={{ color: text_color, opacity: 0.6 }}>
             {copyrightFinal}
           </p>
-          {legal_links.length > 0 && (
+          {legal_links.filter(l => l.label && l.url).length > 0 && (
             <nav className="flex items-center gap-6">
-              {legal_links.map((link, i) => (
+              {legal_links.filter(l => l.label && l.url).map((link, i) => (
                 <Link
                   key={i}
                   href={link.url}
