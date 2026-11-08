@@ -3,7 +3,7 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
-import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X, Globe, FileText } from 'lucide-react'
+import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X, Globe, FileText, Copy, ClipboardPaste } from 'lucide-react'
 import { uploadMedia } from '@/lib/uploadMedia'
 import SectionEditor from './SectionEditor'
 import Image from 'next/image'
@@ -74,6 +74,9 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const [addingSection, setAddingSection] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [copiedSection, setCopiedSection] = useState<{ templateId: string; templateName: string; data: Record<string, any> } | null>(() => {
+    try { const s = localStorage.getItem('admin_copied_section'); return s ? JSON.parse(s) : null } catch { return null }
+  })
   const [ogImageUploading, setOgImageUploading] = useState(false)
   const ogImageInputRef = useRef<HTMLInputElement>(null)
   const [seo, setSeo] = useState<Seo>(() => normalizeSeo(page.seo ?? {}))
@@ -192,14 +195,22 @@ export default function PageEditor({ page, sections: initialSections, templates 
     }
   }
 
-  const addSection = async (templateId: string) => {
+  const copySection = (section: PageSection) => {
+    const template = getTemplate(section)
+    const payload = { templateId: section.template_id, templateName: template.name, data: section.data }
+    try { localStorage.setItem('admin_copied_section', JSON.stringify(payload)) } catch { /* noop */ }
+    setCopiedSection(payload)
+    showNotification(`"${template.name}" copied — paste it on any page`)
+  }
+
+  const addSection = async (templateId: string, overrideData?: Record<string, any>) => {
     const template = templates.find(t => t.id === templateId)
     if (!template) return
 
     setSaving(true)
     try {
-      const newSortOrder = sections.length > 0 
-        ? Math.max(...sections.map(s => s.sort_order)) + 1 
+      const newSortOrder = sections.length > 0
+        ? Math.max(...sections.map(s => s.sort_order)) + 1
         : 0
 
       const { data, error } = await supabase
@@ -207,7 +218,7 @@ export default function PageEditor({ page, sections: initialSections, templates 
         .insert({
           page_id: page.id,
           template_id: templateId,
-          data: template.default_data,
+          data: overrideData ?? template.default_data,
           sort_order: newSortOrder,
           is_visible: true,
         })
@@ -671,6 +682,25 @@ export default function PageEditor({ page, sections: initialSections, templates 
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
               Choose a section template:
             </h3>
+            {/* Paste copied section */}
+            {copiedSection && templates.find(t => t.id === copiedSection.templateId) && (
+              <div className="mb-4">
+                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">Clipboard</p>
+                <button
+                  onClick={() => addSection(copiedSection.templateId, copiedSection.data)}
+                  className="w-full flex items-center gap-3 text-left px-4 py-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-700 hover:border-primary-500 transition-colors"
+                >
+                  <ClipboardPaste className="size-4 text-primary-600 shrink-0" />
+                  <div>
+                    <div className="font-medium text-primary-700 dark:text-primary-300">
+                      Paste: {copiedSection.templateName}
+                    </div>
+                    <div className="text-xs text-primary-500 mt-0.5">Insert with all copied settings</div>
+                  </div>
+                </button>
+                <div className="border-t border-neutral-200 dark:border-neutral-700 mt-4 mb-3" />
+              </div>
+            )}
             {templates.length === 0 ? (
               <div className="text-center py-4">
                 <p className="text-neutral-600 dark:text-neutral-400 mb-2">
@@ -755,6 +785,15 @@ export default function PageEditor({ page, sections: initialSections, templates 
                     className="p-1 text-neutral-400 hover:text-neutral-600"
                   >
                     {section.is_visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                  </button>
+
+                  {/* Copy */}
+                  <button
+                    onClick={() => copySection(section)}
+                    title="Copy section"
+                    className="p-1 text-neutral-400 hover:text-primary-600"
+                  >
+                    <Copy className="size-4" />
                   </button>
 
                   {/* Delete */}

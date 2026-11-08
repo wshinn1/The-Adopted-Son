@@ -148,6 +148,11 @@ const DEVOTIONAL_SLIDER_CUSTOM_KEYS = [
   'selected_devotional_ids', 'slide_duration', 'show_remaining', 'background_color',
 ]
 
+// DevotionalGrid specific fields - handled with custom UI
+const DEVOTIONAL_GRID_CUSTOM_KEYS = [
+  'featured_devotional_id', 'grid_devotional_ids', 'cta_text', 'cta_link',
+]
+
 // HeroTwo specific fields - handled with custom grouped UI
 const HEROTWO_CUSTOM_KEYS = [
   'headline', 'subheadline', 'show_subheadline',
@@ -188,7 +193,7 @@ export default function SectionEditor({
   }, [data, defaultData, templateName])
 
   useEffect(() => {
-    if (templateName !== 'DevotionalSlider' && templateName !== 'HeroSlider1') return
+    if (templateName !== 'DevotionalSlider' && templateName !== 'HeroSlider1' && templateName !== 'DevotionalGrid') return
     const client = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -235,6 +240,7 @@ export default function SectionEditor({
   const isHeroTwoSection = templateName === 'HeroTwo'
   const isCtaStripSection = templateName === 'CtaStrip'
   const isDevotionalSliderSection = templateName === 'DevotionalSlider'
+  const isDevotionalGridSection = templateName === 'DevotionalGrid'
 
   let regularProperties = Object.entries(properties)
   if (isNewsletterSection) {
@@ -251,6 +257,9 @@ export default function SectionEditor({
   }
   if (isDevotionalSliderSection) {
     regularProperties = regularProperties.filter(([key]) => !DEVOTIONAL_SLIDER_CUSTOM_KEYS.includes(key))
+  }
+  if (isDevotionalGridSection) {
+    regularProperties = regularProperties.filter(([key]) => !DEVOTIONAL_GRID_CUSTOM_KEYS.includes(key))
   }
 
   return (
@@ -1643,6 +1652,144 @@ export default function SectionEditor({
                 Clear selection (use 3 newest)
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* DevotionalGrid Custom Fields */}
+      {isDevotionalGridSection && (
+        <div className="space-y-6">
+          {/* Featured devotional picker */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              Featured Devotional (large left card)
+            </label>
+            <p className="text-xs text-neutral-500 mb-3">
+              This appears as the large featured post on the left side.
+            </p>
+            {devotionalsList.length === 0 ? (
+              <p className="text-sm text-neutral-400 italic">Loading devotionals…</p>
+            ) : (
+              <div className="space-y-1 max-h-56 overflow-y-auto rounded-lg border border-neutral-200 dark:border-neutral-700 p-2">
+                {devotionalsList.map((d) => {
+                  const isSelected = formData.featured_devotional_id === d.id
+                  return (
+                    <label
+                      key={d.id}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700'
+                          : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="featured_devotional_id"
+                        checked={isSelected}
+                        onChange={() => handleChange('featured_devotional_id', d.id)}
+                        className="text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="flex-1 text-sm text-neutral-800 dark:text-neutral-200 leading-snug">{d.title}</span>
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+            {formData.featured_devotional_id && (
+              <button
+                type="button"
+                onClick={() => handleChange('featured_devotional_id', '')}
+                className="mt-2 text-xs text-neutral-500 hover:text-red-500 transition-colors"
+              >
+                Clear featured selection
+              </button>
+            )}
+          </div>
+
+          {/* Grid devotionals picker */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              Grid Devotionals (right column, up to 4)
+            </label>
+            <p className="text-xs text-neutral-500 mb-3">
+              These appear as the smaller cards on the right side.
+            </p>
+            {devotionalsList.length === 0 ? (
+              <p className="text-sm text-neutral-400 italic">Loading devotionals…</p>
+            ) : (
+              <div className="space-y-1 max-h-56 overflow-y-auto rounded-lg border border-neutral-200 dark:border-neutral-700 p-2">
+                {devotionalsList.map((d) => {
+                  const selectedIds: string[] = formData.grid_devotional_ids ?? []
+                  const isSelected = selectedIds.includes(d.id)
+                  const idx = selectedIds.indexOf(d.id)
+                  return (
+                    <label
+                      key={d.id}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700'
+                          : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          const prev: string[] = formData.grid_devotional_ids ?? []
+                          if (e.target.checked && prev.length < 4) {
+                            handleChange('grid_devotional_ids', [...prev, d.id])
+                          } else if (!e.target.checked) {
+                            handleChange('grid_devotional_ids', prev.filter((id) => id !== d.id))
+                          }
+                        }}
+                        className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="flex-1 text-sm text-neutral-800 dark:text-neutral-200 leading-snug">{d.title}</span>
+                      {isSelected && (
+                        <span className="text-xs font-medium text-primary-600 dark:text-primary-400 shrink-0">#{idx + 1}</span>
+                      )}
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+            {((formData.grid_devotional_ids as string[] | undefined)?.length ?? 0) > 0 && (
+              <button
+                type="button"
+                onClick={() => handleChange('grid_devotional_ids', [])}
+                className="mt-2 text-xs text-neutral-500 hover:text-red-500 transition-colors"
+              >
+                Clear grid selection
+              </button>
+            )}
+          </div>
+
+          {/* CTA Button */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                CTA Button Text
+              </label>
+              <input
+                type="text"
+                value={formData.cta_text || ''}
+                onChange={(e) => handleChange('cta_text', e.target.value)}
+                placeholder="View all devotionals"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                CTA Button Link
+              </label>
+              <input
+                type="text"
+                value={formData.cta_link || ''}
+                onChange={(e) => handleChange('cta_link', e.target.value)}
+                placeholder="/devotionals"
+                className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+              />
+            </div>
           </div>
         </div>
       )}
