@@ -40,6 +40,8 @@ export interface HeroSlider1Data {
   // Devotional selection
   selected_slider_devotional_ids?: string[]
   selected_grid_devotional_ids?: string[]
+  // Card row below slider
+  card_title_color?: string
   // Editorial header (shown above slider in devotional mode)
   show_editorial_header?: boolean
   editorial_label?: string
@@ -118,6 +120,7 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     subheadline_animation_delay = 1.5,
     subheadline_animation_speed = 0.35,
     subheadline_animation_blur = 10,
+    card_title_color = '',
     show_editorial_header = false,
     editorial_label = '',
     editorial_heading = '',
@@ -385,7 +388,10 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
                     )}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-heading font-bold text-sm text-neutral-900 dark:text-neutral-100 leading-snug group-hover:text-title-hover transition-colors line-clamp-2">
+                    <h3
+                      className={`font-heading font-bold text-sm leading-snug line-clamp-2 ${card_title_color ? 'group-hover:opacity-75 transition-opacity' : 'text-neutral-900 dark:text-neutral-100 group-hover:text-title-hover transition-colors'}`}
+                      style={card_title_color ? { color: card_title_color } : undefined}
+                    >
                       {post.title}
                     </h3>
                     {post.published_at && (

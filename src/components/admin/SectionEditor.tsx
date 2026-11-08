@@ -121,7 +121,7 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
 }
 
 // HeroSlider1 specific fields - these are handled separately with custom UI
-const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur', 'selected_slider_devotional_ids', 'selected_grid_devotional_ids', 'show_editorial_header', 'editorial_label', 'editorial_heading', 'editorial_description', 'show_newsletter', 'newsletter_button_text', 'newsletter_placeholder']
+const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur', 'selected_slider_devotional_ids', 'selected_grid_devotional_ids', 'card_title_color', 'show_editorial_header', 'editorial_label', 'editorial_heading', 'editorial_description', 'show_newsletter', 'newsletter_button_text', 'newsletter_placeholder']
 
 // CtaStrip specific fields - handled with custom grouped UI
 const CTASTRIP_CUSTOM_KEYS = [
@@ -928,6 +928,15 @@ export default function SectionEditor({
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Card title color */}
+          <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4">
+            <ColorField
+              label="Card title color"
+              value={formData.card_title_color || '#171717'}
+              onChange={(v) => handleChange('card_title_color', v)}
+            />
           </div>
 
           {/* Editorial Header */}
