@@ -141,14 +141,20 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     if (!newsletterEmail) return
     setNewsletterStatus('loading')
     try {
-      const { createBrowserClient } = await import('@supabase/ssr')
-      const client = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      const { error } = await client.from('newsletter_subscribers').upsert({ email: newsletterEmail }, { onConflict: 'email' })
-      if (error) throw error
-      setNewsletterStatus('sent')
+      // Derive a first name from the email prefix (e.g. "john.doe@..." → "John")
+      const firstName = newsletterEmail.split('@')[0].split(/[._-]/)[0]
+      const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName: displayName, email: newsletterEmail }),
+      })
+      const json = await res.json()
+      if (res.ok && json.success) {
+        setNewsletterStatus('sent')
+      } else {
+        throw new Error(json.error || 'Subscribe failed')
+      }
     } catch {
       setNewsletterStatus('error')
     }
