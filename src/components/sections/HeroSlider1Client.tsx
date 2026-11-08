@@ -184,7 +184,7 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     const next = () => setCurrentImageIndex(c => (c + 1) % sliderDevotionals.length)
 
     return (
-      <div className="w-full py-8 md:py-10">
+      <div className="w-full bg-neutral-100 dark:bg-neutral-900 py-8 md:py-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           {/* Compact editorial slider */}
           <div className="relative overflow-hidden rounded-2xl" style={{ height: '460px' }}>
@@ -283,28 +283,26 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
 
           {/* Horizontal card list below slider */}
           {gridDevotionals.length > 0 && (
-            <div className="mt-0 border border-t-0 border-neutral-200 dark:border-neutral-700 rounded-b-xl overflow-hidden">
-              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-neutral-200 dark:divide-neutral-700">
-                {gridDevotionals.map((post) => (
-                  <Link key={post.id} href={`/devotionals/${post.slug}`} className="group flex items-center gap-4 p-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-                    <div className="relative w-20 h-14 shrink-0 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-                      {post.cover_image_url ? (
-                        <Image src={post.cover_image_url} alt={post.title} fill className="object-cover" unoptimized />
-                      ) : (
-                        <div className="w-full h-full bg-neutral-200 dark:bg-neutral-700" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="font-heading font-bold text-sm text-neutral-900 dark:text-neutral-100 leading-snug group-hover:text-title-hover transition-colors line-clamp-2">
-                        {post.title}
-                      </h3>
-                      {post.published_at && (
-                        <p className="mt-0.5 text-xs text-neutral-400">{formatDate(post.published_at)}</p>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {gridDevotionals.map((post) => (
+                <Link key={post.id} href={`/devotionals/${post.slug}`} className="group flex items-center gap-3 p-3 bg-white dark:bg-neutral-800 rounded-xl hover:shadow-sm transition-shadow">
+                  <div className="relative w-20 h-16 shrink-0 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-700">
+                    {post.cover_image_url ? (
+                      <Image src={post.cover_image_url} alt={post.title} fill className="object-cover" unoptimized />
+                    ) : (
+                      <div className="w-full h-full bg-neutral-200 dark:bg-neutral-700" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-heading font-bold text-sm text-neutral-900 dark:text-neutral-100 leading-snug group-hover:text-title-hover transition-colors line-clamp-2">
+                      {post.title}
+                    </h3>
+                    {post.published_at && (
+                      <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{formatDate(post.published_at)}</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
             </div>
           )}
         </div>
