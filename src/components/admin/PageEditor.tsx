@@ -81,7 +81,7 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const [ogImageUploading, setOgImageUploading] = useState(false)
   const ogImageInputRef = useRef<HTMLInputElement>(null)
   const [showMediaPicker, setShowMediaPicker] = useState(false)
-  const [mediaItems, setMediaItems] = useState<{ id: string; blob_url?: string; url?: string; filename: string; mime_type?: string; content_type?: string }[]>([])
+  const [mediaItems, setMediaItems] = useState<{ id: string; url: string; filename: string; content_type?: string }[]>([])
   const [mediaLoading, setMediaLoading] = useState(false)
   const [seo, setSeo] = useState<Seo>(() => normalizeSeo(page.seo ?? {}))
   const pageContent = useMemo(() => contentFromSections(sections.map(s => ({ data: s.data }))), [sections])
@@ -237,7 +237,7 @@ export default function PageEditor({ page, sections: initialSections, templates 
     setMediaLoading(true)
     const { data } = await supabase
       .from('media')
-      .select('id, blob_url, url, filename, mime_type, content_type')
+      .select('id, url, filename, content_type')
       .order('created_at', { ascending: false })
     setMediaItems(data || [])
     setMediaLoading(false)
@@ -712,11 +712,11 @@ export default function PageEditor({ page, sections: initialSections, templates 
                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                         {mediaItems
                           .filter(m => {
-                            const mt = m.mime_type || m.content_type || ''
-                            return mt.startsWith('image/') || (!mt && (m.blob_url || m.url || '').match(/\.(jpg|jpeg|png|gif|webp|svg|avif)$/i))
+                            const mt = m.content_type || ''
+                            return mt.startsWith('image/') || (!mt && m.url.match(/\.(jpg|jpeg|png|gif|webp|svg|avif)$/i))
                           })
                           .map((m) => {
-                            const imgUrl = m.blob_url || m.url || ''
+                            const imgUrl = m.url
                             return (
                               <button
                                 key={m.id}
