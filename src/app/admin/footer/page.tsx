@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { Plus, Trash2, Upload, GripVertical, Image as ImageIcon } from 'lucide-react'
+import { Plus, Trash2, Upload, Image as ImageIcon, FileText, Link2 } from 'lucide-react'
 
 interface SocialLink { platform: string; url: string }
 interface FooterNavLink { label: string; url: string }
 interface FooterNavColumn { title: string; title_color: string; link_color: string; links: FooterNavLink[] }
 interface FooterImage { url: string; alt: string }
 interface LegalLink { label: string; url: string }
+interface SitePage { id: string; title: string; slug: string; is_homepage: boolean }
 
 interface FooterConfig {
   bg_color: string
@@ -38,8 +39,125 @@ const DEFAULT: FooterConfig = {
 
 const PLATFORMS = ['twitter', 'instagram', 'facebook', 'youtube', 'linkedin']
 
+/* Fixed routes that don't come from the pages table */
+const FIXED_ROUTES = [
+  { label: 'Devotionals', url: '/devotionals' },
+  { label: 'About', url: '/about' },
+  { label: 'Give / Giving', url: '/give' },
+  { label: 'Contact', url: '/contact' },
+  { label: 'Authors', url: '/authors' },
+  { label: 'Categories', url: '/categories' },
+  { label: 'Tags', url: '/tags' },
+]
+
+/* ── Link row: page-picker or custom ── */
+function LinkRow({
+  link,
+  pages,
+  onChange,
+  onRemove,
+}: {
+  link: FooterNavLink
+  pages: SitePage[]
+  onChange: (patch: Partial<FooterNavLink>) => void
+  onRemove: () => void
+}) {
+  const [mode, setMode] = useState<'page' | 'custom'>('custom')
+
+  /* Derive a "page url" string for the select */
+  const pageOptions = [
+    ...pages.map(p => ({ label: p.title, url: p.is_homepage ? '/' : `/${p.slug}` })),
+    ...FIXED_ROUTES,
+  ]
+
+  const handlePageSelect = (url: string) => {
+    const opt = pageOptions.find(o => o.url === url)
+    onChange({ url, label: link.label || (opt?.label ?? '') })
+  }
+
+  const inputCls = 'w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-400 focus:outline-none'
+
+  return (
+    <div className="flex items-start gap-2 rounded-lg border border-neutral-100 bg-white p-2.5">
+      {/* Mode toggle */}
+      <div className="flex shrink-0 rounded-md border border-neutral-200 overflow-hidden text-xs mt-0.5">
+        <button
+          type="button"
+          onClick={() => setMode('page')}
+          title="Pick a site page"
+          className={`flex items-center gap-1 px-2 py-1.5 transition-colors ${mode === 'page' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500 hover:bg-neutral-50'}`}
+        >
+          <FileText className="size-3" />
+          Page
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('custom')}
+          title="Custom URL"
+          className={`flex items-center gap-1 px-2 py-1.5 transition-colors ${mode === 'custom' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-500 hover:bg-neutral-50'}`}
+        >
+          <Link2 className="size-3" />
+          Custom
+        </button>
+      </div>
+
+      <div className="flex-1 grid grid-cols-2 gap-2">
+        {/* Label */}
+        <input
+          type="text"
+          value={link.label}
+          onChange={e => onChange({ label: e.target.value })}
+          placeholder="Label"
+          className={inputCls}
+        />
+
+        {/* URL — either a select or free-form */}
+        {mode === 'page' ? (
+          <select
+            value={link.url}
+            onChange={e => handlePageSelect(e.target.value)}
+            className={`${inputCls} cursor-pointer`}
+          >
+            <option value="">— choose page —</option>
+            <optgroup label="Site Pages">
+              {pages.map(p => (
+                <option key={p.id} value={p.is_homepage ? '/' : `/${p.slug}`}>
+                  {p.title}{p.is_homepage ? ' (Home)' : ''}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Built-in routes">
+              {FIXED_ROUTES.map(r => (
+                <option key={r.url} value={r.url}>{r.label}</option>
+              ))}
+            </optgroup>
+          </select>
+        ) : (
+          <input
+            type="text"
+            value={link.url}
+            onChange={e => onChange({ url: e.target.value })}
+            placeholder="/path or https://..."
+            className={inputCls}
+          />
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={onRemove}
+        className="shrink-0 mt-1 text-red-400 hover:text-red-600"
+      >
+        <Trash2 className="size-4" />
+      </button>
+    </div>
+  )
+}
+
+/* ── Main page ── */
 export default function FooterAdminPage() {
   const [config, setConfig] = useState<FooterConfig>(DEFAULT)
+  const [pages, setPages] = useState<SitePage[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -62,18 +180,18 @@ export default function FooterAdminPage() {
 
   const loadData = async () => {
     try {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('value')
-        .eq('key', 'footer_config')
-        .single()
+      const [{ data: configRow }, { data: pagesData }] = await Promise.all([
+        supabase.from('site_settings').select('value').eq('key', 'footer_config').single(),
+        supabase.from('pages').select('id, title, slug, is_homepage').order('title'),
+      ])
 
-      if (data?.value) {
-        const parsed = typeof data.value === 'string' ? JSON.parse(data.value) : data.value
+      if (configRow?.value) {
+        const parsed = typeof configRow.value === 'string' ? JSON.parse(configRow.value) : configRow.value
         setConfig({ ...DEFAULT, ...parsed })
       }
-    } catch (e) {
-      // no existing config yet
+      setPages(pagesData || [])
+    } catch {
+      // first load with no config yet
     } finally {
       setLoading(false)
     }
@@ -136,7 +254,7 @@ export default function FooterAdminPage() {
   const openMediaPicker = async (i: number) => {
     setShowMediaPicker(i)
     const { data } = await supabase.from('media').select('id, url, filename, content_type').order('created_at', { ascending: false }).limit(50)
-    setMediaItems((data || []).filter(m => m.content_type?.startsWith('image/')))
+    setMediaItems((data || []).filter((m: any) => m.content_type?.startsWith('image/')))
   }
 
   /* ── Legal links ── */
@@ -267,6 +385,7 @@ export default function FooterAdminPage() {
             <Plus className="size-4" /> Add column
           </button>
         </div>
+
         <div className="space-y-6">
           {config.nav_columns.map((col, ci) => (
             <div key={ci} className="rounded-lg border border-neutral-100 bg-neutral-50 p-4 space-y-4">
@@ -276,6 +395,7 @@ export default function FooterAdminPage() {
                   <Trash2 className="size-4" />
                 </button>
               </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelCls}>Heading text</label>
@@ -310,25 +430,31 @@ export default function FooterAdminPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Links */}
               <div className="space-y-2">
-                <label className={labelCls}>Links</label>
+                <label className={labelCls}>
+                  Links — use <span className="font-semibold text-neutral-700">Page</span> to pick a site page, or <span className="font-semibold text-neutral-700">Custom</span> for any URL
+                </label>
                 {col.links.map((link, li) => (
-                  <div key={li} className="flex items-center gap-2">
-                    <input type="text" value={link.label} onChange={e => updateColumnLink(ci, li, { label: e.target.value })}
-                      placeholder="Label" className={`${inputCls} w-36`} />
-                    <input type="text" value={link.url} onChange={e => updateColumnLink(ci, li, { url: e.target.value })}
-                      placeholder="/path" className={`${inputCls} flex-1`} />
-                    <button onClick={() => removeColumnLink(ci, li)} className="text-red-400 hover:text-red-600">
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  </div>
+                  <LinkRow
+                    key={li}
+                    link={link}
+                    pages={pages}
+                    onChange={patch => updateColumnLink(ci, li, patch)}
+                    onRemove={() => removeColumnLink(ci, li)}
+                  />
                 ))}
-                <button onClick={() => addColumnLink(ci)} className="flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 mt-1">
+                <button
+                  onClick={() => addColumnLink(ci)}
+                  className="flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-700 mt-1"
+                >
                   <Plus className="size-3.5" /> Add link
                 </button>
               </div>
             </div>
           ))}
+
           {config.nav_columns.length === 0 && (
             <p className="text-sm text-neutral-400">No columns yet. Click "Add column" to create one.</p>
           )}
@@ -342,7 +468,6 @@ export default function FooterAdminPage() {
         <div className="grid grid-cols-2 gap-4">
           {config.images.map((img, i) => (
             <div key={i} className="space-y-2">
-              {/* Preview */}
               <div className="aspect-[4/3] relative rounded-lg border border-neutral-200 bg-neutral-50 overflow-hidden">
                 {img.url ? (
                   <img src={img.url} alt={img.alt || ''} className="w-full h-full object-cover" />
@@ -353,34 +478,18 @@ export default function FooterAdminPage() {
                   </div>
                 )}
               </div>
-              {/* Controls */}
-              <input
-                type="text"
-                value={img.url}
-                onChange={e => updateImage(i, { url: e.target.value })}
-                placeholder="Image URL"
-                className={inputCls}
-              />
-              <input
-                type="text"
-                value={img.alt}
-                onChange={e => updateImage(i, { alt: e.target.value })}
-                placeholder="Alt text"
-                className={inputCls}
-              />
+              <input type="text" value={img.url} onChange={e => updateImage(i, { url: e.target.value })}
+                placeholder="Image URL" className={inputCls} />
+              <input type="text" value={img.alt} onChange={e => updateImage(i, { alt: e.target.value })}
+                placeholder="Alt text" className={inputCls} />
               <div className="flex gap-2">
-                <button
-                  onClick={() => fileInputRefs.current[i]?.click()}
-                  disabled={uploadingIdx === i}
-                  className="flex items-center gap-1.5 text-xs text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded px-2.5 py-1.5 bg-white disabled:opacity-50"
-                >
+                <button onClick={() => fileInputRefs.current[i]?.click()} disabled={uploadingIdx === i}
+                  className="flex items-center gap-1.5 text-xs text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded px-2.5 py-1.5 bg-white disabled:opacity-50">
                   <Upload className="size-3.5" />
                   {uploadingIdx === i ? 'Uploading…' : 'Upload'}
                 </button>
-                <button
-                  onClick={() => openMediaPicker(i)}
-                  className="flex items-center gap-1.5 text-xs text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded px-2.5 py-1.5 bg-white"
-                >
+                <button onClick={() => openMediaPicker(i)}
+                  className="flex items-center gap-1.5 text-xs text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded px-2.5 py-1.5 bg-white">
                   <ImageIcon className="size-3.5" />
                   Library
                 </button>
@@ -391,13 +500,8 @@ export default function FooterAdminPage() {
                   </button>
                 )}
               </div>
-              <input
-                ref={el => { fileInputRefs.current[i] = el }}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(i, f) }}
-              />
+              <input ref={el => { fileInputRefs.current[i] = el }} type="file" accept="image/*" className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(i, f) }} />
             </div>
           ))}
         </div>
@@ -408,13 +512,10 @@ export default function FooterAdminPage() {
         <h2 className="text-base font-semibold text-neutral-900">Copyright Bar</h2>
         <div>
           <label className={labelCls}>Copyright text (leave blank for auto)</label>
-          <input
-            type="text"
-            value={config.copyright_text}
+          <input type="text" value={config.copyright_text}
             onChange={e => set({ copyright_text: e.target.value })}
             placeholder={`© ${new Date().getFullYear()} — The Adopted Son. All rights reserved.`}
-            className={inputCls}
-          />
+            className={inputCls} />
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -467,12 +568,11 @@ export default function FooterAdminPage() {
             ) : (
               <div className="grid grid-cols-4 gap-3 overflow-y-auto flex-1 pr-1">
                 {mediaItems.map(item => (
-                  <button
-                    key={item.id}
+                  <button key={item.id}
                     onClick={() => { updateImage(showMediaPicker, { url: item.url, alt: item.filename || '' }); setShowMediaPicker(null) }}
-                    className="aspect-square relative rounded-lg border-2 border-transparent hover:border-neutral-900 overflow-hidden bg-neutral-100 transition-colors"
-                  >
-                    <img src={item.url} alt={item.filename} className="w-full h-full object-cover" />
+                    className="relative rounded-lg border-2 border-transparent hover:border-neutral-900 overflow-hidden bg-neutral-100 transition-colors"
+                    style={{ paddingBottom: '100%' }}>
+                    <img src={item.url} alt={item.filename} className="absolute inset-0 w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -481,13 +581,10 @@ export default function FooterAdminPage() {
         </div>
       )}
 
-      {/* Save button (bottom) */}
+      {/* Save (bottom) */}
       <div className="flex justify-end pb-10">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="rounded-lg bg-neutral-900 px-6 py-2.5 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-50 transition-colors"
-        >
+        <button onClick={handleSave} disabled={saving}
+          className="rounded-lg bg-neutral-900 px-6 py-2.5 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-50 transition-colors">
           {saving ? 'Saving…' : 'Save changes'}
         </button>
       </div>
