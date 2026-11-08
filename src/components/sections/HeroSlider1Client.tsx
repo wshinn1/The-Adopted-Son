@@ -48,6 +48,8 @@ export interface HeroSlider1Data {
   editorial_heading?: string
   editorial_description?: string
   show_newsletter?: boolean
+  show_newsletter_name_field?: boolean
+  newsletter_name_placeholder?: string
   newsletter_button_text?: string
   newsletter_placeholder?: string
 }
@@ -126,6 +128,8 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     editorial_heading = '',
     editorial_description = '',
     show_newsletter = false,
+    show_newsletter_name_field = false,
+    newsletter_name_placeholder = 'First name',
     newsletter_button_text = 'Subscribe',
     newsletter_placeholder = 'Enter your email',
   } = data
@@ -137,6 +141,7 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
   
   // Newsletter form state
   const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [newsletterFirstName, setNewsletterFirstName] = useState('')
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
 
   async function handleNewsletterSubmit(e: React.FormEvent) {
@@ -144,13 +149,13 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     if (!newsletterEmail) return
     setNewsletterStatus('loading')
     try {
-      // Derive a first name from the email prefix (e.g. "john.doe@..." → "John")
-      const firstName = newsletterEmail.split('@')[0].split(/[._-]/)[0]
-      const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
+      // Use entered first name if available, otherwise derive from email prefix
+      const derivedName = newsletterEmail.split('@')[0].split(/[._-]/)[0]
+      const firstName = newsletterFirstName.trim() || (derivedName.charAt(0).toUpperCase() + derivedName.slice(1))
       const res = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName: displayName, email: newsletterEmail }),
+        body: JSON.stringify({ firstName, email: newsletterEmail }),
       })
       const json = await res.json()
       if (res.ok && json.success) {
@@ -254,22 +259,33 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
                   {newsletterStatus === 'sent' ? (
                     <p className="text-sm text-green-600 dark:text-green-400 font-medium">You&apos;re subscribed!</p>
                   ) : (
-                    <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
-                      <input
-                        type="email"
-                        required
-                        value={newsletterEmail}
-                        onChange={e => setNewsletterEmail(e.target.value)}
-                        placeholder={newsletter_placeholder}
-                        className="flex-1 min-w-0 px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-neutral-100"
-                      />
-                      <button
-                        type="submit"
-                        disabled={newsletterStatus === 'loading'}
-                        className="shrink-0 px-4 py-2 text-sm font-semibold bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-300 transition-colors disabled:opacity-50"
-                      >
-                        {newsletterStatus === 'loading' ? '…' : newsletter_button_text}
-                      </button>
+                    <form onSubmit={handleNewsletterSubmit} className="space-y-2">
+                      {show_newsletter_name_field && (
+                        <input
+                          type="text"
+                          value={newsletterFirstName}
+                          onChange={e => setNewsletterFirstName(e.target.value)}
+                          placeholder={newsletter_name_placeholder}
+                          className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-neutral-100"
+                        />
+                      )}
+                      <div className="flex gap-2">
+                        <input
+                          type="email"
+                          required
+                          value={newsletterEmail}
+                          onChange={e => setNewsletterEmail(e.target.value)}
+                          placeholder={newsletter_placeholder}
+                          className="flex-1 min-w-0 px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-neutral-100"
+                        />
+                        <button
+                          type="submit"
+                          disabled={newsletterStatus === 'loading'}
+                          className="shrink-0 px-4 py-2 text-sm font-semibold bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-300 transition-colors disabled:opacity-50"
+                        >
+                          {newsletterStatus === 'loading' ? '…' : newsletter_button_text}
+                        </button>
+                      </div>
                     </form>
                   )}
                   {newsletterStatus === 'error' && (

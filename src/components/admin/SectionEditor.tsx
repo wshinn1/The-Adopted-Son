@@ -121,7 +121,7 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
 }
 
 // HeroSlider1 specific fields - these are handled separately with custom UI
-const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur', 'selected_slider_devotional_ids', 'selected_grid_devotional_ids', 'card_title_color', 'show_editorial_header', 'editorial_label', 'editorial_heading', 'editorial_description', 'show_newsletter', 'newsletter_button_text', 'newsletter_placeholder']
+const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur', 'selected_slider_devotional_ids', 'selected_grid_devotional_ids', 'card_title_color', 'show_editorial_header', 'editorial_label', 'editorial_heading', 'editorial_description', 'show_newsletter', 'show_newsletter_name_field', 'newsletter_name_placeholder', 'newsletter_button_text', 'newsletter_placeholder']
 
 // CtaStrip specific fields - handled with custom grouped UI
 const CTASTRIP_CUSTOM_KEYS = [
@@ -999,8 +999,32 @@ export default function SectionEditor({
                         placeholder="Weekly devotionals and reflections..."
                       />
                     </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">Show first name field</span>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={!!formData.show_newsletter_name_field}
+                          onChange={e => handleChange('show_newsletter_name_field', e.target.checked)}
+                        />
+                        <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-600" />
+                      </label>
+                    </div>
+                    {!!formData.show_newsletter_name_field && (
+                      <div>
+                        <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Name field placeholder</label>
+                        <input
+                          type="text"
+                          value={formData.newsletter_name_placeholder || ''}
+                          onChange={e => handleChange('newsletter_name_placeholder', e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                          placeholder="First name"
+                        />
+                      </div>
+                    )}
                     <div>
-                      <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Input placeholder</label>
+                      <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Email field placeholder</label>
                       <input
                         type="text"
                         value={formData.newsletter_placeholder || ''}
