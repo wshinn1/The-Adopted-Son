@@ -19,6 +19,7 @@ export interface DevotionalGridData {
   grid_devotional_ids?: string[]
   cta_text?: string
   cta_link?: string
+  card_text_color?: string
 }
 
 interface Props {
@@ -37,7 +38,8 @@ function formatDate(dateStr: string | null) {
 }
 
 export default function DevotionalGridClient({ data, featured, gridPosts }: Props) {
-  const { heading, cta_text, cta_link } = data
+  const { heading, cta_text, cta_link, card_text_color } = data
+  const c = card_text_color || null
 
   if (!featured && gridPosts.length === 0) return null
 
@@ -80,15 +82,24 @@ export default function DevotionalGridClient({ data, featured, gridPosts }: Prop
               {/* Text */}
               <div className="p-5 flex flex-col gap-2 flex-1">
                 {featured.published_at && (
-                  <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                  <p
+                    className={c ? undefined : 'text-xs text-neutral-400 dark:text-neutral-500'}
+                    style={c ? { color: c, opacity: 0.6, fontSize: '0.75rem' } : undefined}
+                  >
                     {formatDate(featured.published_at)}
                   </p>
                 )}
-                <h3 className="font-heading font-bold text-xl text-neutral-900 dark:text-neutral-100 leading-snug group-hover:text-primary-600 transition-colors line-clamp-3">
+                <h3
+                  className={`font-heading font-bold text-xl leading-snug group-hover:text-primary-600 transition-colors line-clamp-3 ${c ? '' : 'text-neutral-900 dark:text-neutral-100'}`}
+                  style={c ? { color: c } : undefined}
+                >
                   {featured.title}
                 </h3>
                 {featured.excerpt && (
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed line-clamp-3">
+                  <p
+                    className={`text-sm leading-relaxed line-clamp-3 ${c ? '' : 'text-neutral-500 dark:text-neutral-400'}`}
+                    style={c ? { color: c, opacity: 0.65 } : undefined}
+                  >
                     {featured.excerpt}
                   </p>
                 )}
@@ -122,18 +133,28 @@ export default function DevotionalGridClient({ data, featured, gridPosts }: Prop
 
                   {/* Text */}
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-heading font-semibold text-sm text-neutral-900 dark:text-neutral-100 leading-snug group-hover:text-primary-600 transition-colors line-clamp-2">
+                    <h3
+                      className={`font-heading font-semibold text-sm leading-snug group-hover:text-primary-600 transition-colors line-clamp-2 ${c ? '' : 'text-neutral-900 dark:text-neutral-100'}`}
+                      style={c ? { color: c } : undefined}
+                    >
                       {post.title}
                     </h3>
-                    <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">
+                    <p
+                      className={`text-xs mt-1 ${c ? '' : 'text-neutral-400 dark:text-neutral-500'}`}
+                      style={c ? { color: c, opacity: 0.6 } : undefined}
+                    >
                       {formatDate(post.published_at)}
-                      {post.category && (
-                        <span className="ml-2 text-neutral-300 dark:text-neutral-600">•</span>
-                      )}
-                      {post.category && (
-                        <span className="ml-2">{post.category}</span>
-                      )}
+                      {post.category && <span className="mx-1.5">·</span>}
+                      {post.category}
                     </p>
+                    {post.excerpt && (
+                      <p
+                        className={`text-xs mt-1 leading-relaxed line-clamp-2 ${c ? '' : 'text-neutral-500 dark:text-neutral-400'}`}
+                        style={c ? { color: c, opacity: 0.55 } : undefined}
+                      >
+                        {post.excerpt}
+                      </p>
+                    )}
                   </div>
                 </Link>
               ))}

@@ -150,7 +150,7 @@ const DEVOTIONAL_SLIDER_CUSTOM_KEYS = [
 
 // DevotionalGrid specific fields - handled with custom UI
 const DEVOTIONAL_GRID_CUSTOM_KEYS = [
-  'featured_devotional_id', 'grid_devotional_ids', 'cta_text', 'cta_link',
+  'featured_devotional_id', 'grid_devotional_ids', 'cta_text', 'cta_link', 'card_text_color',
 ]
 
 // HeroTwo specific fields - handled with custom grouped UI
@@ -1763,6 +1763,13 @@ export default function SectionEditor({
               </button>
             )}
           </div>
+
+          {/* Text color */}
+          <ColorField
+            label="Card text color (titles, dates & excerpts)"
+            value={formData.card_text_color || ''}
+            onChange={(val) => handleChange('card_text_color', val)}
+          />
 
           {/* CTA Button */}
           <div className="grid grid-cols-2 gap-4">
