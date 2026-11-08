@@ -221,24 +221,24 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     const next = () => setCurrentImageIndex(c => (c + 1) % sliderDevotionals.length)
 
     return (
-      <div className="w-full py-8 md:py-10">
+      <div className="w-full py-6 md:py-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
 
           {/* Editorial header above slider */}
           {show_editorial_header && (editorial_heading || show_newsletter) && (
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
               <div className="flex-1 min-w-0">
                 {editorial_label && (
                   <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">{editorial_label}</p>
                 )}
                 {editorial_heading && (
-                  <h2 className="font-heading font-black text-4xl md:text-5xl lg:text-6xl text-neutral-900 dark:text-neutral-100 leading-tight text-balance">
+                  <h2 className="font-heading font-black text-3xl md:text-4xl text-neutral-900 dark:text-neutral-100 leading-tight text-balance">
                     {editorial_heading}
                   </h2>
                 )}
               </div>
               {show_newsletter && (
-                <div className="sm:max-w-xs w-full">
+                <div className="sm:max-w-xs w-full sm:pt-1">
                   {editorial_description && (
                     <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">{editorial_description}</p>
                   )}
