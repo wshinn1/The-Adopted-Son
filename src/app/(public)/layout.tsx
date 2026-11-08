@@ -12,24 +12,29 @@ export default async function PublicLayout({
   const { data: rows } = await supabase
     .from('site_settings')
     .select('key, value')
-    .in('key', ['site_name', 'logo_type', 'logo_url', 'nav_links', 'footer_text', 'footer_links'])
+    .in('key', ['site_name', 'logo_type', 'logo_url', 'nav_links', 'footer_text', 'footer_links', 'nav_typography', 'nav_scroll'])
 
   const settings: Record<string, any> = {}
   for (const row of rows ?? []) {
     settings[row.key] = row.value
   }
 
-  const parseJsonSetting = (raw: any): any[] => {
+  const parseArray = (raw: any): any[] => {
+    try { return typeof raw === 'string' ? JSON.parse(raw) : (Array.isArray(raw) ? raw : []) }
+    catch { return [] }
+  }
+  const parseObj = (raw: any): Record<string, any> => {
     try {
-      return typeof raw === 'string' ? JSON.parse(raw) : (raw ?? [])
-    } catch {
-      return []
-    }
+      const v = typeof raw === 'string' ? JSON.parse(raw) : raw
+      return v && typeof v === 'object' && !Array.isArray(v) ? v : {}
+    } catch { return {} }
   }
 
-  const navLinks = parseJsonSetting(settings['nav_links'])
-  const footerLinks = parseJsonSetting(settings['footer_links'])
+  const navLinks = parseArray(settings['nav_links'])
+  const footerLinks = parseArray(settings['footer_links'])
   const footerText: string = settings['footer_text'] ?? ''
+  const navTypography = parseObj(settings['nav_typography'])
+  const navScroll = parseObj(settings['nav_scroll'])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -38,6 +43,8 @@ export default async function PublicLayout({
         logoType={settings['logo_type'] ?? 'text'}
         logoUrl={settings['logo_url'] ?? undefined}
         navLinks={navLinks}
+        navTypography={navTypography}
+        navScroll={navScroll}
       />
       <main className="flex-1">{children}</main>
       <SiteFooter footerText={footerText} footerLinks={footerLinks} />
