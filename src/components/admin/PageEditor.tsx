@@ -3,7 +3,7 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
-import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X, Globe, FileText, Copy, ClipboardPaste } from 'lucide-react'
+import { GripVertical, Plus, Trash2, Eye, EyeOff, ChevronDown, ChevronUp, Share2, Upload, X, Globe, FileText, Bookmark, Library } from 'lucide-react'
 import { uploadMedia } from '@/lib/uploadMedia'
 import SectionEditor from './SectionEditor'
 import Image from 'next/image'
@@ -74,9 +74,10 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const [addingSection, setAddingSection] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [copiedSection, setCopiedSection] = useState<{ templateId: string; templateName: string; data: Record<string, any> } | null>(() => {
-    try { const s = localStorage.getItem('admin_copied_section'); return s ? JSON.parse(s) : null } catch { return null }
-  })
+  const [libraryItems, setLibraryItems] = useState<{ id: string; name: string; template_id: string; component_name: string; data: Record<string, any> }[]>([])
+  const [savingToLibrary, setSavingToLibrary] = useState<string | null>(null) // sectionId being named
+  const [libraryNameInput, setLibraryNameInput] = useState('')
+  const [showLibrary, setShowLibrary] = useState(false)
   const [ogImageUploading, setOgImageUploading] = useState(false)
   const ogImageInputRef = useRef<HTMLInputElement>(null)
   const [seo, setSeo] = useState<Seo>(() => normalizeSeo(page.seo ?? {}))
@@ -195,12 +196,36 @@ export default function PageEditor({ page, sections: initialSections, templates 
     }
   }
 
-  const copySection = (section: PageSection) => {
+  const loadLibrary = useCallback(async () => {
+    const { data } = await supabase.from('section_library').select('*').order('created_at', { ascending: false })
+    setLibraryItems(data || [])
+  }, [supabase])
+
+  useEffect(() => { loadLibrary() }, [loadLibrary])
+
+  const saveToLibrary = async (section: PageSection) => {
     const template = getTemplate(section)
-    const payload = { templateId: section.template_id, templateName: template.name, data: section.data }
-    try { localStorage.setItem('admin_copied_section', JSON.stringify(payload)) } catch { /* noop */ }
-    setCopiedSection(payload)
-    showNotification(`"${template.name}" copied — paste it on any page`)
+    const name = libraryNameInput.trim() || template.name
+    try {
+      const { error } = await supabase.from('section_library').insert({
+        name,
+        template_id: section.template_id,
+        component_name: template.component_name,
+        data: section.data,
+      })
+      if (error) throw error
+      await loadLibrary()
+      setSavingToLibrary(null)
+      setLibraryNameInput('')
+      showNotification(`"${name}" saved to library`)
+    } catch {
+      showNotification('Error saving to library', 'error')
+    }
+  }
+
+  const deleteFromLibrary = async (id: string) => {
+    await supabase.from('section_library').delete().eq('id', id)
+    setLibraryItems(prev => prev.filter(item => item.id !== id))
   }
 
   const addSection = async (templateId: string, overrideData?: Record<string, any>) => {
@@ -682,22 +707,39 @@ export default function PageEditor({ page, sections: initialSections, templates 
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
               Choose a section template:
             </h3>
-            {/* Paste copied section */}
-            {copiedSection && templates.find(t => t.id === copiedSection.templateId) && (
+            {/* From Library */}
+            {libraryItems.length > 0 && (
               <div className="mb-4">
-                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">Clipboard</p>
-                <button
-                  onClick={() => addSection(copiedSection.templateId, copiedSection.data)}
-                  className="w-full flex items-center gap-3 text-left px-4 py-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-700 hover:border-primary-500 transition-colors"
-                >
-                  <ClipboardPaste className="size-4 text-primary-600 shrink-0" />
-                  <div>
-                    <div className="font-medium text-primary-700 dark:text-primary-300">
-                      Paste: {copiedSection.templateName}
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Library className="size-3.5 text-amber-500" />
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">From Library</p>
+                </div>
+                <div className="space-y-1.5">
+                  {libraryItems.map((item) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          const tpl = templates.find(t => t.component_name === item.component_name)
+                          if (tpl) addSection(tpl.id, item.data)
+                        }}
+                        className="flex-1 flex items-center gap-3 text-left px-3 py-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-800 hover:border-amber-400 transition-colors"
+                      >
+                        <Bookmark className="size-3.5 text-amber-500 shrink-0" />
+                        <div>
+                          <div className="text-sm font-medium text-neutral-800 dark:text-neutral-200">{item.name}</div>
+                          <div className="text-xs text-neutral-400">{item.component_name}</div>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => deleteFromLibrary(item.id)}
+                        className="p-1.5 text-neutral-300 hover:text-red-500 transition-colors"
+                        title="Remove from library"
+                      >
+                        <X className="size-3.5" />
+                      </button>
                     </div>
-                    <div className="text-xs text-primary-500 mt-0.5">Insert with all copied settings</div>
-                  </div>
-                </button>
+                  ))}
+                </div>
                 <div className="border-t border-neutral-200 dark:border-neutral-700 mt-4 mb-3" />
               </div>
             )}
@@ -787,13 +829,16 @@ export default function PageEditor({ page, sections: initialSections, templates 
                     {section.is_visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
                   </button>
 
-                  {/* Copy */}
+                  {/* Save to library */}
                   <button
-                    onClick={() => copySection(section)}
-                    title="Copy section"
-                    className="p-1 text-neutral-400 hover:text-primary-600"
+                    onClick={() => {
+                      setSavingToLibrary(section.id)
+                      setLibraryNameInput(getTemplate(section).name)
+                    }}
+                    title="Save to library"
+                    className="p-1 text-neutral-400 hover:text-amber-500"
                   >
-                    <Copy className="size-4" />
+                    <Bookmark className="size-4" />
                   </button>
 
                   {/* Delete */}
@@ -812,6 +857,37 @@ export default function PageEditor({ page, sections: initialSections, templates 
                     {expandedSection === section.id ? 'Collapse' : 'Edit'}
                   </button>
                 </div>
+
+                {/* Save to library inline prompt */}
+                {savingToLibrary === section.id && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-t border-amber-100 dark:border-amber-800">
+                    <Bookmark className="size-4 text-amber-500 shrink-0" />
+                    <input
+                      autoFocus
+                      type="text"
+                      value={libraryNameInput}
+                      onChange={(e) => setLibraryNameInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveToLibrary(section)
+                        if (e.key === 'Escape') { setSavingToLibrary(null); setLibraryNameInput('') }
+                      }}
+                      placeholder="Name this library item…"
+                      className="flex-1 px-2 py-1 text-sm rounded border border-amber-200 dark:border-amber-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    />
+                    <button
+                      onClick={() => saveToLibrary(section)}
+                      className="px-3 py-1 text-xs font-medium bg-amber-500 text-white rounded hover:bg-amber-600"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => { setSavingToLibrary(null); setLibraryNameInput('') }}
+                      className="p-1 text-neutral-400 hover:text-neutral-600"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                )}
 
                 {/* Section Editor */}
                 {expandedSection === section.id && (
