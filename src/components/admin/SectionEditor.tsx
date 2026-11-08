@@ -290,8 +290,8 @@ export default function SectionEditor({
                 </option>
               ))}
             </select>
-          ) : /* Image field */
-          key.toLowerCase().includes('image') || key.toLowerCase().includes('url') && key !== 'button_url' ? (
+          ) : /* Image field — only fields whose key ends with _url (and isn't a button/page URL) */
+          (key.toLowerCase().endsWith('_url') && key !== 'button_url' && !key.toLowerCase().includes('page_url') && !key.toLowerCase().includes('link_url')) ? (
             <div className="space-y-2">
               {formData[key] && (
                 <div className="relative w-full max-w-md rounded-lg overflow-hidden bg-neutral-100">
