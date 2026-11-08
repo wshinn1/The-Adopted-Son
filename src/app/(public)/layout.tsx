@@ -46,7 +46,7 @@ export default async function PublicLayout({
         navTypography={navTypography}
         navScroll={navScroll}
       />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pt-20">{children}</main>
       <SiteFooter footerText={footerText} footerLinks={footerLinks} />
     </div>
   )
