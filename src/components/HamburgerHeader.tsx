@@ -73,7 +73,16 @@ export default function HamburgerHeader({
   } = navScroll
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 60)
+    const SCROLL_IN = 80   // px to trigger scrolled state
+    const SCROLL_OUT = 40  // px to release it (hysteresis prevents flicker)
+    const handleScroll = () => {
+      const y = window.scrollY
+      setIsScrolled(prev => {
+        if (!prev && y > SCROLL_IN) return true
+        if (prev && y < SCROLL_OUT) return false
+        return prev
+      })
+    }
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -114,8 +123,8 @@ export default function HamburgerHeader({
   const bgOpacity = isScrolled ? scrolledOpacity / 100 : initialOpacity / 100
   const headerStyle: React.CSSProperties = {
     backgroundColor: `rgba(255,255,255,${bgOpacity})`,
-    backdropFilter: isScrolled && blurAmount > 0 ? `blur(${blurAmount}px)` : undefined,
-    WebkitBackdropFilter: isScrolled && blurAmount > 0 ? `blur(${blurAmount}px)` : undefined,
+    backdropFilter: `blur(${isScrolled && blurAmount > 0 ? blurAmount : 0}px)`,
+    WebkitBackdropFilter: `blur(${isScrolled && blurAmount > 0 ? blurAmount : 0}px)`,
     transition: 'background-color 0.3s ease, backdrop-filter 0.3s ease',
   }
 
