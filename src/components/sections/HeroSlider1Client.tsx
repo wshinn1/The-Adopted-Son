@@ -370,8 +370,8 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
           {gridDevotionals.length > 0 && (
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
               {gridDevotionals.map((post) => (
-                <Link key={post.id} href={`/devotionals/${post.slug}`} className="group flex items-center gap-3 p-3 bg-white dark:bg-neutral-800 rounded-xl hover:shadow-sm transition-shadow">
-                  <div className="relative w-20 h-16 shrink-0 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-700">
+                <Link key={post.id} href={`/devotionals/${post.slug}`} className="group flex items-start gap-3 p-3 bg-white dark:bg-neutral-800 rounded-xl hover:shadow-sm transition-shadow">
+                  <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-700">
                     {post.cover_image_url ? (
                       <Image src={post.cover_image_url} alt={post.title} fill className="object-cover" unoptimized />
                     ) : (
@@ -384,6 +384,9 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
                     </h3>
                     {post.published_at && (
                       <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{formatDate(post.published_at)}</p>
+                    )}
+                    {post.excerpt && (
+                      <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500 leading-relaxed line-clamp-2">{post.excerpt}</p>
                     )}
                   </div>
                 </Link>
