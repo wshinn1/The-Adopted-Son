@@ -142,6 +142,11 @@ const CTA_FONT_SIZE_OPTIONS = [
   { label: '4XL — 36px', value: '36px' },
 ]
 
+// DevotionalSlider specific fields - handled with custom UI
+const DEVOTIONAL_SLIDER_CUSTOM_KEYS = [
+  'selected_devotional_ids', 'slide_duration', 'show_remaining', 'background_color',
+]
+
 // HeroTwo specific fields - handled with custom grouped UI
 const HEROTWO_CUSTOM_KEYS = [
   'headline', 'subheadline', 'show_subheadline',
@@ -175,10 +180,29 @@ export default function SectionEditor({
 
   const [formData, setFormData] = useState<Record<string, any>>({ ...enhancedDefaults, ...data })
   const [uploading, setUploading] = useState(false)
+  const [devotionalsList, setDevotionalsList] = useState<{ id: string; title: string; published_at: string | null }[]>([])
 
   useEffect(() => {
     setFormData({ ...enhancedDefaults, ...data })
   }, [data, defaultData, templateName])
+
+  useEffect(() => {
+    if (templateName !== 'DevotionalSlider') return
+    import('@supabase/supabase-js').then(({ createClient }) => {
+      const client = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+      client
+        .from('devotionals')
+        .select('id, title, published_at')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false })
+        .then(({ data: rows }) => {
+          if (rows) setDevotionalsList(rows)
+        })
+    })
+  }, [templateName])
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }))
@@ -210,6 +234,7 @@ export default function SectionEditor({
   const isHeroSlider1Section = templateName === 'HeroSlider1'
   const isHeroTwoSection = templateName === 'HeroTwo'
   const isCtaStripSection = templateName === 'CtaStrip'
+  const isDevotionalSliderSection = templateName === 'DevotionalSlider'
 
   let regularProperties = Object.entries(properties)
   if (isNewsletterSection) {
@@ -223,6 +248,9 @@ export default function SectionEditor({
   }
   if (isCtaStripSection) {
     regularProperties = regularProperties.filter(([key]) => !CTASTRIP_CUSTOM_KEYS.includes(key))
+  }
+  if (isDevotionalSliderSection) {
+    regularProperties = regularProperties.filter(([key]) => !DEVOTIONAL_SLIDER_CUSTOM_KEYS.includes(key))
   }
 
   return (
@@ -1293,6 +1321,112 @@ export default function SectionEditor({
             >
               Subscribe
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* DevotionalSlider Custom Fields */}
+      {isDevotionalSliderSection && (
+        <div className="space-y-6">
+          {/* Slide Duration */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              Slide Duration (seconds)
+            </label>
+            <input
+              type="number"
+              min={2}
+              max={30}
+              value={formData.slide_duration ?? 5}
+              onChange={(e) => handleChange('slide_duration', Number(e.target.value))}
+              className="w-32 px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+            />
+            <p className="mt-1 text-xs text-neutral-500">How many seconds each slide stays on screen (2–30)</p>
+          </div>
+
+          {/* Show Remaining Toggle */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={formData.show_remaining !== false}
+              onClick={() => handleChange('show_remaining', formData.show_remaining === false ? true : false)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                formData.show_remaining !== false ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  formData.show_remaining !== false ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className="text-sm text-neutral-700 dark:text-neutral-300">Show remaining devotionals below slider</span>
+          </div>
+
+          {/* Background Color */}
+          <ColorField
+            label="Background Color"
+            value={formData.background_color || '#ffffff'}
+            onChange={(val) => handleChange('background_color', val)}
+          />
+
+          {/* Devotional Picker */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+              Slider Devotionals
+            </label>
+            <p className="text-xs text-neutral-500 mb-3">
+              Select which devotionals appear in the slider (in order). If none selected, the 3 newest are used. Selected devotionals won&apos;t appear in the grid below.
+            </p>
+            {devotionalsList.length === 0 ? (
+              <p className="text-sm text-neutral-400 italic">Loading devotionals…</p>
+            ) : (
+              <div className="space-y-1 max-h-72 overflow-y-auto rounded-lg border border-neutral-200 dark:border-neutral-700 p-2">
+                {devotionalsList.map((d) => {
+                  const selectedIds: string[] = formData.selected_devotional_ids ?? []
+                  const isSelected = selectedIds.includes(d.id)
+                  const idx = selectedIds.indexOf(d.id)
+                  return (
+                    <label
+                      key={d.id}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700'
+                          : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          const prev: string[] = formData.selected_devotional_ids ?? []
+                          if (e.target.checked) {
+                            handleChange('selected_devotional_ids', [...prev, d.id])
+                          } else {
+                            handleChange('selected_devotional_ids', prev.filter((id) => id !== d.id))
+                          }
+                        }}
+                        className="rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="flex-1 text-sm text-neutral-800 dark:text-neutral-200 leading-snug">{d.title}</span>
+                      {isSelected && (
+                        <span className="text-xs font-medium text-primary-600 dark:text-primary-400 shrink-0">#{idx + 1}</span>
+                      )}
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+            {((formData.selected_devotional_ids as string[] | undefined)?.length ?? 0) > 0 && (
+              <button
+                type="button"
+                onClick={() => handleChange('selected_devotional_ids', [])}
+                className="mt-2 text-xs text-neutral-500 hover:text-red-500 transition-colors"
+              >
+                Clear selection (use 3 newest)
+              </button>
+            )}
           </div>
         </div>
       )}

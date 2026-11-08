@@ -9,6 +9,7 @@ import MoreInfo from '@/components/sections/MoreInfo'
 import HeroSlider1 from '@/components/sections/HeroSlider1'
 import HeroTwo from '@/components/sections/HeroTwo'
 import CtaStrip from '@/components/sections/CtaStrip'
+import DevotionalSlider from '@/components/sections/DevotionalSlider'
 
 const SECTION_MAP: Record<string, ComponentType<{ data: any }>> = {
   Home1,
@@ -20,6 +21,7 @@ const SECTION_MAP: Record<string, ComponentType<{ data: any }>> = {
   HeroSlider1,
   HeroTwo,
   CtaStrip,
+  DevotionalSlider,
 }
 
 interface PageSection {
