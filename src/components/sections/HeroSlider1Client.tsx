@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { TextGenerateEffect } from '@/components/ui/text-generate-effect'
 import BlurText from '@/components/ui/blur-text'
 import { useSplashComplete } from '@/components/SplashContext'
@@ -178,6 +178,139 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     return () => clearInterval(interval)
   }, [slideImages.length, image_transition_speed])
 
+  // ── Devotional slider mode: editorial compact layout ────────────────────────
+  if (useDevotionalSlider) {
+    const prev = () => setCurrentImageIndex(c => (c - 1 + sliderDevotionals.length) % sliderDevotionals.length)
+    const next = () => setCurrentImageIndex(c => (c + 1) % sliderDevotionals.length)
+
+    return (
+      <>
+        {/* Compact editorial slider */}
+        <div className="relative w-full overflow-hidden rounded-b-lg" style={{ minHeight: '62vh' }}>
+          {/* Crossfade background images */}
+          {sliderDevotionals.map((d, i) => (
+            <div
+              key={d.id}
+              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+              style={{ opacity: i === currentImageIndex && isFirstImageLoaded ? 1 : 0, zIndex: 0 }}
+            >
+              {d.cover_image_url ? (
+                <Image
+                  src={d.cover_image_url}
+                  alt={d.title}
+                  fill
+                  priority={i === 0}
+                  className="object-cover"
+                  unoptimized
+                  onLoad={() => { if (i === 0) setIsFirstImageLoaded(true) }}
+                />
+              ) : (
+                <div className="w-full h-full bg-neutral-800" />
+              )}
+            </div>
+          ))}
+
+          {/* Bottom gradient */}
+          <div
+            className="absolute inset-0 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.25) 55%, transparent 100%)' }}
+          />
+
+          {/* Category badge */}
+          {currentDevo?.category && (
+            <div className="absolute top-5 left-5 z-20">
+              <span className="inline-block bg-white text-neutral-900 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded">
+                {currentDevo.category}
+              </span>
+            </div>
+          )}
+
+          {/* Prev / Next arrows */}
+          {sliderDevotionals.length > 1 && (
+            <>
+              <button
+                onClick={prev}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors backdrop-blur-sm"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="size-5" />
+              </button>
+              <button
+                onClick={next}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors backdrop-blur-sm"
+                aria-label="Next"
+              >
+                <ChevronRight className="size-5" />
+              </button>
+            </>
+          )}
+
+          {/* Text — bottom left */}
+          <Link
+            href={`/devotionals/${currentDevo?.slug ?? ''}`}
+            className="absolute bottom-0 left-0 right-0 z-20 px-7 pb-10 md:px-10 md:pb-12 max-w-2xl group"
+          >
+            {currentDevo?.published_at && (
+              <p className="text-white/60 text-sm mb-1.5">{formatDate(currentDevo.published_at)}</p>
+            )}
+            <h2 className="text-white font-heading font-bold text-2xl md:text-3xl leading-tight text-balance group-hover:underline underline-offset-4 decoration-white/40">
+              {currentDevo?.title}
+            </h2>
+            {currentDevo?.excerpt && (
+              <p className="mt-2 text-white/75 text-sm md:text-base leading-relaxed line-clamp-2">
+                {currentDevo.excerpt}
+              </p>
+            )}
+          </Link>
+
+          {/* Dot indicators */}
+          {sliderDevotionals.length > 1 && (
+            <div className="absolute bottom-4 right-6 z-20 flex gap-1.5">
+              {sliderDevotionals.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentImageIndex(i)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === currentImageIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
+                  }`}
+                  aria-label={`Slide ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Horizontal card list below slider */}
+        {gridDevotionals.length > 0 && (
+          <div className="border-t border-neutral-200 dark:border-neutral-700">
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-neutral-200 dark:divide-neutral-700">
+              {gridDevotionals.map((post) => (
+                <Link key={post.id} href={`/devotionals/${post.slug}`} className="group flex items-start gap-4 p-5 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+                  <div className="relative w-24 h-16 shrink-0 rounded-md overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+                    {post.cover_image_url ? (
+                      <Image src={post.cover_image_url} alt={post.title} fill className="object-cover" unoptimized />
+                    ) : (
+                      <div className="w-full h-full bg-neutral-200 dark:bg-neutral-700" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-heading font-bold text-sm text-neutral-900 dark:text-neutral-100 leading-snug text-balance group-hover:text-title-hover transition-colors line-clamp-3">
+                      {post.title}
+                    </h3>
+                    {post.published_at && (
+                      <p className="mt-1 text-xs text-neutral-400">{formatDate(post.published_at)}</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </>
+    )
+  }
+
+  // ── Static hero mode (no devotionals selected) ───────────────────────────────
   return (
     <>
     <section
@@ -185,7 +318,7 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
       style={{ backgroundColor: overlay_color }}
     >
       {/* Background Images with Crossfade */}
-      {slideImages.map((imageUrl, index) => (
+      {staticImages.map((imageUrl, index) => (
         <div
           key={`${imageUrl}-${index}`}
           className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
@@ -194,88 +327,35 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
             zIndex: 0,
           }}
         >
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={useDevotionalSlider ? (sliderDevotionals[index]?.title ?? '') : `Background ${index + 1}`}
-              fill
-              priority={index === 0}
-              className="object-cover"
-              unoptimized={imageUrl.includes('blob.vercel-storage.com')}
-              onLoad={() => {
-                if (index === 0) setIsFirstImageLoaded(true)
-              }}
-            />
-          ) : (
-            <div className="w-full h-full bg-neutral-900" onLoad={index === 0 ? () => setIsFirstImageLoaded(true) : undefined} />
-          )}
+          <Image
+            src={imageUrl}
+            alt={`Background ${index + 1}`}
+            fill
+            priority={index === 0}
+            className="object-cover"
+            unoptimized={imageUrl.includes('blob.vercel-storage.com')}
+            onLoad={() => { if (index === 0) setIsFirstImageLoaded(true) }}
+          />
         </div>
       ))}
 
-      {/* Edge blur effect - all four edges */}
-      <div 
-        className="absolute inset-0 z-[1] pointer-events-none"
-        style={{
-          boxShadow: 'inset 0 0 100px 50px rgba(0,0,0,0.3)',
-        }}
-      />
-      
-      {/* Additional edge blurs for stronger effect */}
-      {/* Top edge */}
-      <div 
-        className="absolute top-0 left-0 right-0 h-32 z-[1] pointer-events-none"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)',
-        }}
-      />
-      {/* Bottom edge */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-32 z-[1] pointer-events-none"
-        style={{
-          background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)',
-        }}
-      />
-      {/* Left edge */}
-      <div 
-        className="absolute top-0 bottom-0 left-0 w-32 z-[1] pointer-events-none"
-        style={{
-          background: 'linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 100%)',
-        }}
-      />
-      {/* Right edge */}
-      <div 
-        className="absolute top-0 bottom-0 right-0 w-32 z-[1] pointer-events-none"
-        style={{
-          background: 'linear-gradient(to left, rgba(0,0,0,0.4) 0%, transparent 100%)',
-        }}
-      />
+      {/* Edge blur effect */}
+      <div className="absolute inset-0 z-[1] pointer-events-none" style={{ boxShadow: 'inset 0 0 100px 50px rgba(0,0,0,0.3)' }} />
+      <div className="absolute top-0 left-0 right-0 h-32 z-[1] pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)' }} />
+      <div className="absolute bottom-0 left-0 right-0 h-32 z-[1] pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)' }} />
+      <div className="absolute top-0 bottom-0 left-0 w-32 z-[1] pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 100%)' }} />
+      <div className="absolute top-0 bottom-0 right-0 w-32 z-[1] pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(0,0,0,0.4) 0%, transparent 100%)' }} />
 
       {/* Color overlay */}
-      <div 
-        className="absolute inset-0 z-[2]"
-        style={{ 
-          backgroundColor: overlay_color,
-          opacity: overlay_opacity,
-        }}
-      />
-
-      {/* Devotional category badge */}
-      {useDevotionalSlider && currentDevo?.category && (
-        <div className="absolute top-6 left-6 z-20">
-          <span className="inline-block bg-white text-neutral-900 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded">
-            {currentDevo.category}
-          </span>
-        </div>
-      )}
+      <div className="absolute inset-0 z-[2]" style={{ backgroundColor: overlay_color, opacity: overlay_opacity }} />
 
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-        {/* Main Headline */}
         {shouldAnimate ? (
           <TextGenerateEffect
             key={currentHeadline}
             words={currentHeadline}
-            className={useDevotionalSlider ? '' : 'uppercase tracking-wider'}
+            className="uppercase tracking-wider"
             filter={true}
             duration={text_animation_duration}
             staggerDelay={text_animation_stagger}
@@ -290,7 +370,7 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
           />
         ) : (
           <div
-            className={`${useDevotionalSlider ? '' : 'uppercase tracking-wider'} opacity-0`}
+            className="uppercase tracking-wider opacity-0"
             style={{
               color: text_color,
               fontFamily: 'var(--font-hero)',
@@ -303,34 +383,7 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
           </div>
         )}
 
-        {/* Devotional excerpt (shown instead of static subheadline when in devotional mode) */}
-        {useDevotionalSlider && currentDevo?.excerpt && shouldAnimate && (
-          <BlurText
-            key={currentDevo.id}
-            text={currentDevo.excerpt}
-            className="mt-4 text-base md:text-lg font-body max-w-2xl mx-auto leading-relaxed justify-center line-clamp-2"
-            animateBy="words"
-            direction="bottom"
-            stepDuration={subheadline_animation_speed}
-            blurAmount={subheadline_animation_blur}
-            initialDelay={subheadline_animation_delay}
-            style={{ color: text_color, opacity: 0.85 }}
-          />
-        )}
-
-        {/* Read button for devotional slides */}
-        {useDevotionalSlider && currentDevo && (
-          <Link
-            href={`/devotionals/${currentDevo.slug}`}
-            className="mt-6 inline-block px-6 py-2.5 rounded-full border-2 text-sm font-semibold transition-all hover:scale-105"
-            style={{ borderColor: text_color, color: text_color }}
-          >
-            Read now
-          </Link>
-        )}
-
-        {/* Optional Subheadline (static mode only) */}
-        {!useDevotionalSlider && show_subheadline && subheadline && shouldAnimate && (
+        {show_subheadline && subheadline && shouldAnimate && (
           <BlurText
             key={subheadline}
             text={subheadline}
@@ -371,16 +424,14 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
       </div>
 
       {/* Slide indicators */}
-      {slideImages.length > 1 && (
+      {staticImages.length > 1 && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-          {slideImages.map((_, index) => (
+          {staticImages.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentImageIndex(index)}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                index === currentImageIndex
-                  ? 'w-6 bg-white'
-                  : 'w-1.5 bg-white/50 hover:bg-white/75'
+                index === currentImageIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/75'
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
@@ -388,46 +439,6 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
         </div>
       )}
     </section>
-
-    {/* Grid of devotionals below the hero */}
-    {gridDevotionals.length > 0 && (
-      <section className="px-6 md:px-12 lg:px-24 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {gridDevotionals.map((post) => (
-            <Link key={post.id} href={`/devotionals/${post.slug}`} className="group block">
-              <article>
-                <div className="relative aspect-video overflow-hidden rounded-lg bg-neutral-100 dark:bg-neutral-800">
-                  {post.cover_image_url ? (
-                    <Image
-                      src={post.cover_image_url}
-                      alt={post.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-neutral-200 dark:bg-neutral-700" />
-                  )}
-                </div>
-                <div className="pt-4">
-                  {post.published_at && (
-                    <p className="text-xs text-neutral-400 mb-1">{formatDate(post.published_at)}</p>
-                  )}
-                  <h3 className="font-heading font-bold text-neutral-900 dark:text-neutral-100 leading-snug text-balance group-hover:text-title-hover transition-colors">
-                    {post.title}
-                  </h3>
-                  {post.excerpt && (
-                    <p className="mt-1.5 text-sm text-neutral-500 dark:text-neutral-400 line-clamp-2 leading-relaxed">
-                      {post.excerpt}
-                    </p>
-                  )}
-                </div>
-              </article>
-            </Link>
-          ))}
-        </div>
-      </section>
-    )}
     </>
   )
 }
