@@ -40,6 +40,14 @@ export interface HeroSlider1Data {
   // Devotional selection
   selected_slider_devotional_ids?: string[]
   selected_grid_devotional_ids?: string[]
+  // Editorial header (shown above slider in devotional mode)
+  show_editorial_header?: boolean
+  editorial_label?: string
+  editorial_heading?: string
+  editorial_description?: string
+  show_newsletter?: boolean
+  newsletter_button_text?: string
+  newsletter_placeholder?: string
 }
 
 export interface SliderDevo {
@@ -110,6 +118,13 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     subheadline_animation_delay = 1.5,
     subheadline_animation_speed = 0.35,
     subheadline_animation_blur = 10,
+    show_editorial_header = false,
+    editorial_label = '',
+    editorial_heading = '',
+    editorial_description = '',
+    show_newsletter = false,
+    newsletter_button_text = 'Subscribe',
+    newsletter_placeholder = 'Enter your email',
   } = data
   
   // Check if splash screen is complete
@@ -117,6 +132,28 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
   // Track if animations should start
   const [shouldAnimate, setShouldAnimate] = useState(false)
   
+  // Newsletter form state
+  const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
+
+  async function handleNewsletterSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newsletterEmail) return
+    setNewsletterStatus('loading')
+    try {
+      const { createBrowserClient } = await import('@supabase/ssr')
+      const client = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+      const { error } = await client.from('newsletter_subscribers').upsert({ email: newsletterEmail }, { onConflict: 'email' })
+      if (error) throw error
+      setNewsletterStatus('sent')
+    } catch {
+      setNewsletterStatus('error')
+    }
+  }
+
   // Arrow hover state
   const [isArrowHovered, setIsArrowHovered] = useState(false)
   // Arrow visibility state (for delayed fade-in)
@@ -184,8 +221,56 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     const next = () => setCurrentImageIndex(c => (c + 1) % sliderDevotionals.length)
 
     return (
-      <div className="w-full bg-neutral-100 dark:bg-neutral-900 py-8 md:py-10">
+      <div className="w-full py-8 md:py-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
+
+          {/* Editorial header above slider */}
+          {show_editorial_header && (editorial_heading || show_newsletter) && (
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-6">
+              <div className="flex-1 min-w-0">
+                {editorial_label && (
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-1">{editorial_label}</p>
+                )}
+                {editorial_heading && (
+                  <h2 className="font-heading font-black text-4xl md:text-5xl lg:text-6xl text-neutral-900 dark:text-neutral-100 leading-tight text-balance">
+                    {editorial_heading}
+                  </h2>
+                )}
+              </div>
+              {show_newsletter && (
+                <div className="sm:max-w-xs w-full">
+                  {editorial_description && (
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">{editorial_description}</p>
+                  )}
+                  {newsletterStatus === 'sent' ? (
+                    <p className="text-sm text-green-600 dark:text-green-400 font-medium">You&apos;re subscribed!</p>
+                  ) : (
+                    <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+                      <input
+                        type="email"
+                        required
+                        value={newsletterEmail}
+                        onChange={e => setNewsletterEmail(e.target.value)}
+                        placeholder={newsletter_placeholder}
+                        className="flex-1 min-w-0 px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-neutral-100"
+                      />
+                      <button
+                        type="submit"
+                        disabled={newsletterStatus === 'loading'}
+                        className="shrink-0 px-4 py-2 text-sm font-semibold bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-300 transition-colors disabled:opacity-50"
+                      >
+                        {newsletterStatus === 'loading' ? '…' : newsletter_button_text}
+                      </button>
+                    </form>
+                  )}
+                  {newsletterStatus === 'error' && (
+                    <p className="mt-1 text-xs text-red-500">Something went wrong. Please try again.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Compact editorial slider */}
           <div className="relative overflow-hidden rounded-2xl" style={{ height: '460px' }}>
             {/* Crossfade background images */}

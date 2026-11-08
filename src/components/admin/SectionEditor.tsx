@@ -121,7 +121,7 @@ const NEWSLETTER_BUTTON_DEFAULTS = {
 }
 
 // HeroSlider1 specific fields - these are handled separately with custom UI
-const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur', 'selected_slider_devotional_ids', 'selected_grid_devotional_ids']
+const HEROSLIDER1_CUSTOM_KEYS = ['headlines', 'text_color', 'min_height', 'background_images', 'image_transition_seconds', 'arrow_color', 'arrow_hover_color', 'arrow_glass_opacity', 'arrow_glass_blur', 'arrow_delay_seconds', 'overlay_color', 'overlay_opacity', 'text_animation_duration', 'text_animation_stagger', 'text_animation_blur', 'subheadline_animation_delay', 'subheadline_animation_speed', 'subheadline_animation_blur', 'selected_slider_devotional_ids', 'selected_grid_devotional_ids', 'show_editorial_header', 'editorial_label', 'editorial_heading', 'editorial_description', 'show_newsletter', 'newsletter_button_text', 'newsletter_placeholder']
 
 // CtaStrip specific fields - handled with custom grouped UI
 const CTASTRIP_CUSTOM_KEYS = [
@@ -928,6 +928,92 @@ export default function SectionEditor({
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Editorial Header */}
+          <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Editorial Header (above slider)</h4>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={!!formData.show_editorial_header}
+                  onChange={e => handleChange('show_editorial_header', e.target.checked)}
+                />
+                <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-600" />
+              </label>
+            </div>
+            {!!formData.show_editorial_header && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Small label (e.g. "Welcome to The Adopted Son")</label>
+                  <input
+                    type="text"
+                    value={formData.editorial_label || ''}
+                    onChange={e => handleChange('editorial_label', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    placeholder="Welcome to The Adopted Son"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Heading</label>
+                  <textarea
+                    value={formData.editorial_heading || ''}
+                    onChange={e => handleChange('editorial_heading', e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                    placeholder="Where ideas come to life"
+                  />
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <h5 className="text-xs font-semibold text-neutral-600 dark:text-neutral-400">Newsletter Signup</h5>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={!!formData.show_newsletter}
+                      onChange={e => handleChange('show_newsletter', e.target.checked)}
+                    />
+                    <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-600" />
+                  </label>
+                </div>
+                {!!formData.show_newsletter && (
+                  <div className="space-y-2 pl-2 border-l-2 border-neutral-200 dark:border-neutral-700">
+                    <div>
+                      <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Description text</label>
+                      <textarea
+                        value={formData.editorial_description || ''}
+                        onChange={e => handleChange('editorial_description', e.target.value)}
+                        rows={2}
+                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                        placeholder="Weekly devotionals and reflections..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Input placeholder</label>
+                      <input
+                        type="text"
+                        value={formData.newsletter_placeholder || ''}
+                        onChange={e => handleChange('newsletter_placeholder', e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                        placeholder="Enter your email"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Button text</label>
+                      <input
+                        type="text"
+                        value={formData.newsletter_button_text || ''}
+                        onChange={e => handleChange('newsletter_button_text', e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 text-sm"
+                        placeholder="Subscribe"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
