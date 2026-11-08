@@ -360,7 +360,7 @@ export default async function DevotionalsPage({ searchParams }: Props) {
 
       </div>
 
-      {(settings.footer_config as FooterConfig)?.show_on_devotionals && (
+      {Object.keys(settings.footer_config || {}).length > 0 && (
         <BigFooter
           config={settings.footer_config as FooterConfig}
           siteName={settings.site_name}

@@ -549,8 +549,8 @@ export default function FooterAdminPage() {
             <span className={`absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow transition-transform ${config.show_on_devotionals ? 'translate-x-5' : 'translate-x-0'}`} />
           </div>
           <div>
-            <span className="text-sm font-medium text-neutral-800">Show on devotional pages</span>
-            <p className="text-xs text-neutral-500">Off by default. The footer always shows on regular site pages.</p>
+            <span className="text-sm font-medium text-neutral-800">Show on individual devotional posts</span>
+            <p className="text-xs text-neutral-500">Off by default. The footer always shows on all other pages including /devotionals.</p>
           </div>
         </label>
       </div>
