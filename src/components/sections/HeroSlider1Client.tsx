@@ -42,6 +42,8 @@ export interface HeroSlider1Data {
   selected_grid_devotional_ids?: string[]
   // Card row below slider
   card_title_color?: string
+  card_date_color?: string
+  card_excerpt_color?: string
   // Editorial header (shown above slider in devotional mode)
   show_editorial_header?: boolean
   editorial_label?: string
@@ -123,6 +125,8 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     subheadline_animation_speed = 0.35,
     subheadline_animation_blur = 10,
     card_title_color = '',
+    card_date_color = '',
+    card_excerpt_color = '',
     show_editorial_header = false,
     editorial_label = '',
     editorial_heading = '',
@@ -410,22 +414,37 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
                     >
                       {post.title}
                     </h3>
-                    {post.published_at && (
-                      <p
-                        className={`mt-0.5 text-xs ${card_title_color ? '' : 'text-neutral-500 dark:text-neutral-400'}`}
-                        style={card_title_color ? { color: card_title_color, opacity: 0.65 } : undefined}
-                      >
-                        {formatDate(post.published_at)}
-                      </p>
-                    )}
-                    {post.excerpt && (
-                      <p
-                        className={`mt-1 text-xs leading-relaxed line-clamp-2 ${card_title_color ? '' : 'text-neutral-400 dark:text-neutral-500'}`}
-                        style={card_title_color ? { color: card_title_color, opacity: 0.55 } : undefined}
-                      >
-                        {post.excerpt}
-                      </p>
-                    )}
+                    {post.published_at && (() => {
+                      const dc = card_date_color || (card_title_color ? undefined : null)
+                      const useFallback = !card_date_color && card_title_color
+                      return (
+                        <p
+                          className={`mt-0.5 text-xs ${!card_date_color && !card_title_color ? 'text-neutral-500 dark:text-neutral-400' : ''}`}
+                          style={
+                            card_date_color ? { color: card_date_color }
+                            : useFallback ? { color: card_title_color, opacity: 0.65 }
+                            : undefined
+                          }
+                        >
+                          {formatDate(post.published_at)}
+                        </p>
+                      )
+                    })()}
+                    {post.excerpt && (() => {
+                      const useFallback = !card_excerpt_color && card_title_color
+                      return (
+                        <p
+                          className={`mt-1 text-xs leading-relaxed line-clamp-2 ${!card_excerpt_color && !card_title_color ? 'text-neutral-400 dark:text-neutral-500' : ''}`}
+                          style={
+                            card_excerpt_color ? { color: card_excerpt_color }
+                            : useFallback ? { color: card_title_color, opacity: 0.55 }
+                            : undefined
+                          }
+                        >
+                          {post.excerpt}
+                        </p>
+                      )
+                    })()}
                   </div>
                 </Link>
               ))}
