@@ -80,6 +80,9 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const [showLibrary, setShowLibrary] = useState(false)
   const [ogImageUploading, setOgImageUploading] = useState(false)
   const ogImageInputRef = useRef<HTMLInputElement>(null)
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [mediaItems, setMediaItems] = useState<{ id: string; blob_url?: string; url?: string; filename: string; mime_type?: string; content_type?: string }[]>([])
+  const [mediaLoading, setMediaLoading] = useState(false)
   const [seo, setSeo] = useState<Seo>(() => normalizeSeo(page.seo ?? {}))
   const pageContent = useMemo(() => contentFromSections(sections.map(s => ({ data: s.data }))), [sections])
   const seoKey = `pages:${page.id}`
@@ -226,6 +229,18 @@ export default function PageEditor({ page, sections: initialSections, templates 
   const deleteFromLibrary = async (id: string) => {
     await supabase.from('section_library').delete().eq('id', id)
     setLibraryItems(prev => prev.filter(item => item.id !== id))
+  }
+
+  const openMediaPicker = async () => {
+    setShowMediaPicker(true)
+    if (mediaItems.length > 0) return
+    setMediaLoading(true)
+    const { data } = await supabase
+      .from('media')
+      .select('id, blob_url, url, filename, mime_type, content_type')
+      .order('created_at', { ascending: false })
+    setMediaItems(data || [])
+    setMediaLoading(false)
   }
 
   const addSection = async (templateId: string, overrideData?: Record<string, any>) => {
@@ -628,22 +643,40 @@ export default function PageEditor({ page, sections: initialSections, templates 
                 >
                   <X className="size-4" />
                 </button>
-                <button
-                  onClick={() => ogImageInputRef.current?.click()}
-                  className="mt-2 text-sm text-primary-600 hover:text-primary-700"
-                >
-                  Replace image
-                </button>
+                <div className="flex gap-3 mt-2">
+                  <button
+                    onClick={() => ogImageInputRef.current?.click()}
+                    className="text-sm text-primary-600 hover:text-primary-700"
+                  >
+                    Replace image
+                  </button>
+                  <span className="text-neutral-300">|</span>
+                  <button
+                    onClick={openMediaPicker}
+                    className="text-sm text-primary-600 hover:text-primary-700"
+                  >
+                    Choose from library
+                  </button>
+                </div>
               </div>
             ) : (
-              <button
-                onClick={() => ogImageInputRef.current?.click()}
-                disabled={ogImageUploading}
-                className="flex items-center gap-2 px-4 py-2.5 border border-dashed border-neutral-300 dark:border-neutral-600 rounded-xl text-sm text-neutral-600 dark:text-neutral-400 hover:border-primary-400 hover:text-primary-600 transition-colors disabled:opacity-50"
-              >
-                <Upload className="size-4" />
-                {ogImageUploading ? 'Uploading...' : 'Upload social image'}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => ogImageInputRef.current?.click()}
+                  disabled={ogImageUploading}
+                  className="flex items-center gap-2 px-4 py-2.5 border border-dashed border-neutral-300 dark:border-neutral-600 rounded-xl text-sm text-neutral-600 dark:text-neutral-400 hover:border-primary-400 hover:text-primary-600 transition-colors disabled:opacity-50"
+                >
+                  <Upload className="size-4" />
+                  {ogImageUploading ? 'Uploading...' : 'Upload social image'}
+                </button>
+                <button
+                  onClick={openMediaPicker}
+                  className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 dark:border-neutral-600 rounded-xl text-sm text-neutral-600 dark:text-neutral-400 hover:border-primary-400 hover:text-primary-600 transition-colors"
+                >
+                  <FileText className="size-4" />
+                  Choose from library
+                </button>
+              </div>
             )}
 
             <input
@@ -653,6 +686,60 @@ export default function PageEditor({ page, sections: initialSections, templates 
               className="hidden"
               onChange={handleOgImageUpload}
             />
+
+            {/* Media picker modal */}
+            {showMediaPicker && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowMediaPicker(false)}>
+                <div
+                  className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700">
+                    <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">Choose from Media Library</h3>
+                    <button onClick={() => setShowMediaPicker(false)} className="p-1 text-neutral-400 hover:text-neutral-600">
+                      <X className="size-5" />
+                    </button>
+                  </div>
+                  <div className="overflow-y-auto p-5 flex-1">
+                    {mediaLoading ? (
+                      <div className="flex items-center justify-center py-16 text-neutral-400">Loading media…</div>
+                    ) : mediaItems.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-16 gap-2 text-neutral-400">
+                        <p>No images uploaded yet.</p>
+                        <p className="text-sm">Go to <a href="/admin/media" className="text-primary-600 underline">Media Library</a> to upload images.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        {mediaItems
+                          .filter(m => {
+                            const mt = m.mime_type || m.content_type || ''
+                            return mt.startsWith('image/') || (!mt && (m.blob_url || m.url || '').match(/\.(jpg|jpeg|png|gif|webp|svg|avif)$/i))
+                          })
+                          .map((m) => {
+                            const imgUrl = m.blob_url || m.url || ''
+                            return (
+                              <button
+                                key={m.id}
+                                onClick={() => {
+                                  setPageData(p => ({ ...p, og_image_url: imgUrl }))
+                                  setShowMediaPicker(false)
+                                }}
+                                className="relative aspect-[4/3] rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 border-2 border-transparent hover:border-primary-500 transition-colors group"
+                              >
+                                <Image src={imgUrl} alt={m.filename} fill className="object-cover" unoptimized />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                                <div className="absolute bottom-0 inset-x-0 p-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <p className="text-white text-xs truncate">{m.filename}</p>
+                                </div>
+                              </button>
+                            )
+                          })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
