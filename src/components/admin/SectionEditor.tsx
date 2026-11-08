@@ -933,7 +933,7 @@ export default function SectionEditor({
           {/* Card title color */}
           <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4">
             <ColorField
-              label="Card title color"
+              label="Card text color (title, date & excerpt)"
               value={formData.card_title_color || '#171717'}
               onChange={(v) => handleChange('card_title_color', v)}
             />

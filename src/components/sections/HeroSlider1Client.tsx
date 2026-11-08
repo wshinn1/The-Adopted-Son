@@ -411,10 +411,20 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
                       {post.title}
                     </h3>
                     {post.published_at && (
-                      <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{formatDate(post.published_at)}</p>
+                      <p
+                        className={`mt-0.5 text-xs ${card_title_color ? '' : 'text-neutral-500 dark:text-neutral-400'}`}
+                        style={card_title_color ? { color: card_title_color, opacity: 0.65 } : undefined}
+                      >
+                        {formatDate(post.published_at)}
+                      </p>
                     )}
                     {post.excerpt && (
-                      <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500 leading-relaxed line-clamp-2">{post.excerpt}</p>
+                      <p
+                        className={`mt-1 text-xs leading-relaxed line-clamp-2 ${card_title_color ? '' : 'text-neutral-400 dark:text-neutral-500'}`}
+                        style={card_title_color ? { color: card_title_color, opacity: 0.55 } : undefined}
+                      >
+                        {post.excerpt}
+                      </p>
                     )}
                   </div>
                 </Link>
