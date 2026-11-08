@@ -33,6 +33,8 @@ export interface SiteSettings {
   logo_type: 'text' | 'image'
   logo_url: string
   nav_links: Array<{ label: string; url: string }>
+  nav_typography: Record<string, any>
+  nav_scroll: Record<string, any>
   footer_text: string
   footer_config: Record<string, any>
   social_links: Array<{ platform: string; url: string }>
@@ -64,6 +66,8 @@ const defaults: SiteSettings = {
     { label: 'About', url: '/about' },
     { label: 'Give', url: '/give' },
   ],
+  nav_typography: {},
+  nav_scroll: {},
   footer_text: '© 2026 The Adopted Son. All rights reserved.',
   footer_config: {},
   social_links: [],
@@ -178,6 +182,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     logo_type: settings.logo_type || defaults.logo_type,
     logo_url: settings.logo_url || defaults.logo_url,
     nav_links: settings.nav_links || defaults.nav_links,
+    nav_typography: settings.nav_typography || defaults.nav_typography,
+    nav_scroll: settings.nav_scroll || defaults.nav_scroll,
     footer_text: settings.footer_text || defaults.footer_text,
     social_links: settings.social_links || defaults.social_links,
     typography: settings.typography || defaults.typography,

@@ -148,6 +148,8 @@ export default async function DevotionalPage({ params }: Props) {
         logoType={settings.logo_type}
         logoUrl={settings.logo_url || undefined}
         navLinks={settings.nav_links}
+        navTypography={settings.nav_typography}
+        navScroll={settings.nav_scroll}
       />
 
       <script
