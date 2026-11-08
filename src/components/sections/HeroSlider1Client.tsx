@@ -184,129 +184,131 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
     const next = () => setCurrentImageIndex(c => (c + 1) % sliderDevotionals.length)
 
     return (
-      <>
-        {/* Compact editorial slider */}
-        <div className="relative w-full overflow-hidden rounded-b-lg" style={{ minHeight: '62vh' }}>
-          {/* Crossfade background images */}
-          {sliderDevotionals.map((d, i) => (
+      <div className="w-full py-8 md:py-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          {/* Compact editorial slider */}
+          <div className="relative overflow-hidden rounded-2xl" style={{ height: '460px' }}>
+            {/* Crossfade background images */}
+            {sliderDevotionals.map((d, i) => (
+              <div
+                key={d.id}
+                className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+                style={{ opacity: i === currentImageIndex && isFirstImageLoaded ? 1 : 0, zIndex: 0 }}
+              >
+                {d.cover_image_url ? (
+                  <Image
+                    src={d.cover_image_url}
+                    alt={d.title}
+                    fill
+                    priority={i === 0}
+                    className="object-cover"
+                    unoptimized
+                    onLoad={() => { if (i === 0) setIsFirstImageLoaded(true) }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-neutral-800" />
+                )}
+              </div>
+            ))}
+
+            {/* Bottom gradient */}
             <div
-              key={d.id}
-              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-              style={{ opacity: i === currentImageIndex && isFirstImageLoaded ? 1 : 0, zIndex: 0 }}
-            >
-              {d.cover_image_url ? (
-                <Image
-                  src={d.cover_image_url}
-                  alt={d.title}
-                  fill
-                  priority={i === 0}
-                  className="object-cover"
-                  unoptimized
-                  onLoad={() => { if (i === 0) setIsFirstImageLoaded(true) }}
-                />
-              ) : (
-                <div className="w-full h-full bg-neutral-800" />
-              )}
-            </div>
-          ))}
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.25) 55%, transparent 100%)' }}
+            />
 
-          {/* Bottom gradient */}
-          <div
-            className="absolute inset-0 z-10 pointer-events-none"
-            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.25) 55%, transparent 100%)' }}
-          />
-
-          {/* Category badge */}
-          {currentDevo?.category && (
-            <div className="absolute top-5 left-5 z-20">
-              <span className="inline-block bg-white text-neutral-900 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded">
-                {currentDevo.category}
-              </span>
-            </div>
-          )}
-
-          {/* Prev / Next arrows */}
-          {sliderDevotionals.length > 1 && (
-            <>
-              <button
-                onClick={prev}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors backdrop-blur-sm"
-                aria-label="Previous"
-              >
-                <ChevronLeft className="size-5" />
-              </button>
-              <button
-                onClick={next}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors backdrop-blur-sm"
-                aria-label="Next"
-              >
-                <ChevronRight className="size-5" />
-              </button>
-            </>
-          )}
-
-          {/* Text — bottom left */}
-          <Link
-            href={`/devotionals/${currentDevo?.slug ?? ''}`}
-            className="absolute bottom-0 left-0 right-0 z-20 px-7 pb-10 md:px-10 md:pb-12 max-w-2xl group"
-          >
-            {currentDevo?.published_at && (
-              <p className="text-white/60 text-sm mb-1.5">{formatDate(currentDevo.published_at)}</p>
+            {/* Category badge */}
+            {currentDevo?.category && (
+              <div className="absolute top-5 left-5 z-20">
+                <span className="inline-block bg-white text-neutral-900 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded">
+                  {currentDevo.category}
+                </span>
+              </div>
             )}
-            <h2 className="text-white font-heading font-bold text-2xl md:text-3xl leading-tight text-balance group-hover:underline underline-offset-4 decoration-white/40">
-              {currentDevo?.title}
-            </h2>
-            {currentDevo?.excerpt && (
-              <p className="mt-2 text-white/75 text-sm md:text-base leading-relaxed line-clamp-2">
-                {currentDevo.excerpt}
-              </p>
-            )}
-          </Link>
 
-          {/* Dot indicators */}
-          {sliderDevotionals.length > 1 && (
-            <div className="absolute bottom-4 right-6 z-20 flex gap-1.5">
-              {sliderDevotionals.map((_, i) => (
+            {/* Prev / Next arrows */}
+            {sliderDevotionals.length > 1 && (
+              <>
                 <button
-                  key={i}
-                  onClick={() => setCurrentImageIndex(i)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === currentImageIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
-                  }`}
-                  aria-label={`Slide ${i + 1}`}
-                />
-              ))}
+                  onClick={prev}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors backdrop-blur-sm"
+                  aria-label="Previous"
+                >
+                  <ChevronLeft className="size-5" />
+                </button>
+                <button
+                  onClick={next}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors backdrop-blur-sm"
+                  aria-label="Next"
+                >
+                  <ChevronRight className="size-5" />
+                </button>
+              </>
+            )}
+
+            {/* Text — bottom left */}
+            <Link
+              href={`/devotionals/${currentDevo?.slug ?? ''}`}
+              className="absolute bottom-0 left-0 right-0 z-20 px-7 pb-10 md:px-10 md:pb-12 max-w-2xl group"
+            >
+              {currentDevo?.published_at && (
+                <p className="text-white/60 text-sm mb-1.5">{formatDate(currentDevo.published_at)}</p>
+              )}
+              <h2 className="text-white font-heading font-bold text-2xl md:text-3xl leading-tight text-balance group-hover:underline underline-offset-4 decoration-white/40">
+                {currentDevo?.title}
+              </h2>
+              {currentDevo?.excerpt && (
+                <p className="mt-2 text-white/75 text-sm md:text-base leading-relaxed line-clamp-2">
+                  {currentDevo.excerpt}
+                </p>
+              )}
+            </Link>
+
+            {/* Dot indicators */}
+            {sliderDevotionals.length > 1 && (
+              <div className="absolute bottom-4 right-6 z-20 flex gap-1.5">
+                {sliderDevotionals.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentImageIndex(i)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      i === currentImageIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
+                    }`}
+                    aria-label={`Slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Horizontal card list below slider */}
+          {gridDevotionals.length > 0 && (
+            <div className="mt-0 border border-t-0 border-neutral-200 dark:border-neutral-700 rounded-b-xl overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-neutral-200 dark:divide-neutral-700">
+                {gridDevotionals.map((post) => (
+                  <Link key={post.id} href={`/devotionals/${post.slug}`} className="group flex items-center gap-4 p-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+                    <div className="relative w-20 h-14 shrink-0 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+                      {post.cover_image_url ? (
+                        <Image src={post.cover_image_url} alt={post.title} fill className="object-cover" unoptimized />
+                      ) : (
+                        <div className="w-full h-full bg-neutral-200 dark:bg-neutral-700" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-heading font-bold text-sm text-neutral-900 dark:text-neutral-100 leading-snug group-hover:text-title-hover transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
+                      {post.published_at && (
+                        <p className="mt-0.5 text-xs text-neutral-400">{formatDate(post.published_at)}</p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
         </div>
-
-        {/* Horizontal card list below slider */}
-        {gridDevotionals.length > 0 && (
-          <div className="border-t border-neutral-200 dark:border-neutral-700">
-            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-neutral-200 dark:divide-neutral-700">
-              {gridDevotionals.map((post) => (
-                <Link key={post.id} href={`/devotionals/${post.slug}`} className="group flex items-start gap-4 p-5 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-                  <div className="relative w-24 h-16 shrink-0 rounded-md overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-                    {post.cover_image_url ? (
-                      <Image src={post.cover_image_url} alt={post.title} fill className="object-cover" unoptimized />
-                    ) : (
-                      <div className="w-full h-full bg-neutral-200 dark:bg-neutral-700" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="font-heading font-bold text-sm text-neutral-900 dark:text-neutral-100 leading-snug text-balance group-hover:text-title-hover transition-colors line-clamp-3">
-                      {post.title}
-                    </h3>
-                    {post.published_at && (
-                      <p className="mt-1 text-xs text-neutral-400">{formatDate(post.published_at)}</p>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </>
+      </div>
     )
   }
 
