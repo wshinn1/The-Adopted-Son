@@ -34,6 +34,7 @@ export interface SiteSettings {
   logo_url: string
   nav_links: Array<{ label: string; url: string }>
   footer_text: string
+  footer_config: Record<string, any>
   social_links: Array<{ platform: string; url: string }>
   typography: {
     heading_font: string
@@ -64,6 +65,7 @@ const defaults: SiteSettings = {
     { label: 'Give', url: '/give' },
   ],
   footer_text: '© 2026 The Adopted Son. All rights reserved.',
+  footer_config: {},
   social_links: [],
   typography: {
     heading_font: 'font-sans',
@@ -184,6 +186,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     share_buttons: settings.share_buttons || defaults.share_buttons,
     popup_settings: settings.popup_settings || defaults.popup_settings,
     elevenlabs_voice_id: settings.elevenlabs_voice_id || defaults.elevenlabs_voice_id,
+    footer_config: settings.footer_config || {},
   }
 }
 

@@ -1,7 +1,8 @@
 import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 import HamburgerHeader from '@/components/HamburgerHeader'
-import SiteFooter from '@/components/SiteFooter'
+import BigFooter from '@/components/BigFooter'
+import type { FooterConfig } from '@/components/BigFooter'
 
 export default async function PublicLayout({
   children,
@@ -12,7 +13,7 @@ export default async function PublicLayout({
   const { data: rows } = await supabase
     .from('site_settings')
     .select('key, value')
-    .in('key', ['site_name', 'logo_type', 'logo_url', 'nav_links', 'footer_text', 'footer_links', 'nav_typography', 'nav_scroll'])
+    .in('key', ['site_name', 'logo_type', 'logo_url', 'nav_links', 'nav_typography', 'nav_scroll', 'footer_config'])
 
   const settings: Record<string, any> = {}
   for (const row of rows ?? []) {
@@ -31,10 +32,9 @@ export default async function PublicLayout({
   }
 
   const navLinks = parseArray(settings['nav_links'])
-  const footerLinks = parseArray(settings['footer_links'])
-  const footerText: string = settings['footer_text'] ?? ''
   const navTypography = parseObj(settings['nav_typography'])
   const navScroll = parseObj(settings['nav_scroll'])
+  const footerConfig: FooterConfig = parseObj(settings['footer_config'])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -47,7 +47,12 @@ export default async function PublicLayout({
         navScroll={navScroll}
       />
       <main className="flex-1 pt-20">{children}</main>
-      <SiteFooter footerText={footerText} footerLinks={footerLinks} />
+      <BigFooter
+        config={footerConfig}
+        siteName={settings['site_name'] ?? 'The Adopted Son'}
+        logoType={settings['logo_type'] ?? 'text'}
+        logoUrl={settings['logo_url'] ?? undefined}
+      />
     </div>
   )
 }

@@ -6,6 +6,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Clock } from 'lucide-react'
 import HamburgerHeader from '@/components/HamburgerHeader'
+import BigFooter from '@/components/BigFooter'
+import type { FooterConfig } from '@/components/BigFooter'
 import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
 import DevotionalsGrid from '@/components/DevotionalsGrid'
 import DevotionalsSearch from '@/components/DevotionalsSearch'
@@ -357,6 +359,15 @@ export default async function DevotionalsPage({ searchParams }: Props) {
         </>
 
       </div>
+
+      {(settings.footer_config as FooterConfig)?.show_on_devotionals && (
+        <BigFooter
+          config={settings.footer_config as FooterConfig}
+          siteName={settings.site_name}
+          logoType={settings.logo_type}
+          logoUrl={settings.logo_url || undefined}
+        />
+      )}
     </div>
   )
 }
