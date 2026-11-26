@@ -175,7 +175,7 @@ export default function HeroSlider1({ data }: HeroSlider1Props) {
             fill
             priority={index === 0}
             className="object-cover"
-            unoptimized={imageUrl.includes('blob.vercel-storage.com')}
+            unoptimized
             onLoad={() => {
               if (index === 0) {
                 setIsFirstImageLoaded(true)

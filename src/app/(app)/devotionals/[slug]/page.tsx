@@ -1,5 +1,7 @@
 import BlogPostPage from '@/components/blog/BlogPostPage'
 import HamburgerHeader from '@/components/HamburgerHeader'
+import BigFooter from '@/components/BigFooter'
+import type { FooterConfig } from '@/components/BigFooter'
 import NewsletterSignUp from '@/components/sections/NewsletterSignUp'
 import CtaStrip from '@/components/sections/CtaStrip'
 import ReadingProgress from '@/components/ReadingProgress'
@@ -146,6 +148,8 @@ export default async function DevotionalPage({ params }: Props) {
         logoType={settings.logo_type}
         logoUrl={settings.logo_url || undefined}
         navLinks={settings.nav_links}
+        navTypography={settings.nav_typography}
+        navScroll={settings.nav_scroll}
       />
 
       <script
@@ -222,6 +226,15 @@ export default async function DevotionalPage({ params }: Props) {
             </div>
           </div>
         </div>
+      )}
+
+      {(settings.footer_config as FooterConfig)?.show_on_devotionals && (
+        <BigFooter
+          config={settings.footer_config as FooterConfig}
+          siteName={settings.site_name}
+          logoType={settings.logo_type}
+          logoUrl={settings.logo_url || undefined}
+        />
       )}
     </div>
   )

@@ -59,7 +59,7 @@ export default function TextSection({ data }: TextSectionProps) {
               width={1200}
               height={800}
               className="w-full h-auto object-cover"
-              unoptimized={featured_image_url.includes('blob.vercel-storage.com')}
+              unoptimized
             />
           </div>
         )}
@@ -87,7 +87,7 @@ export default function TextSection({ data }: TextSectionProps) {
               width={1200}
               height={800}
               className="w-full h-auto object-cover"
-              unoptimized={featured_image_url.includes('blob.vercel-storage.com')}
+              unoptimized
             />
           </div>
         )}

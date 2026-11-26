@@ -45,7 +45,7 @@ export default function MoreInfo({ data }: MoreInfoProps) {
                   alt={image_alt}
                   fill
                   className="object-cover"
-                  unoptimized={image_url.includes('blob.vercel-storage.com')}
+                  unoptimized
                 />
               </div>
             </div>

@@ -1,6 +1,8 @@
 import { devotionalToPost, Devotional } from '@/lib/devotional-mapper'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getSiteSettings } from '@/lib/site-settings'
+import BigFooter from '@/components/BigFooter'
+import type { FooterConfig } from '@/components/BigFooter'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -165,12 +167,15 @@ export default async function DevotionalsPage({ searchParams }: Props) {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50">
       <HamburgerHeader
         siteName={settings.site_name}
         logoType={settings.logo_type}
         logoUrl={settings.logo_url || undefined}
         navLinks={settings.nav_links}
+        navTypography={settings.nav_typography}
+        navScroll={settings.nav_scroll}
       />
       {/* Spacer for fixed header */}
       <div className="h-20" />
@@ -358,5 +363,13 @@ export default async function DevotionalsPage({ searchParams }: Props) {
 
       </div>
     </div>
+
+    <BigFooter
+      config={settings.footer_config as FooterConfig}
+      siteName={settings.site_name}
+      logoType={settings.logo_type}
+      logoUrl={settings.logo_url || undefined}
+    />
+    </>
   )
 }

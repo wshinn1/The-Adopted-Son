@@ -19,46 +19,67 @@ interface HamburgerHeaderProps {
   logoType?: 'text' | 'image'
   logoUrl?: string
   navLinks: NavLink[]
+  navScroll?: Record<string, any>
+  navTypography?: Record<string, any>
 }
 
-export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, navLinks }: HamburgerHeaderProps) {
+export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, navLinks, navScroll = {}, navTypography = {} }: HamburgerHeaderProps) {
   const pathname = usePathname()
   const isHomepage = pathname === '/'
-  
+
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [isScrolled, setIsScrolled] = useState(false)
   const [isHeaderVisible, setIsHeaderVisible] = useState(!isHomepage)
   const [isDesktop, setIsDesktop] = useState(false)
+
+  const scrollThreshold = navScroll?.scroll_threshold ?? 80
+  const bgOpacity = isScrolled ? (navScroll?.bg_opacity ?? 0.95) : (navScroll?.initial_opacity ?? 0)
+  const blurAmount = navScroll?.blur_amount ?? 8
 
   // Track desktop breakpoint
   useEffect(() => {
     const checkDesktop = () => {
-      setIsDesktop(window.innerWidth >= 1024) // lg breakpoint
+      setIsDesktop(window.innerWidth >= 1024)
     }
-    
     checkDesktop()
     window.addEventListener('resize', checkDesktop)
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
 
+  // Hysteresis scroll: different thresholds for show/hide to prevent flicker
+  useEffect(() => {
+    const SCROLL_IN = scrollThreshold
+    const SCROLL_OUT = Math.max(0, scrollThreshold - 40)
+
+    const handleScroll = () => {
+      const y = window.scrollY
+      setIsScrolled(prev => {
+        if (!prev && y > SCROLL_IN) return true
+        if (prev && y < SCROLL_OUT) return false
+        return prev
+      })
+    }
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [scrollThreshold])
+
   // Handle scroll to show/hide header on desktop (only on homepage)
   useEffect(() => {
-    // Always show header on non-homepage or mobile
     if (!isDesktop || !isHomepage) {
       setIsHeaderVisible(true)
       return
     }
 
     const handleScroll = () => {
-      // Show header after scrolling down 100px (homepage only)
       const shouldShow = window.scrollY > 100
       setIsHeaderVisible(shouldShow)
     }
 
-    // Initial check
     handleScroll()
-    
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isDesktop, isHomepage])
@@ -86,10 +107,15 @@ export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, 
   return (
     <>
       {/* Fixed Header - hidden on desktop until user scrolls */}
-      <header 
-        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 lg:px-24 bg-white/80 backdrop-blur-sm transition-transform duration-300 ease-in-out ${
+      <header
+        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 lg:px-24 transition-all duration-300 ease-in-out ${
           isDesktop && !isHeaderVisible ? '-translate-y-full' : 'translate-y-0'
         }`}
+        style={{
+          backgroundColor: `rgba(255,255,255,${bgOpacity})`,
+          backdropFilter: `blur(${isScrolled && blurAmount > 0 ? blurAmount : 0}px)`,
+          WebkitBackdropFilter: `blur(${isScrolled && blurAmount > 0 ? blurAmount : 0}px)`,
+        }}
       >
         {/* Logo / Site Name */}
         <Link href="/" className="text-lg font-medium text-neutral-900">
@@ -100,7 +126,7 @@ export default function HamburgerHeader({ siteName, logoType = 'text', logoUrl, 
               width={160}
               height={40}
               className="h-10 w-auto object-contain"
-              unoptimized={logoUrl.includes('blob.vercel-storage.com')}
+              unoptimized
             />
           ) : (
             <span className="font-heading text-xl font-semibold">{siteName.replace(/^["'"']|["'"']$/g, '')}</span>

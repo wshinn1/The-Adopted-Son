@@ -19,6 +19,7 @@ const navItems = [
   { label: 'Financials', href: '/admin/financials', icon: '$' },
   { label: 'Backups', href: '/admin/backups', icon: '↺' },
   { label: 'Menu', href: '/admin/menu', icon: '☰' },
+  { label: 'Footer', href: '/admin/footer', icon: '▬' },
   { label: 'Typography', href: '/admin/typography', icon: 'Aa' },
   { label: 'Site Colors', href: '/admin/site-colors', icon: '◉' },
   { label: 'Givings', href: '/admin/givings', icon: '♡' },

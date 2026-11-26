@@ -50,6 +50,9 @@ export interface SiteSettings {
   }
   popup_settings: PopupSettings
   elevenlabs_voice_id: string
+  nav_typography: Record<string, any>
+  nav_scroll: Record<string, any>
+  footer_config: Record<string, any>
 }
 
 const defaults: SiteSettings = {
@@ -97,6 +100,9 @@ const defaults: SiteSettings = {
     accent_color: '#8B5A2B',
   },
   elevenlabs_voice_id: '',
+  nav_typography: {},
+  nav_scroll: {},
+  footer_config: {},
 }
 
 export interface CtaStripSettings {
@@ -184,6 +190,9 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     share_buttons: settings.share_buttons || defaults.share_buttons,
     popup_settings: settings.popup_settings || defaults.popup_settings,
     elevenlabs_voice_id: settings.elevenlabs_voice_id || defaults.elevenlabs_voice_id,
+    nav_typography: typeof settings.nav_typography === 'object' && settings.nav_typography !== null ? settings.nav_typography : {},
+    nav_scroll: typeof settings.nav_scroll === 'object' && settings.nav_scroll !== null ? settings.nav_scroll : {},
+    footer_config: typeof settings.footer_config === 'object' && settings.footer_config !== null ? settings.footer_config : {},
   }
 }
 
