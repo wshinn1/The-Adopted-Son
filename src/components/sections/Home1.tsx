@@ -57,7 +57,7 @@ export default function Home1({ data }: Home1Props) {
               priority
               loading="eager"
               className="object-cover"
-              unoptimized={data.image_url.includes('blob.vercel-storage.com')}
+              unoptimized
             />
           )}
         </div>
