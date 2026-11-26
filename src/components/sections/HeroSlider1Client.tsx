@@ -478,7 +478,7 @@ export default function HeroSlider1Client({ data, sliderDevotionals = [], gridDe
             fill
             priority={index === 0}
             className="object-cover"
-            unoptimized={imageUrl.includes('blob.vercel-storage.com')}
+            unoptimized
             onLoad={() => { if (index === 0) setIsFirstImageLoaded(true) }}
           />
         </div>
