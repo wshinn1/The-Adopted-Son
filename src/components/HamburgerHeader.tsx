@@ -144,7 +144,7 @@ export default function HamburgerHeader({
               width={160}
               height={40}
               className="h-9 w-auto object-contain"
-              unoptimized={logoUrl!.includes('blob.vercel-storage.com')}
+              unoptimized
             />
           ) : (
             <span className="font-heading text-xl font-semibold text-neutral-900">
